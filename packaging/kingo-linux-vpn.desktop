@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Kingo Linux VPN
+Comment=Native Linux VPN client with system tray support
+Exec=kingo-linux-vpn %U
+Icon=kingo-vpn
+Terminal=false
+Type=Application
+Categories=Network;VPN;
+StartupNotify=true
+X-GNOME-Autostart-enabled=true
+X-KDE-autostart-after=panel
