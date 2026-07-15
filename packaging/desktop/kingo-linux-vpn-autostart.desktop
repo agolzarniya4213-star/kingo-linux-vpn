@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Kingo Linux VPN Autostart
+Comment=Start Kingo Linux VPN daemon and UI
+Exec=sh -c 'systemctl --user start kingo-linux-vpn-daemon.service && systemctl --user start kingo-linux-vpn-ui.service'
+X-GNOME-Autostart-enabled=true
+NoDisplay=true

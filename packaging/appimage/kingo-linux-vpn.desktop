@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Kingo Linux VPN
+Comment=Kingo VPN client for Linux
+Exec=kingo-linux-vpn-ui
+Icon=kingo-linux-vpn
+Terminal=false
+Categories=Network;Security;
+StartupNotify=true

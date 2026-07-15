@@ -1,0 +1,14 @@
+[Unit]
+Description=Kingo Linux VPN UI
+After=graphical-session.target
+Wants=graphical-session.target
+PartOf=kingo-linux-vpn-daemon.service
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/kingo-linux-vpn-ui
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=default.target
