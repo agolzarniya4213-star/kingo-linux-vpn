@@ -1,0 +1,22 @@
+# packaging/kingo-linux-vpn-tray.service
+[Unit]
+Description=Kingo Linux VPN Tray Icon
+After=network.target kingo-linux-vpn.service
+
+[Service]
+Type=simple
+User=%i
+ExecStart=/usr/bin/kingo-linux-vpn-tray
+Restart=on-failure
+RestartSec=5
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/%i/.Xauthority
+
+# Security settings
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
