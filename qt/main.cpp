@@ -2,12 +2,15 @@
 #include "trayicon.h"
 
 int main(int argc, char *argv[]) {
-    // در برنامه‌های Tray، برنامه نباید با بسته شدن پنجره متوقف شود
+    // Prevents app from closing when hidden
     QApplication app(argc, argv);
     app.setQuitOnLastWindowClosed(false);
 
-    // راه‌اندازی Tray Icon
+    // Initialize Tray Icon
     TrayIcon tray;
+
+    // Make the "Quit" button actually close the application
+    QObject::connect(&tray, &TrayIcon::quitRequested, &app, &QApplication::quit);
 
     return app.exec();
 }
