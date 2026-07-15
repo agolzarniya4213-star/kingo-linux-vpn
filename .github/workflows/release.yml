@@ -1,0 +1,37 @@
+name: Release Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential cmake qtbase5-dev qt5-qtsvg-dev \
+          libappindicator3-dev fakeroot dpkg-dev
+    
+    - name: Build project
+      run: |
+        mkdir build && cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release
+        make -j$(nproc)
+    
+    - name: Create packages
+      run: |
+        chmod +x scripts/*.sh
+        ./scripts/build-release.sh
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-packages
+        path: build-release/*.AppImage
