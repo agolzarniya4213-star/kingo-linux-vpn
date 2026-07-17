@@ -17,23 +17,24 @@ signals:
     void quitRequested();
 
 private slots:
-    void handleActivated(QSystemTrayIcon::ActivationReason reason);
     void onConnectSuccess(const QString &message);
     void onDisconnectSuccess(const QString &message);
     void onCommandError(const QString &message);
+    void showAboutDialog();
 
 private:
     QSystemTrayIcon *m_trayIcon;
     QMenu *m_menu;
     QAction *m_connectAction;
     QAction *m_disconnectAction;
-    QAction *m_showAction;
+    QAction *m_separator;
+    QAction *m_aboutAction;
     QAction *m_quitAction;
     
     IpcClient *m_ipcClient;
 
-    void setupIcons();
-    void setupMenu();
+    void setupUI();
+    void updateTrayState(bool isConnected);
 };
 
 #endif // TRAYICON_H
