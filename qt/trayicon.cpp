@@ -1,57 +1,39 @@
-#include "trayicon.h"
-#include <QApplication>
-#include <QStyle>
+#ifndef TRAYICON_H
+#define TRAYICON_H
 
-TrayIcon::TrayIcon(QObject *parent)
-    : QObject(parent)
-    , m_trayIcon(new QSystemTrayIcon(this))
-    , m_menu(new QMenu())
-    , m_connectAction(new QAction(tr("Connect"), this))
-    , m_disconnectAction(new QAction(tr("Disconnect"), this))
-    , m_showAction(new QAction(tr("Show Window"), this))
-    , m_quitAction(new QAction(tr("Quit"), this))
+#include <QSystemTrayIcon>
+#include <QMenu>
+
+class IpcClient;
+
+class TrayIcon : public QObject
 {
-    setupIcons();
-    setupMenu();
+    Q_OBJECT
+public:
+    explicit TrayIcon(QObject *parent = nullptr);
+    ~TrayIcon();
 
-    connect(m_trayIcon, &QSystemTrayIcon::activated, 
-            this, &TrayIcon::handleActivated);
-    connect(m_connectAction, &QAction::triggered, 
-            this, &TrayIcon::connectRequested);
-    connect(m_disconnectAction, &QAction::triggered, 
-            this, &TrayIcon::disconnectRequested);
-    connect(m_quitAction, &QAction::triggered, 
-            this, &TrayIcon::quitRequested);
+signals:
+    void quitRequested();
 
-    m_trayIcon->show();
-}
+private slots:
+    void handleActivated(QSystemTrayIcon::ActivationReason reason);
+    void onConnectSuccess(const QString &message);
+    void onDisconnectSuccess(const QString &message);
+    void onCommandError(const QString &message);
 
-TrayIcon::~TrayIcon() {
-    m_trayIcon->hide();
-}
+private:
+    QSystemTrayIcon *m_trayIcon;
+    QMenu *m_menu;
+    QAction *m_connectAction;
+    QAction *m_disconnectAction;
+    QAction *m_showAction;
+    QAction *m_quitAction;
+    
+    IpcClient *m_ipcClient;
 
-void TrayIcon::setupIcons()
-{
-    // Using standard system icon to prevent file missing errors
-    m_trayIcon->setIcon(QApplication::style()->standardIcon(QStyle::SP_ComputerIcon));
-    m_trayIcon->setToolTip("Kingo VPN - Disconnected");
-    m_trayIcon->setContextMenu(m_menu);
-}
+    void setupIcons();
+    void setupMenu();
+};
 
-void TrayIcon::setupMenu()
-{
-    m_menu->addAction(m_connectAction);
-    m_menu->addAction(m_disconnectAction);
-    m_menu->addSeparator();
-    m_menu->addAction(m_showAction);
-    m_menu->addAction(m_quitAction);
-
-    m_disconnectAction->setEnabled(false);
-}
-
-void TrayIcon::handleActivated(QSystemTrayIcon::ActivationReason reason)
-{
-    if (reason == QSystemTrayIcon::Trigger) {
-        // Logic for single click goes here in the next step
-    }
-}
+#endif // TRAYICON_H
