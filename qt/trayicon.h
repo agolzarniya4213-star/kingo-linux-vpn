@@ -3,56 +3,37 @@
 
 #include <QSystemTrayIcon>
 #include <QMenu>
-#include <QAction>
-#include <QTimer>
+
+class IpcClient;
 
 class TrayIcon : public QObject
 {
-    QObject
-    Q_PROPERTY(bool isConnected READ isConnected NOTIFY connectionStateChanged)
-    Q_PROPERTY(QString currentServer READ currentServer NOTIFY currentServerChanged)
-
+    Q_OBJECT
 public:
     explicit TrayIcon(QObject *parent = nullptr);
-    ~TrayIcon() override;
-
-    // Setters for daemon integration
-    void setConnected(bool connected, const QString &serverName = "");
-    void setConnecting(const QString &serverName = "");
-    void setError(const QString &errorMessage);
-    void updateServerList(const QStringList &servers);
+    ~TrayIcon();
 
 signals:
-    void connectRequested(const QString &serverName);
-    void disconnectRequested();
     void quitRequested();
-    void showMainWindowRequested();
-    void connectionStateChanged(bool connected);
-    void currentServerChanged(const QString &serverName);
 
 private slots:
     void handleActivated(QSystemTrayIcon::ActivationReason reason);
-    void handleConnectAction();
-    void handleDisconnectAction();
+    void onConnectSuccess(const QString &message);
+    void onDisconnectSuccess(const QString &message);
+    void onCommandError(const QString &message);
 
 private:
     QSystemTrayIcon *m_trayIcon;
     QMenu *m_menu;
     QAction *m_connectAction;
     QAction *m_disconnectAction;
-    QAction *m_separator;
     QAction *m_showAction;
     QAction *m_quitAction;
     
-    bool m_isConnected;
-    QString m_currentServer;
-    QTimer m_connectionTimer;
-    
+    IpcClient *m_ipcClient;
+
     void setupIcons();
     void setupMenu();
-    void updateIcon();
-    void showNotification(const QString &title, const QString &message, 
-                         QSystemTrayIcon::MessageIcon icon = QSystemTrayIcon::Information);
 };
 
 #endif // TRAYICON_H
