@@ -2,42 +2,46 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QStandardPaths>
+#include <QDir>
 
 IpcClient::IpcClient(QObject *parent)
     : QObject(parent)
     , m_socket(new QLocalSocket(this))
 {
-    // Find the exact same path as the Go daemon
+    // Calculate exact socket path matching Go daemon logic
     QString configDir = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
-    m_socketPath = configDir + "/kingo-linux-vpn/daemon.sock";
+    m_socketPath = configDir + QDir::separator() + "kingo-linux-vpn" + QDir::separator() + "daemon.sock";
+
+    // Async event-driven connections
+    connect(m_socket, &QLocalSocket::connected, this, &IpcClient::onConnected);
+    connect(m_socket, &QLocalSocket::readyRead, this, &IpcClient::onReadyRead);
+    connect(m_socket, &QLocalSocket::errorOccurred, this, &IpcClient::onError);
 }
 
 void IpcClient::sendCommand(const QString &action)
 {
-    m_socket->connectToServer(m_socketPath);
-    
-    // Wait 500ms for the daemon to respond
-    if (!m_socket->waitForConnected(500)) {
-        emit commandError("Cannot connect to daemon. Is it running?");
-        return;
+    if (m_socket->state() == QLocalSocket::UnconnectedState) {
+        m_pendingAction = action;
+        m_socket->connectToServer(m_socketPath);
+    } else {
+        emit commandError("Socket is busy. Please wait.");
     }
+}
 
-    // Create JSON payload: {"action": "connect"}
+void IpcClient::onConnected()
+{
+    // Build JSON payload
     QJsonObject obj;
-    obj["action"] = action;
+    obj["action"] = m_pendingAction;
     QJsonDocument doc(obj);
     QByteArray data = doc.toJson(QJsonDocument::Compact) + "\n";
 
     m_socket->write(data);
     m_socket->flush();
+}
 
-    if (!m_socket->waitForReadyRead(1000)) {
-        emit commandError("Daemon timeout");
-        m_socket->disconnectFromServer();
-        return;
-    }
-
-    // Read response
+void IpcClient::onReadyRead()
+{
     QByteArray response = m_socket->readAll();
     m_socket->disconnectFromServer();
 
@@ -47,4 +51,11 @@ void IpcClient::sendCommand(const QString &action)
     } else {
         emit commandError(resDoc.object()["message"].toString());
     }
+}
+
+void IpcClient::onError(QLocalSocket::LocalSocketError socketError)
+{
+    Q_UNUSED(socketError)
+    m_socket->disconnectFromServer();
+    emit commandError("Cannot connect to daemon. Is kingo-linux-vpn daemon running?");
 }
