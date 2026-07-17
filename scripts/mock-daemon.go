@@ -26,12 +26,13 @@ func main() {
 
     listener, err := net.Listen("unix", socketPath)
     if err != nil {
-        panic(err)
+        fmt.Printf("Failed to start daemon: %v\n", err)
+        return
     }
     defer listener.Close()
     defer os.Remove(socketPath)
 
-    fmt.Println("Mock Daemon is running on:", socketPath)
+    fmt.Println("[OK] Mock Daemon is securely running on:", socketPath)
 
     for {
         conn, err := listener.Accept()
@@ -47,15 +48,15 @@ func main() {
 
         var res Response
         if req.Action == "connect" {
-            res = Response{Status: "success", Message: "Mock VPN Connected!"}
+            res = Response{Status: "success", Message: "Securely connected to mock server."}
         } else if req.Action == "disconnect" {
-            res = Response{Status: "success", Message: "Mock VPN Disconnected!"}
+            res = Response{Status: "success", Message: "Successfully disconnected."}
         } else {
-            res = Response{Status: "error", Message: "Unknown action"}
+            res = Response{Status: "error", Message: "Invalid command"}
         }
 
         json.NewEncoder(conn).Encode(res)
         conn.Close()
-        fmt.Println("Handled action:", req.Action)
+        fmt.Println("[EVENT] Handled action:", req.Action)
     }
 }
