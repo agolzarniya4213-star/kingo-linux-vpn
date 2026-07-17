@@ -4,7 +4,6 @@ project(kingo-tray)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_AUTOMOC ON)
 
-# Added Network module for Socket communication
 find_package(Qt5 REQUIRED COMPONENTS Widgets Svg Network)
 
 add_executable(kingo-tray
