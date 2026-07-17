@@ -4,21 +4,21 @@ project(kingo-tray)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_AUTOMOC ON)
 
-# پیدا کردن کتابخانه‌های Qt
-find_package(Qt5 REQUIRED COMPONENTS Widgets Svg)
+# Added Network module for Socket communication
+find_package(Qt5 REQUIRED COMPONENTS Widgets Svg Network)
 
-# تعریف فایل‌های اجرایی
 add_executable(kingo-tray
     main.cpp
     trayicon.cpp
     trayicon.h
+    ipcclient.cpp
+    ipcclient.h
 )
 
-# لینک کردن کتابخانه‌ها
 target_link_libraries(kingo-tray
     Qt5::Widgets
     Qt5::Svg
+    Qt5::Network
 )
 
-# دستورات نصب (اختیاری برای آینده)
 install(TARGETS kingo-tray DESTINATION bin)
