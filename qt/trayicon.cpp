@@ -15,7 +15,6 @@ TrayIcon::TrayIcon(QObject *parent)
 {
     setupUI();
 
-    // Strict Signal-Slot connections (Modern Qt5 syntax)
     connect(m_trayIcon, &QSystemTrayIcon::activated, 
             this, &TrayIcon::handleActivated);
             
@@ -30,9 +29,7 @@ TrayIcon::TrayIcon(QObject *parent)
     connect(m_quitAction, &QAction::triggered, 
             this, &TrayIcon::quitRequested);
 
-    // IPC Response Handlers
     connect(m_ipcClient, &IpcClient::commandSuccess, this, [this](const QString &msg) {
-        // Determine state based on which action was taken
         bool isNowConnected = !m_connectAction->isEnabled();
         if (isNowConnected) {
             onDisconnectSuccess(msg);
@@ -63,15 +60,13 @@ void TrayIcon::setupUI()
     m_menu->addAction(m_showAction);
     m_menu->addAction(m_quitAction);
 
-    // Initial State Logic
     m_disconnectAction->setEnabled(false);
 }
 
 void TrayIcon::handleActivated(QSystemTrayIcon::ActivationReason reason)
 {
-    // Reserved for future single-click logic
     if (reason == QSystemTrayIcon::Trigger) {
-        // TODO: Toggle main window visibility
+        // Future: Toggle main window
     }
 }
 
