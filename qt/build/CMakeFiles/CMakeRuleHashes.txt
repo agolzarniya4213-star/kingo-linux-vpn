@@ -1,6 +1,0 @@
-# Hashes of file build rules.
-113bab03b9586256dccb475bcfe06962 CMakeFiles/ipcclient_autogen
-113bab03b9586256dccb475bcfe06962 CMakeFiles/kingo-tray_autogen
-eea07d19e194521e14e23e5efaa2c642 ipcclient_autogen/timestamp
-3979f331ab099bd542b854a7cdb79c36 kingo-tray_autogen/EWIEGA46WW/qrc_resources.cpp
-cf0b26e718bd77d0c4d644bc5e41319a kingo-tray_autogen/timestamp
