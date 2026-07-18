@@ -1,62 +1,58 @@
-#ifndef APPCORE_H
-#define APPCORE_H
+#pragma once
 
 #include <QObject>
+#include <QVariantList>
 #include <QString>
 #include <QTimer>
 
 class IpcClient;
 
-class AppCore : public QObject
-{
+class AppCore : public QObject {
     Q_OBJECT
-    Q_PROPERTY(bool isConnected READ isConnected NOTIFY connectionStateChanged)
-    Q_PROPERTY(QString statusText READ statusText NOTIFY connectionStateChanged)
+    Q_PROPERTY(QString connectionStatus READ connectionStatus NOTIFY statusChanged)
+    Q_PROPERTY(QString downloadSpeed READ downloadSpeed NOTIFY statsChanged)
+    Q_PROPERTY(QString uploadSpeed READ uploadSpeed NOTIFY statsChanged)
+    Q_PROPERTY(QString totalDownload READ totalDownload NOTIFY statsChanged)
+    Q_PROPERTY(QString totalUpload READ totalUpload NOTIFY statsChanged)
     Q_PROPERTY(QString selectedServer READ selectedServer WRITE setSelectedServer NOTIFY selectedServerChanged)
-    
-    // New Properties for Live Stats
-    Q_PROPERTY(QString rxData READ rxData NOTIFY statsUpdated)
-    Q_PROPERTY(QString txData READ txData NOTIFY statsUpdated)
-    Q_PROPERTY(QString pingData READ pingData NOTIFY statsUpdated)
+    Q_PROPERTY(QVariantList serverList READ serverList NOTIFY serverListChanged)
 
 public:
     explicit AppCore(QObject *parent = nullptr);
+    ~AppCore() override;
 
-    bool isConnected() const;
-    QString statusText() const;
+    QString connectionStatus() const;
+    QString downloadSpeed() const;
+    QString uploadSpeed() const;
+    QString totalDownload() const;
+    QString totalUpload() const;
     QString selectedServer() const;
     void setSelectedServer(const QString &server);
-    
-    QString rxData() const;
-    QString txData() const;
-    QString pingData() const;
+    QVariantList serverList() const;
 
-    Q_INVOKABLE void toggleConnection();
-    Q_INVOKABLE void openServerList();
+    Q_INVOKABLE void refreshServers();
+    Q_INVOKABLE QString formatBytes(double bytes) const;
+
+public slots:
+    void connectVPN();
+    void disconnectVPN();
 
 signals:
-    void connectionStateChanged();
+    void statusChanged();
+    void statsChanged();
     void selectedServerChanged();
-    void showServerListRequested();
-    void statsUpdated();
-
-private slots:
-    void onConnectSuccess(const QString & /*message*/);
-    void onDisconnectSuccess(const QString & /*message*/);
-    void onCommandError(const QString & /*errorMessage*/);
-    void updateMockStats();
+    void serverListChanged();
 
 private:
-    IpcClient *m_ipc;
-    bool m_isConnected;
-    QString m_statusText;
+    IpcClient *m_ipc = nullptr;
+    QTimer *m_timer = nullptr;
+    QString m_connectionStatus;
+    QString m_downloadSpeed;
+    QString m_uploadSpeed;
+    QString m_totalDownload;
+    QString m_totalUpload;
     QString m_selectedServer;
-    
-    QTimer *m_statsTimer;
-    double m_mockRx;
-    double m_mockTx;
-    int m_mockPing;
-    
-    QString formatBytes(double bytes) const;
+    QVariantList m_serverList;
+
+    void pollStatus();
 };
-#endif // APPCORE_H
