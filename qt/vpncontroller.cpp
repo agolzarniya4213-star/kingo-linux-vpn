@@ -39,6 +39,12 @@ void VpnController::addSubscription(const QString &url) {
     m_client->sendRequest(req);
 }
 
+void VpnController::testLatency() {
+    QJsonObject req;
+    req["action"] = "test_latency";
+    m_client->sendRequest(req);
+}
+
 void VpnController::onResponseReceived(const QJsonObject &response) {
     if (response.contains("state")) {
         setStatus(response["state"].toString());

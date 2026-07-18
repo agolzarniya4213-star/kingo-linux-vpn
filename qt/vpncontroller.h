@@ -21,6 +21,7 @@ public:
     Q_INVOKABLE void refreshStatus();
     Q_INVOKABLE void fetchServers();
     Q_INVOKABLE void addSubscription(const QString &url);
+    Q_INVOKABLE void testLatency();
 
 signals:
     void statusChanged();

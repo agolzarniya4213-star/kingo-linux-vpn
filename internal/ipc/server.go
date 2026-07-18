@@ -10,6 +10,7 @@ import (
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/core"
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/fetcher"
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/model"
+    "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/network"
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/storage"
 )
 
@@ -114,6 +115,17 @@ func (s *Server) handleConnection(conn net.Conn) {
                     resp.Message = err.Error()
                 }
             }
+        case "test_latency":
+            servers, err := s.db.GetServers()
+            if err != nil {
+                resp = Response{Success: false, Message: err.Error()}
+                break
+            }
+            // تست همزمان تأخیر سرورها
+            testedServers := network.TestAllLatency(context.Background(), servers)
+            // ذخیره تأخیرها در دیتابیس
+            _ = s.db.SaveServers(testedServers)
+            resp = Response{Success: true, Servers: testedServers}
         default:
             resp = Response{Success: false, Message: "unknown action"}
         }

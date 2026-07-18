@@ -35,12 +35,22 @@ Window {
             background: Rectangle { color: "#313244"; radius: 5 }
         }
 
-        Button {
-            text: "Update Subscription"
-            onClicked: {
-                if (subUrlField.text.length > 0) {
-                    vpnController.addSubscription(subUrlField.text)
+        Row {
+            width: parent.width
+            spacing: 10
+
+            Button {
+                text: "Update Subscription"
+                onClicked: {
+                    if (subUrlField.text.length > 0) {
+                        vpnController.addSubscription(subUrlField.text)
+                    }
                 }
+            }
+
+            Button {
+                text: "Test Latency"
+                onClicked: vpnController.testLatency()
             }
         }
 
@@ -63,17 +73,36 @@ Window {
                 color: "#313244"
                 radius: 5
 
-                Column {
-                    anchors.centerIn: parent
-                    Text {
-                        text: modelData.name
-                        color: "#cdd6f4"
-                        font.bold: true
+                Row {
+                    anchors.fill: parent
+                    anchors.margins: 10
+                    spacing: 10
+
+                    Column {
+                        width: parent.width - 60
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        Text {
+                            text: modelData.name
+                            color: "#cdd6f4"
+                            font.bold: true
+                            elide: Text.ElideRight
+                            width: parent.width
+                        }
+                        Text {
+                            text: modelData.protocol + " - " + modelData.address
+                            color: "#a6adc8"
+                            font.pointSize: 8
+                        }
                     }
+
                     Text {
-                        text: modelData.protocol + " - " + modelData.address
-                        color: "#a6adc8"
-                        font.pointSize: 8
+                        width: 50
+                        anchors.verticalCenter: parent.verticalCenter
+                        horizontalAlignment: Text.AlignRight
+                        text: modelData.latency == 9999 ? "N/A" : (modelData.latency == 0 ? "-" : modelData.latency + "ms")
+                        color: modelData.latency < 100 ? "#a6e3a1" : (modelData.latency < 300 ? "#f9e2af" : "#f38ba8")
+                        font.bold: true
                     }
                 }
 

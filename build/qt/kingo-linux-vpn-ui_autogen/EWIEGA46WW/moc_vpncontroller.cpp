@@ -54,6 +54,7 @@ template <> constexpr inline auto VpnController::qt_create_metaobjectdata<qt_met
         "fetchServers",
         "addSubscription",
         "url",
+        "testLatency",
         "status",
         "connected",
         "servers",
@@ -87,14 +88,16 @@ template <> constexpr inline auto VpnController::qt_create_metaobjectdata<qt_met
         QtMocHelpers::MethodData<void(const QString &)>(14, 2, QMC::AccessPublic, QMetaType::Void, {{
             { QMetaType::QString, 15 },
         }}),
+        // Method 'testLatency'
+        QtMocHelpers::MethodData<void()>(16, 2, QMC::AccessPublic, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
         // property 'status'
-        QtMocHelpers::PropertyData<QString>(16, QMetaType::QString, QMC::DefaultPropertyFlags, 0),
+        QtMocHelpers::PropertyData<QString>(17, QMetaType::QString, QMC::DefaultPropertyFlags, 0),
         // property 'connected'
-        QtMocHelpers::PropertyData<bool>(17, QMetaType::Bool, QMC::DefaultPropertyFlags, 0),
+        QtMocHelpers::PropertyData<bool>(18, QMetaType::Bool, QMC::DefaultPropertyFlags, 0),
         // property 'servers'
-        QtMocHelpers::PropertyData<QVariantList>(18, 0x80000000 | 19, QMC::DefaultPropertyFlags | QMC::EnumOrFlag, 1),
+        QtMocHelpers::PropertyData<QVariantList>(19, 0x80000000 | 20, QMC::DefaultPropertyFlags | QMC::EnumOrFlag, 1),
     };
     QtMocHelpers::UintData qt_enums {
     };
@@ -125,6 +128,7 @@ void VpnController::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _i
         case 6: _t->refreshStatus(); break;
         case 7: _t->fetchServers(); break;
         case 8: _t->addSubscription((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
+        case 9: _t->testLatency(); break;
         default: ;
         }
     }
@@ -166,14 +170,14 @@ int VpnController::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 9)
+        if (_id < 10)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 9;
+        _id -= 10;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 9)
+        if (_id < 10)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 9;
+        _id -= 10;
     }
     if (_c == QMetaObject::ReadProperty || _c == QMetaObject::WriteProperty
             || _c == QMetaObject::ResetProperty || _c == QMetaObject::BindableProperty
