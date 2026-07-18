@@ -1,0 +1,40 @@
+file(REMOVE_RECURSE
+  ".qt/rcc/qrc_kingo-linux-vpn-ui_raw_qml_0.cpp"
+  ".qt/rcc/qrc_qmake_KingoVPN.cpp"
+  ".rcc/qmlcache/kingo-linux-vpn-ui_main_qml.cpp"
+  ".rcc/qmlcache/kingo-linux-vpn-ui_main_qml.cpp.aotstats"
+  ".rcc/qmlcache/kingo-linux-vpn-ui_qmlcache_loader.cpp"
+  "CMakeFiles/kingo-linux-vpn-ui.dir/link.d"
+  "CMakeFiles/kingo-linux-vpn-ui_autogen.dir/AutogenUsed.txt"
+  "CMakeFiles/kingo-linux-vpn-ui_autogen.dir/ParseCache.txt"
+  "kingo-linux-vpn-ui_autogen"
+  "CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_kingo-linux-vpn-ui_raw_qml_0.cpp.o"
+  "CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_kingo-linux-vpn-ui_raw_qml_0.cpp.o.d"
+  "CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_qmake_KingoVPN.cpp.o"
+  "CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_qmake_KingoVPN.cpp.o.d"
+  "CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_main_qml.cpp.o"
+  "CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_main_qml.cpp.o.d"
+  "CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_qmlcache_loader.cpp.o"
+  "CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_qmlcache_loader.cpp.o.d"
+  "CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_autogen/mocs_compilation.cpp.o"
+  "CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_autogen/mocs_compilation.cpp.o.d"
+  "CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_qmltyperegistrations.cpp.o"
+  "CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_qmltyperegistrations.cpp.o.d"
+  "CMakeFiles/kingo-linux-vpn-ui.dir/main.cpp.o"
+  "CMakeFiles/kingo-linux-vpn-ui.dir/main.cpp.o.d"
+  "KingoVPN/kingo-linux-vpn-ui.qmltypes"
+  "kingo-linux-vpn-ui"
+  "kingo-linux-vpn-ui.pdb"
+  "kingo-linux-vpn-ui_autogen/mocs_compilation.cpp"
+  "kingo-linux-vpn-ui_autogen/timestamp"
+  "kingo-linux-vpn-ui_qmltyperegistrations.cpp"
+  "meta_types/kingo-linux-vpn-ui_json_file_list.txt"
+  "meta_types/kingo-linux-vpn-ui_json_file_list.txt.timestamp"
+  "meta_types/qt6kingo-linux-vpn-ui_metatypes.json"
+  "meta_types/qt6kingo-linux-vpn-ui_metatypes.json.gen"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang CXX)
+  include(CMakeFiles/kingo-linux-vpn-ui.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()

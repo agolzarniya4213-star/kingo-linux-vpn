@@ -5,12 +5,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 
-# اضافه کردن QuickControls2 برای QQuickStyle
 find_package(Qt6 COMPONENTS Quick QuickControls2 Gui REQUIRED)
 
-qt_add_executable(kingo-linux-vpn-ui
-    main.cpp
-)
+qt_add_executable(kingo-linux-vpn-ui main.cpp)
 
 qt_add_qml_module(kingo-linux-vpn-ui
     URI KingoVPN
@@ -18,5 +15,4 @@ qt_add_qml_module(kingo-linux-vpn-ui
     QML_FILES main.qml
 )
 
-# لینک کردن صریح کتابخانه‌ها
 target_link_libraries(kingo-linux-vpn-ui PRIVATE Qt6::Quick Qt6::QuickControls2 Qt6::Gui)

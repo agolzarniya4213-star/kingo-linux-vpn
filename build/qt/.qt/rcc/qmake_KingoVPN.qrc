@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/KingoVPN">
+    <file alias="qmldir">/home/abolfazl4213/kingo-linux-vpn/build/qt/KingoVPN/qmldir</file>
+  </qresource>
+</RCC>
+

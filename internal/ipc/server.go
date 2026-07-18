@@ -3,7 +3,6 @@ package ipc
 import (
     "context"
     "encoding/json"
-    "log/slog"
     "net"
     "os"
 
@@ -27,10 +26,7 @@ type Server struct {
 }
 
 func NewServer(socketPath string, manager core.Manager) *Server {
-    return &Server{
-        socketPath: socketPath,
-        manager:    manager,
-    }
+    return &Server{socketPath: socketPath, manager: manager}
 }
 
 func (s *Server) Start(ctx context.Context) error {
@@ -44,11 +40,8 @@ func (s *Server) Start(ctx context.Context) error {
     }
     defer listener.Close()
 
-    slog.Info("IPC Server listening", "socket", s.socketPath)
-
     go func() {
         <-ctx.Done()
-        slog.Info("Closing IPC listener...")
         listener.Close()
         os.Remove(s.socketPath)
     }()
@@ -60,17 +53,15 @@ func (s *Server) Start(ctx context.Context) error {
             case <-ctx.Done():
                 return nil
             default:
-                slog.Error("Failed to accept connection", "error", err)
                 continue
             }
         }
-        go s.handleConnection(ctx, conn)
+        go s.handleConnection(conn)
     }
 }
 
-func (s *Server) handleConnection(ctx context.Context, conn net.Conn) {
+func (s *Server) handleConnection(conn net.Conn) {
     defer conn.Close()
-
     decoder := json.NewDecoder(conn)
     encoder := json.NewEncoder(conn)
 
@@ -83,33 +74,19 @@ func (s *Server) handleConnection(ctx context.Context, conn net.Conn) {
         var resp Response
         switch req.Action {
         case "connect":
-            err := s.manager.Start(ctx, req.ConfigPath)
-            resp = Response{
-                Success: err == nil,
-                Message: "Connected",
-                State:   string(s.manager.GetState()),
-            }
+            err := s.manager.Start(context.Background(), req.ConfigPath)
+            resp = Response{Success: err == nil, State: string(s.manager.GetState())}
             if err != nil {
                 resp.Message = err.Error()
             }
         case "disconnect":
-            err := s.manager.Stop()
-            resp = Response{
-                Success: err == nil,
-                Message: "Disconnected",
-                State:   string(s.manager.GetState()),
-            }
+            s.manager.Stop()
+            resp = Response{Success: true, State: string(s.manager.GetState())}
         case "status":
-            resp = Response{
-                Success: true,
-                State:   string(s.manager.GetState()),
-            }
+            resp = Response{Success: true, State: string(s.manager.GetState())}
         default:
-            resp = Response{Success: false, Message: "Unknown action"}
+            resp = Response{Success: false, Message: "unknown action"}
         }
-
-        if err := encoder.Encode(resp); err != nil {
-            break
-        }
+        encoder.Encode(resp)
     }
 }

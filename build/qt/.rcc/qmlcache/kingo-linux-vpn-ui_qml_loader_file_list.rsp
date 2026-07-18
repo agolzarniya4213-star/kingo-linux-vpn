@@ -1,0 +1,5 @@
+--resource
+/home/abolfazl4213/kingo-linux-vpn/build/qt/.qt/rcc/qmake_KingoVPN.qrc
+--resource
+/home/abolfazl4213/kingo-linux-vpn/build/qt/.qt/rcc/kingo-linux-vpn-ui_raw_qml_0.qrc
+/KingoVPN/main.qml

@@ -12,31 +12,22 @@ import (
 )
 
 func main() {
-    logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-    slog.SetDefault(logger)
-
-    slog.Info("Starting Kingo Linux VPN Daemon...")
-
+    slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
     ctx, cancel := context.WithCancel(context.Background())
     defer cancel()
 
     sigChan := make(chan os.Signal, 1)
     signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-    
     go func() {
-        sig := <-sigChan
-        slog.Info("Received signal, shutting down...", "signal", sig)
+        <-sigChan
         cancel()
     }()
 
     coreManager := core.NewSingBoxManager()
     ipcServer := ipc.NewServer("/tmp/kingo-vpn.sock", coreManager)
 
-    err := ipcServer.Start(ctx)
-    if err != nil {
-        slog.Error("Failed to start IPC server", "error", err)
+    if err := ipcServer.Start(ctx); err != nil {
+        slog.Error("IPC server failed", "error", err)
         os.Exit(1)
     }
-
-    slog.Info("Kingo Daemon stopped gracefully.")
 }

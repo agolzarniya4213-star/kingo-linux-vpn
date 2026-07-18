@@ -6,4 +6,3 @@ DAEMON_PID=$!
 sleep 2
 "$DIR/build/qt/kingo-linux-vpn-ui"
 kill $DAEMON_PID 2>/dev/null
-exit 0
