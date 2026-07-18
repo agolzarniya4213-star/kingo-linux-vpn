@@ -1,5 +1,8 @@
 #include "appcore.h"
 #include "ipcclient.h"
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 
 AppCore::AppCore(QObject *parent)
     : QObject(parent)
@@ -13,6 +16,7 @@ AppCore::AppCore(QObject *parent)
 {
     connect(m_timer, &QTimer::timeout, this, &AppCore::pollStatus);
     m_timer->start(1000);
+    refreshServers();
 }
 
 AppCore::~AppCore() = default;
@@ -45,7 +49,34 @@ void AppCore::disconnectVPN() {
 }
 
 void AppCore::refreshServers() {
-    m_ipc->sendCommand("refresh");
+    QString resp = m_ipc->sendCommand("refresh");
+    if (resp.isEmpty()) {
+        return;
+    }
+
+    QJsonDocument doc = QJsonDocument::fromJson(resp.toUtf8());
+    if (!doc.isObject()) {
+        return;
+    }
+
+    QJsonObject root = doc.object();
+    QJsonArray arr = root["servers"].toArray();
+
+    QVariantList newList;
+    for (const QJsonValue &val : arr) {
+        QJsonObject obj = val.toObject();
+        QVariantMap map;
+        map["name"] = obj["name"].toString();
+        map["protocol"] = obj["protocol"].toString();
+        map["address"] = obj["address"].toString();
+        map["port"] = obj["port"].toInt();
+        newList.append(map);
+    }
+
+    if (m_serverList != newList) {
+        m_serverList = newList;
+        emit serverListChanged();
+    }
 }
 
 QString AppCore::formatBytes(double bytes) const {
@@ -61,5 +92,21 @@ QString AppCore::formatBytes(double bytes) const {
 }
 
 void AppCore::pollStatus() {
-    m_ipc->sendCommand("status");
+    QString resp = m_ipc->sendCommand("status");
+    if (resp.isEmpty()) {
+        return;
+    }
+
+    QJsonDocument doc = QJsonDocument::fromJson(resp.toUtf8());
+    if (!doc.isObject()) {
+        return;
+    }
+
+    QJsonObject root = doc.object();
+    QString newStatus = root["status"].toString("Disconnected");
+
+    if (m_connectionStatus != newStatus) {
+        m_connectionStatus = newStatus;
+        emit statusChanged();
+    }
 }

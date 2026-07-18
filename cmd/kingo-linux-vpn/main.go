@@ -5,7 +5,11 @@ import (
     "fmt"
     "log"
     "os"
+    "os/signal"
+    "syscall"
+    "time"
 
+    "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/core"
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/fetcher"
 )
 
@@ -17,10 +21,22 @@ func main() {
     if err != nil {
         log.Fatalf("Failed to fetch servers: %v", err)
     }
+    fmt.Printf("Fetched %d servers\n", len(servers))
 
-    fmt.Printf("Successfully parsed %d servers:\n", len(servers))
-    for i, s := range servers {
-        fmt.Printf("%d. [%s] %s:%d - %s\n", i+1, s.Protocol, s.Address, s.Port, s.Name)
+    ipc := core.NewIpcServer()
+    ipc.SetServers(servers)
+
+    if err := ipc.Start("9876"); err != nil {
+        log.Fatalf("Failed to start IPC: %v", err)
     }
-    os.Exit(0)
+
+    fmt.Println("Daemon running. Press Ctrl+C to stop.")
+
+    sigs := make(chan os.Signal, 1)
+    signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+    <-sigs
+
+    fmt.Println("\nShutting down...")
+    ipc.Stop()
+    time.Sleep(100 * time.Millisecond)
 }
