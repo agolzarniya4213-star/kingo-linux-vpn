@@ -20,10 +20,12 @@ public:
     Q_INVOKABLE void disconnectVpn();
     Q_INVOKABLE void refreshStatus();
     Q_INVOKABLE void fetchServers();
+    Q_INVOKABLE void addSubscription(const QString &url);
 
 signals:
     void statusChanged();
     void serversChanged();
+    void errorOccurred(const QString &error);
 
 private slots:
     void onResponseReceived(const QJsonObject &response);

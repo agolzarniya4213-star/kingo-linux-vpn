@@ -2,6 +2,7 @@
 
 VpnController::VpnController(QObject *parent) : QObject(parent), m_client(new IpcClient(this)) {
     connect(m_client, &IpcClient::responseReceived, this, &VpnController::onResponseReceived);
+    connect(m_client, &IpcClient::errorOccurred, this, &VpnController::errorOccurred);
     refreshStatus();
     fetchServers();
 }
@@ -31,6 +32,13 @@ void VpnController::fetchServers() {
     m_client->sendRequest(req);
 }
 
+void VpnController::addSubscription(const QString &url) {
+    QJsonObject req;
+    req["action"] = "add_subscription";
+    req["sub_url"] = url;
+    m_client->sendRequest(req);
+}
+
 void VpnController::onResponseReceived(const QJsonObject &response) {
     if (response.contains("state")) {
         setStatus(response["state"].toString());
@@ -38,6 +46,9 @@ void VpnController::onResponseReceived(const QJsonObject &response) {
     if (response.contains("servers")) {
         m_servers = response["servers"].toVariant().toList();
         emit serversChanged();
+    }
+    if (response.contains("message") && !response["message"].toString().isEmpty()) {
+        emit errorOccurred(response["message"].toString());
     }
 }
 

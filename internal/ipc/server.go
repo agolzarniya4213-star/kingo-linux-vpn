@@ -7,6 +7,7 @@ import (
     "os"
 
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/core"
+    "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/fetcher"
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/model"
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/storage"
 )
@@ -14,6 +15,7 @@ import (
 type Request struct {
     Action     string `json:"action"`
     ConfigPath string `json:"config_path,omitempty"`
+    SubURL     string `json:"sub_url,omitempty"`
 }
 
 type Response struct {
@@ -93,6 +95,17 @@ func (s *Server) handleConnection(conn net.Conn) {
             resp = Response{Success: err == nil, Servers: servers}
             if err != nil {
                 resp.Message = err.Error()
+            }
+        case "add_subscription":
+            servers, err := fetcher.FetchSubscription(req.SubURL)
+            if err != nil {
+                resp = Response{Success: false, Message: err.Error()}
+            } else {
+                err = s.db.SaveServers(servers)
+                resp = Response{Success: err == nil, Servers: servers}
+                if err != nil {
+                    resp.Message = err.Error()
+                }
             }
         default:
             resp = Response{Success: false, Message: "unknown action"}

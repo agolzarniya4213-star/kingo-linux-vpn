@@ -3,7 +3,7 @@ import QtQuick.Controls
 
 Window {
     width: 400
-    height: 600
+    height: 650
     visible: true
     title: "Kingo Linux VPN"
     color: "#1e1e2e"
@@ -31,6 +31,25 @@ Window {
             }
         }
 
+        // بخش مدیریت اشتراک
+        TextField {
+            id: subUrlField
+            width: parent.width
+            height: 40
+            placeholderText: "Enter Subscription URL..."
+            color: "#cdd6f4"
+            background: Rectangle { color: "#313244"; radius: 5 }
+        }
+
+        Button {
+            text: "Update Subscription"
+            onClicked: {
+                if (subUrlField.text.length > 0) {
+                    vpnController.addSubscription(subUrlField.text)
+                }
+            }
+        }
+
         Text {
             text: "Available Servers:"
             color: "#cdd6f4"
@@ -40,7 +59,7 @@ Window {
 
         ListView {
             width: parent.width
-            height: 400
+            height: 350
             clip: true
             model: vpnController.servers
 

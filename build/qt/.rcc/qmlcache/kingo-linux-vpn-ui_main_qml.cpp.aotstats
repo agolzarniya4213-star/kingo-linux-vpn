@@ -46,11 +46,27 @@
                             "message": "Could not find signal \"clicked\"."
                         },
                         {
+                            "codegenResult": 2,
+                            "column": 20,
+                            "durationMicroseconds": 0,
+                            "functionName": "width",
+                            "line": 37,
+                            "message": "Could not find property \"width\"."
+                        },
+                        {
+                            "codegenResult": 2,
+                            "column": 24,
+                            "durationMicroseconds": 0,
+                            "functionName": "onClicked",
+                            "line": 46,
+                            "message": "Could not find signal \"clicked\"."
+                        },
+                        {
                             "codegenResult": 0,
                             "column": 20,
                             "durationMicroseconds": 0,
                             "functionName": "width",
-                            "line": 42,
+                            "line": 61,
                             "message": ""
                         },
                         {
@@ -58,7 +74,7 @@
                             "column": 20,
                             "durationMicroseconds": 0,
                             "functionName": "model",
-                            "line": 45,
+                            "line": 64,
                             "message": "Cannot access value for name vpnController"
                         },
                         {
@@ -66,7 +82,7 @@
                             "column": 24,
                             "durationMicroseconds": 0,
                             "functionName": "width",
-                            "line": 48,
+                            "line": 67,
                             "message": ""
                         },
                         {
@@ -74,7 +90,7 @@
                             "column": 39,
                             "durationMicroseconds": 0,
                             "functionName": "centerIn",
-                            "line": 54,
+                            "line": 73,
                             "message": ""
                         },
                         {
@@ -82,7 +98,7 @@
                             "column": 31,
                             "durationMicroseconds": 0,
                             "functionName": "text",
-                            "line": 56,
+                            "line": 75,
                             "message": "Cannot access value for name modelData"
                         },
                         {
@@ -90,7 +106,7 @@
                             "column": 31,
                             "durationMicroseconds": 0,
                             "functionName": "text",
-                            "line": 61,
+                            "line": 80,
                             "message": "Cannot access value for name modelData"
                         }
                     ],

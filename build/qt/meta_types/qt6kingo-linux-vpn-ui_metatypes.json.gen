@@ -68,30 +68,43 @@
                                 "type": "QString"
                             }
                         ],
-                        "index": 3,
+                        "index": 4,
                         "lineNumber": 19,
                         "name": "connectVpn",
                         "returnType": "void"
                     },
                     {
                         "access": "public",
-                        "index": 4,
+                        "index": 5,
                         "lineNumber": 20,
                         "name": "disconnectVpn",
                         "returnType": "void"
                     },
                     {
                         "access": "public",
-                        "index": 5,
+                        "index": 6,
                         "lineNumber": 21,
                         "name": "refreshStatus",
                         "returnType": "void"
                     },
                     {
                         "access": "public",
-                        "index": 6,
+                        "index": 7,
                         "lineNumber": 22,
                         "name": "fetchServers",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "arguments": [
+                            {
+                                "name": "url",
+                                "type": "QString"
+                            }
+                        ],
+                        "index": 8,
+                        "lineNumber": 23,
+                        "name": "addSubscription",
                         "returnType": "void"
                     }
                 ],
@@ -154,15 +167,28 @@
                     {
                         "access": "public",
                         "index": 0,
-                        "lineNumber": 25,
+                        "lineNumber": 26,
                         "name": "statusChanged",
                         "returnType": "void"
                     },
                     {
                         "access": "public",
                         "index": 1,
-                        "lineNumber": 26,
+                        "lineNumber": 27,
                         "name": "serversChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "arguments": [
+                            {
+                                "name": "error",
+                                "type": "QString"
+                            }
+                        ],
+                        "index": 2,
+                        "lineNumber": 28,
+                        "name": "errorOccurred",
                         "returnType": "void"
                     }
                 ],
@@ -175,8 +201,8 @@
                                 "type": "QJsonObject"
                             }
                         ],
-                        "index": 2,
-                        "lineNumber": 29,
+                        "index": 3,
+                        "lineNumber": 31,
                         "name": "onResponseReceived",
                         "returnType": "void"
                     }
