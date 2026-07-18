@@ -1,31 +1,26 @@
 package main
 
 import (
+    "context"
     "fmt"
+    "log"
     "os"
-    "os/signal"
-    "syscall"
 
-    "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/daemon"
+    "kingo-linux-vpn/internal/fetcher"
 )
 
 func main() {
-    configDir, err := os.UserConfigDir()
+    f := fetcher.NewHttpFetcher()
+    ctx := context.Background()
+    
+    servers, err := f.Fetch(ctx, "https://raw.githubusercontent.com/kingowow/Kingo-vpn/main/merged_config.txt")
     if err != nil {
-        fmt.Fprintf(os.Stderr, "Error getting config dir: %v\n", err)
-        os.Exit(1)
+        log.Fatalf("Failed to fetch servers: %v", err)
     }
 
-    ipcServer := daemon.NewIpcServer(configDir)
-    if err := ipcServer.Start(); err != nil {
-        fmt.Fprintf(os.Stderr, "Failed to start daemon: %v\n", err)
-        os.Exit(1)
+    fmt.Printf("Successfully parsed %d servers:\n", len(servers))
+    for i, s := range servers {
+        fmt.Printf("%d. [%s] %s:%d - %s\n", i+1, s.Protocol, s.Address, s.Port, s.Name)
     }
-    defer ipcServer.Stop()
-
-    fmt.Println("Kingo Daemon started.")
-    sigChan := make(chan os.Signal, 1)
-    signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-    <-sigChan
-    fmt.Println("Shutting down daemon...")
+    os.Exit(0)
 }
