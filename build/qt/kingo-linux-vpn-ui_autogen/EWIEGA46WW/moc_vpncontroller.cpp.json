@@ -2,7 +2,7 @@
     "classes": [
         {
             "className": "VpnController",
-            "lineNumber": 5,
+            "lineNumber": 6,
             "methods": [
                 {
                     "access": "public",
@@ -12,23 +12,30 @@
                             "type": "QString"
                         }
                     ],
-                    "index": 2,
-                    "lineNumber": 16,
+                    "index": 3,
+                    "lineNumber": 19,
                     "name": "connectVpn",
                     "returnType": "void"
                 },
                 {
                     "access": "public",
-                    "index": 3,
-                    "lineNumber": 17,
+                    "index": 4,
+                    "lineNumber": 20,
                     "name": "disconnectVpn",
                     "returnType": "void"
                 },
                 {
                     "access": "public",
-                    "index": 4,
-                    "lineNumber": 18,
+                    "index": 5,
+                    "lineNumber": 21,
                     "name": "refreshStatus",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 6,
+                    "lineNumber": 22,
+                    "name": "fetchServers",
                     "returnType": "void"
                 }
             ],
@@ -39,7 +46,7 @@
                     "designable": true,
                     "final": false,
                     "index": 0,
-                    "lineNumber": 7,
+                    "lineNumber": 8,
                     "name": "status",
                     "notify": "statusChanged",
                     "override": false,
@@ -56,7 +63,7 @@
                     "designable": true,
                     "final": false,
                     "index": 1,
-                    "lineNumber": 8,
+                    "lineNumber": 9,
                     "name": "connected",
                     "notify": "statusChanged",
                     "override": false,
@@ -67,6 +74,23 @@
                     "type": "bool",
                     "user": false,
                     "virtual": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 2,
+                    "lineNumber": 10,
+                    "name": "servers",
+                    "notify": "serversChanged",
+                    "override": false,
+                    "read": "servers",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QVariantList",
+                    "user": false,
+                    "virtual": false
                 }
             ],
             "qualifiedClassName": "VpnController",
@@ -74,8 +98,15 @@
                 {
                     "access": "public",
                     "index": 0,
-                    "lineNumber": 21,
+                    "lineNumber": 25,
                     "name": "statusChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 1,
+                    "lineNumber": 26,
+                    "name": "serversChanged",
                     "returnType": "void"
                 }
             ],
@@ -88,8 +119,8 @@
                             "type": "QJsonObject"
                         }
                     ],
-                    "index": 1,
-                    "lineNumber": 24,
+                    "index": 2,
+                    "lineNumber": 29,
                     "name": "onResponseReceived",
                     "returnType": "void"
                 }

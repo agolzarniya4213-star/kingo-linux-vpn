@@ -3,6 +3,7 @@
 VpnController::VpnController(QObject *parent) : QObject(parent), m_client(new IpcClient(this)) {
     connect(m_client, &IpcClient::responseReceived, this, &VpnController::onResponseReceived);
     refreshStatus();
+    fetchServers();
 }
 
 void VpnController::connectVpn(const QString &configPath) {
@@ -24,9 +25,19 @@ void VpnController::refreshStatus() {
     m_client->sendRequest(req);
 }
 
+void VpnController::fetchServers() {
+    QJsonObject req;
+    req["action"] = "get_servers";
+    m_client->sendRequest(req);
+}
+
 void VpnController::onResponseReceived(const QJsonObject &response) {
     if (response.contains("state")) {
         setStatus(response["state"].toString());
+    }
+    if (response.contains("servers")) {
+        m_servers = response["servers"].toVariant().toList();
+        emit serversChanged();
     }
 }
 

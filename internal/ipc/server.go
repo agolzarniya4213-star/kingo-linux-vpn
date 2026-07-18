@@ -7,6 +7,8 @@ import (
     "os"
 
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/core"
+    "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/model"
+    "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/storage"
 )
 
 type Request struct {
@@ -15,18 +17,20 @@ type Request struct {
 }
 
 type Response struct {
-    Success bool   `json:"success"`
-    Message string `json:"message"`
-    State   string `json:"state"`
+    Success bool           `json:"success"`
+    Message string         `json:"message"`
+    State   string         `json:"state"`
+    Servers []model.Server `json:"servers,omitempty"`
 }
 
 type Server struct {
     socketPath string
     manager    core.Manager
+    db         *storage.SQLiteStorage
 }
 
-func NewServer(socketPath string, manager core.Manager) *Server {
-    return &Server{socketPath: socketPath, manager: manager}
+func NewServer(socketPath string, manager core.Manager, db *storage.SQLiteStorage) *Server {
+    return &Server{socketPath: socketPath, manager: manager, db: db}
 }
 
 func (s *Server) Start(ctx context.Context) error {
@@ -84,6 +88,12 @@ func (s *Server) handleConnection(conn net.Conn) {
             resp = Response{Success: true, State: string(s.manager.GetState())}
         case "status":
             resp = Response{Success: true, State: string(s.manager.GetState())}
+        case "get_servers":
+            servers, err := s.db.GetServers()
+            resp = Response{Success: err == nil, Servers: servers}
+            if err != nil {
+                resp.Message = err.Error()
+            }
         default:
             resp = Response{Success: false, Message: "unknown action"}
         }

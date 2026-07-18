@@ -328,4 +328,7 @@ CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_autogen/mocs_compilation.cp
  /usr/include/qt6/QtCore/qtmocconstants.h \
  /usr/include/qt6/QtCore/q20algorithm.h \
  /home/abolfazl4213/kingo-linux-vpn/build/qt/kingo-linux-vpn-ui_autogen/EWIEGA46WW/moc_vpncontroller.cpp \
- /home/abolfazl4213/kingo-linux-vpn/build/qt/kingo-linux-vpn-ui_autogen/EWIEGA46WW/../../../../qt/vpncontroller.h
+ /home/abolfazl4213/kingo-linux-vpn/build/qt/kingo-linux-vpn-ui_autogen/EWIEGA46WW/../../../../qt/vpncontroller.h \
+ /usr/include/qt6/QtCore/QVariantList \
+ /usr/include/qt6/QtCore/qvariantlist.h /usr/include/qt6/QtCore/QList \
+ /usr/include/qt6/QtCore/QVariant

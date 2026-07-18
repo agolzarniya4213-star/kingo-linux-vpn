@@ -284,7 +284,28 @@ CMakeFiles/kingo-linux-vpn-ui.dir/vpncontroller.cpp.o: \
  /usr/include/qt6/QtCore/qobject_impl.h \
  /usr/include/qt6/QtCore/qbindingstorage.h /usr/include/c++/16/chrono \
  /usr/include/c++/16/bits/chrono.h /usr/include/c++/16/ratio \
- /usr/include/c++/16/ctime \
+ /usr/include/c++/16/ctime /usr/include/qt6/QtCore/QVariantList \
+ /usr/include/qt6/QtCore/qvariantlist.h /usr/include/qt6/QtCore/QList \
+ /usr/include/qt6/QtCore/QVariant /usr/include/qt6/QtCore/qvariant.h \
+ /usr/include/qt6/QtCore/qdebug.h /usr/include/qt6/QtCore/qtextstream.h \
+ /usr/include/qt6/QtCore/qcontiguouscache.h /usr/include/c++/16/climits \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/16/include/limits.h \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/16/include/syslimits.h \
+ /usr/include/limits.h /usr/include/bits/posix1_lim.h \
+ /usr/include/bits/local_lim.h /usr/include/linux/limits.h \
+ /usr/include/bits/posix2_lim.h /usr/include/bits/xopen_lim.h \
+ /usr/include/bits/uio_lim.h /usr/include/qt6/QtCore/qsharedpointer.h \
+ /usr/include/qt6/QtCore/qshareddata.h \
+ /usr/include/qt6/QtCore/qsharedpointer_impl.h /usr/include/c++/16/set \
+ /usr/include/c++/16/bits/stl_set.h \
+ /usr/include/c++/16/bits/stl_multiset.h \
+ /usr/include/c++/16/unordered_set \
+ /usr/include/c++/16/bits/unordered_set.h /usr/include/qt6/QtCore/qmap.h \
+ /usr/include/qt6/QtCore/qshareddata_impl.h \
+ /usr/include/qt6/QtCore/qset.h /usr/include/qt6/QtCore/qhash.h \
+ /usr/include/qt6/QtCore/qvarlengtharray.h \
+ /usr/include/qt6/QtCore/qalloc.h /usr/include/qt6/QtCore/q23utility.h \
+ /usr/include/qt6/QtCore/q20utility.h \
  /home/abolfazl4213/kingo-linux-vpn/qt/ipcclient.h \
  /usr/include/qt6/QtNetwork/QLocalSocket \
  /usr/include/qt6/QtNetwork/qlocalsocket.h \
@@ -299,27 +320,8 @@ CMakeFiles/kingo-linux-vpn-ui.dir/vpncontroller.cpp.o: \
  /usr/include/qt6/QtCore/qjsonvalue.h \
  /usr/include/qt6/QtCore/qcborvalue.h \
  /usr/include/qt6/QtCore/qcborcommon.h \
- /usr/include/qt6/QtCore/qshareddata.h \
  /usr/include/qt6/QtCore/qdatetime.h /usr/include/qt6/QtCore/qcalendar.h \
- /usr/include/qt6/QtCore/qlocale.h /usr/include/qt6/QtCore/qvariant.h \
- /usr/include/qt6/QtCore/qdebug.h /usr/include/qt6/QtCore/qtextstream.h \
- /usr/include/qt6/QtCore/qcontiguouscache.h /usr/include/c++/16/climits \
- /usr/lib/gcc/x86_64-pc-linux-gnu/16/include/limits.h \
- /usr/lib/gcc/x86_64-pc-linux-gnu/16/include/syslimits.h \
- /usr/include/limits.h /usr/include/bits/posix1_lim.h \
- /usr/include/bits/local_lim.h /usr/include/linux/limits.h \
- /usr/include/bits/posix2_lim.h /usr/include/bits/xopen_lim.h \
- /usr/include/bits/uio_lim.h /usr/include/qt6/QtCore/qsharedpointer.h \
- /usr/include/qt6/QtCore/qsharedpointer_impl.h /usr/include/c++/16/set \
- /usr/include/c++/16/bits/stl_set.h \
- /usr/include/c++/16/bits/stl_multiset.h \
- /usr/include/c++/16/unordered_set \
- /usr/include/c++/16/bits/unordered_set.h /usr/include/qt6/QtCore/qmap.h \
- /usr/include/qt6/QtCore/qshareddata_impl.h \
- /usr/include/qt6/QtCore/qset.h /usr/include/qt6/QtCore/qhash.h \
- /usr/include/qt6/QtCore/qvarlengtharray.h \
- /usr/include/qt6/QtCore/qalloc.h /usr/include/qt6/QtCore/q23utility.h \
- /usr/include/qt6/QtCore/q20utility.h \
+ /usr/include/qt6/QtCore/qlocale.h \
  /usr/include/qt6/QtCore/qregularexpression.h \
  /usr/include/qt6/QtCore/qurl.h /usr/include/qt6/QtCore/quuid.h \
  /usr/include/qt6/QtCore/qendian.h \

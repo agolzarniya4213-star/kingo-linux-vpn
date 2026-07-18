@@ -7,9 +7,9 @@
                     "entries": [
                         {
                             "codegenResult": 0,
-                            "column": 27,
+                            "column": 23,
                             "durationMicroseconds": 0,
-                            "functionName": "centerIn",
+                            "functionName": "fill",
                             "line": 12,
                             "message": ""
                         },
@@ -30,19 +30,11 @@
                             "message": "Cannot access value for name vpnController"
                         },
                         {
-                            "codegenResult": 0,
-                            "column": 39,
-                            "durationMicroseconds": 0,
-                            "functionName": "horizontalCenter",
-                            "line": 16,
-                            "message": ""
-                        },
-                        {
                             "codegenResult": 2,
                             "column": 19,
                             "durationMicroseconds": 0,
                             "functionName": "text",
-                            "line": 25,
+                            "line": 24,
                             "message": "Could not find property \"text\"."
                         },
                         {
@@ -50,16 +42,56 @@
                             "column": 24,
                             "durationMicroseconds": 0,
                             "functionName": "onClicked",
-                            "line": 26,
+                            "line": 25,
                             "message": "Could not find signal \"clicked\"."
                         },
                         {
+                            "codegenResult": 0,
+                            "column": 20,
+                            "durationMicroseconds": 0,
+                            "functionName": "width",
+                            "line": 42,
+                            "message": ""
+                        },
+                        {
                             "codegenResult": 2,
+                            "column": 20,
+                            "durationMicroseconds": 0,
+                            "functionName": "model",
+                            "line": 45,
+                            "message": "Cannot access value for name vpnController"
+                        },
+                        {
+                            "codegenResult": 0,
+                            "column": 24,
+                            "durationMicroseconds": 0,
+                            "functionName": "width",
+                            "line": 48,
+                            "message": ""
+                        },
+                        {
+                            "codegenResult": 0,
                             "column": 39,
                             "durationMicroseconds": 0,
-                            "functionName": "horizontalCenter",
-                            "line": 24,
-                            "message": "Could not find property \"horizontalCenter\"."
+                            "functionName": "centerIn",
+                            "line": 54,
+                            "message": ""
+                        },
+                        {
+                            "codegenResult": 2,
+                            "column": 31,
+                            "durationMicroseconds": 0,
+                            "functionName": "text",
+                            "line": 56,
+                            "message": "Cannot access value for name modelData"
+                        },
+                        {
+                            "codegenResult": 2,
+                            "column": 31,
+                            "durationMicroseconds": 0,
+                            "functionName": "text",
+                            "line": 61,
+                            "message": "Cannot access value for name modelData"
                         }
                     ],
                     "filePath": "/home/abolfazl4213/kingo-linux-vpn/qt/main.qml"

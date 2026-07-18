@@ -41,6 +41,7 @@ template <> constexpr inline auto VpnController::qt_create_metaobjectdata<qt_met
         "VpnController",
         "statusChanged",
         "",
+        "serversChanged",
         "onResponseReceived",
         "QJsonObject",
         "response",
@@ -48,31 +49,40 @@ template <> constexpr inline auto VpnController::qt_create_metaobjectdata<qt_met
         "configPath",
         "disconnectVpn",
         "refreshStatus",
+        "fetchServers",
         "status",
-        "connected"
+        "connected",
+        "servers",
+        "QVariantList"
     };
 
     QtMocHelpers::UintData qt_methods {
         // Signal 'statusChanged'
         QtMocHelpers::SignalData<void()>(1, 2, QMC::AccessPublic, QMetaType::Void),
+        // Signal 'serversChanged'
+        QtMocHelpers::SignalData<void()>(3, 2, QMC::AccessPublic, QMetaType::Void),
         // Slot 'onResponseReceived'
-        QtMocHelpers::SlotData<void(const QJsonObject &)>(3, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { 0x80000000 | 4, 5 },
+        QtMocHelpers::SlotData<void(const QJsonObject &)>(4, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { 0x80000000 | 5, 6 },
         }}),
         // Method 'connectVpn'
-        QtMocHelpers::MethodData<void(const QString &)>(6, 2, QMC::AccessPublic, QMetaType::Void, {{
-            { QMetaType::QString, 7 },
+        QtMocHelpers::MethodData<void(const QString &)>(7, 2, QMC::AccessPublic, QMetaType::Void, {{
+            { QMetaType::QString, 8 },
         }}),
         // Method 'disconnectVpn'
-        QtMocHelpers::MethodData<void()>(8, 2, QMC::AccessPublic, QMetaType::Void),
-        // Method 'refreshStatus'
         QtMocHelpers::MethodData<void()>(9, 2, QMC::AccessPublic, QMetaType::Void),
+        // Method 'refreshStatus'
+        QtMocHelpers::MethodData<void()>(10, 2, QMC::AccessPublic, QMetaType::Void),
+        // Method 'fetchServers'
+        QtMocHelpers::MethodData<void()>(11, 2, QMC::AccessPublic, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
         // property 'status'
-        QtMocHelpers::PropertyData<QString>(10, QMetaType::QString, QMC::DefaultPropertyFlags, 0),
+        QtMocHelpers::PropertyData<QString>(12, QMetaType::QString, QMC::DefaultPropertyFlags, 0),
         // property 'connected'
-        QtMocHelpers::PropertyData<bool>(11, QMetaType::Bool, QMC::DefaultPropertyFlags, 0),
+        QtMocHelpers::PropertyData<bool>(13, QMetaType::Bool, QMC::DefaultPropertyFlags, 0),
+        // property 'servers'
+        QtMocHelpers::PropertyData<QVariantList>(14, 0x80000000 | 15, QMC::DefaultPropertyFlags | QMC::EnumOrFlag, 1),
     };
     QtMocHelpers::UintData qt_enums {
     };
@@ -95,15 +105,19 @@ void VpnController::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _i
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
         case 0: _t->statusChanged(); break;
-        case 1: _t->onResponseReceived((*reinterpret_cast<std::add_pointer_t<QJsonObject>>(_a[1]))); break;
-        case 2: _t->connectVpn((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
-        case 3: _t->disconnectVpn(); break;
-        case 4: _t->refreshStatus(); break;
+        case 1: _t->serversChanged(); break;
+        case 2: _t->onResponseReceived((*reinterpret_cast<std::add_pointer_t<QJsonObject>>(_a[1]))); break;
+        case 3: _t->connectVpn((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
+        case 4: _t->disconnectVpn(); break;
+        case 5: _t->refreshStatus(); break;
+        case 6: _t->fetchServers(); break;
         default: ;
         }
     }
     if (_c == QMetaObject::IndexOfMethod) {
         if (QtMocHelpers::indexOfMethod<void (VpnController::*)()>(_a, &VpnController::statusChanged, 0))
+            return;
+        if (QtMocHelpers::indexOfMethod<void (VpnController::*)()>(_a, &VpnController::serversChanged, 1))
             return;
     }
     if (_c == QMetaObject::ReadProperty) {
@@ -111,6 +125,7 @@ void VpnController::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _i
         switch (_id) {
         case 0: *reinterpret_cast<QString*>(_v) = _t->status(); break;
         case 1: *reinterpret_cast<bool*>(_v) = _t->connected(); break;
+        case 2: *reinterpret_cast<QVariantList*>(_v) = _t->servers(); break;
         default: break;
         }
     }
@@ -135,20 +150,20 @@ int VpnController::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 5)
+        if (_id < 7)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 5;
+        _id -= 7;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 5)
+        if (_id < 7)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 5;
+        _id -= 7;
     }
     if (_c == QMetaObject::ReadProperty || _c == QMetaObject::WriteProperty
             || _c == QMetaObject::ResetProperty || _c == QMetaObject::BindableProperty
             || _c == QMetaObject::RegisterPropertyMetaType) {
         qt_static_metacall(this, _c, _id, _a);
-        _id -= 2;
+        _id -= 3;
     }
     return _id;
 }
@@ -157,5 +172,11 @@ int VpnController::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 void VpnController::statusChanged()
 {
     QMetaObject::activate(this, &staticMetaObject, 0, nullptr);
+}
+
+// SIGNAL 1
+void VpnController::serversChanged()
+{
+    QMetaObject::activate(this, &staticMetaObject, 1, nullptr);
 }
 QT_WARNING_POP

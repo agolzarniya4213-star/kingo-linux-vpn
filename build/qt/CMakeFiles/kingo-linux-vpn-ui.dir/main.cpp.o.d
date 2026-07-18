@@ -354,7 +354,9 @@ CMakeFiles/kingo-linux-vpn-ui.dir/main.cpp.o: \
  /usr/include/qt6/QtQuickControls2/qtquickcontrols2global.h \
  /usr/include/qt6/QtQuickControls2/qtquickcontrols2exports.h \
  /home/abolfazl4213/kingo-linux-vpn/qt/vpncontroller.h \
- /usr/include/qt6/QtCore/QObject \
+ /usr/include/qt6/QtCore/QObject /usr/include/qt6/QtCore/QVariantList \
+ /usr/include/qt6/QtCore/qvariantlist.h /usr/include/qt6/QtCore/QList \
+ /usr/include/qt6/QtCore/QVariant \
  /home/abolfazl4213/kingo-linux-vpn/qt/ipcclient.h \
  /usr/include/qt6/QtNetwork/QLocalSocket \
  /usr/include/qt6/QtNetwork/qlocalsocket.h \

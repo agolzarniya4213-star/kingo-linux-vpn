@@ -9,26 +9,59 @@ Window {
     color: "#1e1e2e"
 
     Column {
-        anchors.centerIn: parent
-        spacing: 20
+        anchors.fill: parent
+        anchors.margins: 20
+        spacing: 15
 
         Text {
-            anchors.horizontalCenter: parent.horizontalCenter
             text: "Status: " + (vpnController.connected ? "Connected" : "Disconnected")
             color: vpnController.connected ? "#a6e3a1" : "#f38ba8"
-            font.pointSize: 24
+            font.pointSize: 16
             font.bold: true
         }
 
         Button {
-            anchors.horizontalCenter: parent.horizontalCenter
             text: vpnController.connected ? "Disconnect" : "Connect (Mock Config)"
             onClicked: {
                 if (vpnController.connected) {
                     vpnController.disconnectVpn()
                 } else {
-                    // برای تست اولیه یک مسیر فیک ارسال می‌کنیم
                     vpnController.connectVpn("/tmp/dummy_config.json")
+                }
+            }
+        }
+
+        Text {
+            text: "Available Servers:"
+            color: "#cdd6f4"
+            font.pointSize: 14
+            topPadding: 10
+        }
+
+        ListView {
+            width: parent.width
+            height: 400
+            clip: true
+            model: vpnController.servers
+
+            delegate: Rectangle {
+                width: parent.width
+                height: 50
+                color: "#313244"
+                radius: 5
+
+                Column {
+                    anchors.centerIn: parent
+                    Text {
+                        text: modelData.name
+                        color: "#cdd6f4"
+                        font.bold: true
+                    }
+                    Text {
+                        text: modelData.protocol + " - " + modelData.address
+                        color: "#a6adc8"
+                        font.pointSize: 8
+                    }
                 }
             }
         }
