@@ -2,41 +2,41 @@ package main
 
 import (
     "context"
-    "fmt"
-    "log"
+    "log/slog"
     "os"
     "os/signal"
     "syscall"
-    "time"
 
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/core"
-    "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/fetcher"
+    "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/ipc"
 )
 
 func main() {
-    f := fetcher.NewHttpFetcher()
-    ctx := context.Background()
+    logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+    slog.SetDefault(logger)
 
-    servers, err := f.Fetch(ctx, "https://raw.githubusercontent.com/kingowow/Kingo-vpn/main/merged_config.txt")
+    slog.Info("Starting Kingo Linux VPN Daemon...")
+
+    ctx, cancel := context.WithCancel(context.Background())
+    defer cancel()
+
+    sigChan := make(chan os.Signal, 1)
+    signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+    
+    go func() {
+        sig := <-sigChan
+        slog.Info("Received signal, shutting down...", "signal", sig)
+        cancel()
+    }()
+
+    coreManager := core.NewSingBoxManager()
+    ipcServer := ipc.NewServer("/tmp/kingo-vpn.sock", coreManager)
+
+    err := ipcServer.Start(ctx)
     if err != nil {
-        log.Fatalf("Failed to fetch servers: %v", err)
-    }
-    fmt.Printf("Fetched %d servers\n", len(servers))
-
-    ipc := core.NewIpcServer()
-    ipc.SetServers(servers)
-
-    if err := ipc.Start("9876"); err != nil {
-        log.Fatalf("Failed to start IPC: %v", err)
+        slog.Error("Failed to start IPC server", "error", err)
+        os.Exit(1)
     }
 
-    fmt.Println("Daemon running. Press Ctrl+C to stop.")
-
-    sigs := make(chan os.Signal, 1)
-    signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-    <-sigs
-
-    fmt.Println("\nShutting down...")
-    ipc.Stop()
-    time.Sleep(100 * time.Millisecond)
+    slog.Info("Kingo Daemon stopped gracefully.")
 }
