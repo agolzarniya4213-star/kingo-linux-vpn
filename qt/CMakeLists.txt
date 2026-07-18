@@ -7,7 +7,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt5 REQUIRED COMPONENTS Widgets Svg Network Quick Qml)
+find_package(Qt5 REQUIRED COMPONENTS Widgets Svg Network Quick Qml QuickControls2)
 
 add_library(ipcclient STATIC
     ipcclient.cpp
@@ -29,6 +29,7 @@ target_link_libraries(kingo-tray
     Qt5::Svg
     Qt5::Quick
     Qt5::Qml
+    Qt5::QuickControls2
     ipcclient
 )
 
