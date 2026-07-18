@@ -6,7 +6,7 @@ import (
     "os/signal"
     "syscall"
 
-    "kingo-linux-vpn/internal/daemon"
+    "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/daemon"
 )
 
 func main() {
@@ -23,12 +23,9 @@ func main() {
     }
     defer ipcServer.Stop()
 
-    fmt.Println("Kingo Linux VPN Daemon started successfully.")
-
-    // Graceful shutdown
+    fmt.Println("Kingo Daemon started.")
     sigChan := make(chan os.Signal, 1)
     signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
     <-sigChan
-
     fmt.Println("Shutting down daemon...")
 }

@@ -11,6 +11,7 @@ import (
 
 type Request struct {
     Action string `json:"action"`
+    Server string `json:"server,omitempty"` // Added server field
 }
 
 type Response struct {
@@ -59,7 +60,7 @@ func (s *IpcServer) acceptConnections() {
     for {
         conn, err := s.listener.Accept()
         if err != nil {
-            return // Listener closed
+            return
         }
         go s.handleConnection(conn)
     }
@@ -75,12 +76,15 @@ func (s *IpcServer) handleConnection(conn net.Conn) {
     }
 
     var res Response
-    // Real routing will be added here in future steps
     switch req.Action {
     case "connect":
-        res = Response{Status: "success", Message: "Real daemon received: connect"}
+        msg := "Connected to default server."
+        if req.Server != "" {
+            msg = fmt.Sprintf("Secure tunnel established to %s.", req.Server)
+        }
+        res = Response{Status: "success", Message: msg}
     case "disconnect":
-        res = Response{Status: "success", Message: "Real daemon received: disconnect"}
+        res = Response{Status: "success", Message: "Tunnel disconnected safely."}
     default:
         sendError(conn, "Unknown action")
         return

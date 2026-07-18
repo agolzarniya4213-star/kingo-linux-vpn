@@ -11,7 +11,7 @@ class IpcClient : public QObject
 public:
     explicit IpcClient(QObject *parent = nullptr);
 
-    void sendCommand(const QString &action);
+    void sendCommand(const QString &action, const QString &server = "");
 
 signals:
     void commandSuccess(const QString &message);

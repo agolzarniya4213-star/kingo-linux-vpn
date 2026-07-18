@@ -18,7 +18,7 @@ void IpcClient::initializeSocketPath()
     m_socketPath = configDir + QDir::separator() + "kingo-linux-vpn" + QDir::separator() + "daemon.sock";
 }
 
-void IpcClient::sendCommand(const QString &action)
+void IpcClient::sendCommand(const QString &action, const QString &server)
 {
     if (action.isEmpty()) {
         emit commandError("Internal Error: Action cannot be empty.");
@@ -34,6 +34,10 @@ void IpcClient::sendCommand(const QString &action)
 
     QJsonObject payload;
     payload["action"] = action;
+    if (!server.isEmpty()) {
+        payload["server"] = server;
+    }
+    
     QJsonDocument doc(payload);
     QByteArray data = doc.toJson(QJsonDocument::Compact) + "\n";
 
