@@ -348,7 +348,24 @@ CMakeFiles/kingo-linux-vpn-ui.dir/main.cpp.o: \
  /usr/include/qt6/QtQmlIntegration/qqmlintegration.h \
  /usr/include/qt6/QtQml/qqmlerror.h \
  /usr/include/qt6/QtQml/qqmlabstracturlinterceptor.h \
+ /usr/include/qt6/QtQml/QQmlContext /usr/include/qt6/QtQml/qqmlcontext.h \
  /usr/include/qt6/QtQuickControls2/QQuickStyle \
  /usr/include/qt6/QtQuickControls2/qquickstyle.h \
  /usr/include/qt6/QtQuickControls2/qtquickcontrols2global.h \
- /usr/include/qt6/QtQuickControls2/qtquickcontrols2exports.h
+ /usr/include/qt6/QtQuickControls2/qtquickcontrols2exports.h \
+ /home/abolfazl4213/kingo-linux-vpn/qt/vpncontroller.h \
+ /usr/include/qt6/QtCore/QObject \
+ /home/abolfazl4213/kingo-linux-vpn/qt/ipcclient.h \
+ /usr/include/qt6/QtNetwork/QLocalSocket \
+ /usr/include/qt6/QtNetwork/qlocalsocket.h \
+ /usr/include/qt6/QtCore/qiodevice.h \
+ /usr/include/qt6/QtNetwork/qabstractsocket.h \
+ /usr/include/qt6/QtCore/QJsonObject \
+ /usr/include/qt6/QtCore/qjsonobject.h \
+ /usr/include/qt6/QtCore/qjsonvalue.h \
+ /usr/include/qt6/QtCore/qcborvalue.h \
+ /usr/include/qt6/QtCore/qcborcommon.h \
+ /usr/include/qt6/QtCore/qregularexpression.h \
+ /usr/include/qt6/QtCore/quuid.h /usr/include/qt6/QtCore/qendian.h \
+ /usr/include/qt6/QtCore/qjsondocument.h \
+ /usr/include/qt6/QtCore/qjsonparseerror.h

@@ -4,6 +4,8 @@ kingo-linux-vpn-ui: \
   /usr/lib/gcc/x86_64-pc-linux-gnu/16/crtbeginS.o \
   CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_autogen/mocs_compilation.cpp.o \
   CMakeFiles/kingo-linux-vpn-ui.dir/main.cpp.o \
+  CMakeFiles/kingo-linux-vpn-ui.dir/ipcclient.cpp.o \
+  CMakeFiles/kingo-linux-vpn-ui.dir/vpncontroller.cpp.o \
   CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_qmltyperegistrations.cpp.o \
   CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_qmake_KingoVPN.cpp.o \
   CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_qmlcache_loader.cpp.o \
@@ -125,6 +127,10 @@ kingo-linux-vpn-ui: \
 CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_autogen/mocs_compilation.cpp.o:
 
 CMakeFiles/kingo-linux-vpn-ui.dir/main.cpp.o:
+
+CMakeFiles/kingo-linux-vpn-ui.dir/ipcclient.cpp.o:
+
+CMakeFiles/kingo-linux-vpn-ui.dir/vpncontroller.cpp.o:
 
 CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_qmltyperegistrations.cpp.o:
 

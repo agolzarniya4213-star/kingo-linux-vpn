@@ -1,8 +1,7 @@
-CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_autogen/mocs_compilation.cpp.o: \
- /home/abolfazl4213/kingo-linux-vpn/build/qt/kingo-linux-vpn-ui_autogen/mocs_compilation.cpp \
+CMakeFiles/kingo-linux-vpn-ui.dir/vpncontroller.cpp.o: \
+ /home/abolfazl4213/kingo-linux-vpn/qt/vpncontroller.cpp \
  /usr/include/stdc-predef.h \
- /home/abolfazl4213/kingo-linux-vpn/build/qt/kingo-linux-vpn-ui_autogen/EWIEGA46WW/moc_ipcclient.cpp \
- /home/abolfazl4213/kingo-linux-vpn/build/qt/kingo-linux-vpn-ui_autogen/EWIEGA46WW/../../../../qt/ipcclient.h \
+ /home/abolfazl4213/kingo-linux-vpn/qt/vpncontroller.h \
  /usr/include/qt6/QtCore/QObject /usr/include/qt6/QtCore/qobject.h \
  /usr/include/qt6/QtCore/qobjectdefs.h \
  /usr/include/qt6/QtCore/qnamespace.h /usr/include/qt6/QtCore/qglobal.h \
@@ -285,7 +284,9 @@ CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_autogen/mocs_compilation.cp
  /usr/include/qt6/QtCore/qobject_impl.h \
  /usr/include/qt6/QtCore/qbindingstorage.h /usr/include/c++/16/chrono \
  /usr/include/c++/16/bits/chrono.h /usr/include/c++/16/ratio \
- /usr/include/c++/16/ctime /usr/include/qt6/QtNetwork/QLocalSocket \
+ /usr/include/c++/16/ctime \
+ /home/abolfazl4213/kingo-linux-vpn/qt/ipcclient.h \
+ /usr/include/qt6/QtNetwork/QLocalSocket \
  /usr/include/qt6/QtNetwork/qlocalsocket.h \
  /usr/include/qt6/QtNetwork/qtnetworkglobal.h \
  /usr/include/qt6/QtNetwork/qtnetwork-config.h \
@@ -323,9 +324,4 @@ CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_autogen/mocs_compilation.cp
  /usr/include/qt6/QtCore/qurl.h /usr/include/qt6/QtCore/quuid.h \
  /usr/include/qt6/QtCore/qendian.h \
  /usr/include/qt6/QtCore/qjsondocument.h \
- /usr/include/qt6/QtCore/qjsonparseerror.h \
- /usr/include/qt6/QtCore/qtmochelpers.h \
- /usr/include/qt6/QtCore/qtmocconstants.h \
- /usr/include/qt6/QtCore/q20algorithm.h \
- /home/abolfazl4213/kingo-linux-vpn/build/qt/kingo-linux-vpn-ui_autogen/EWIEGA46WW/moc_vpncontroller.cpp \
- /home/abolfazl4213/kingo-linux-vpn/build/qt/kingo-linux-vpn-ui_autogen/EWIEGA46WW/../../../../qt/vpncontroller.h
+ /usr/include/qt6/QtCore/qjsonparseerror.h

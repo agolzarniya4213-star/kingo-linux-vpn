@@ -1648,7 +1648,21 @@
 	"CROSS_CONFIG" : false,
 	"DEP_FILE" : "/home/abolfazl4213/kingo-linux-vpn/build/qt/kingo-linux-vpn-ui_autogen/deps",
 	"DEP_FILE_RULE_NAME" : "kingo-linux-vpn-ui_autogen/timestamp",
-	"HEADERS" : [],
+	"HEADERS" : 
+	[
+		[
+			"/home/abolfazl4213/kingo-linux-vpn/qt/ipcclient.h",
+			"Mu",
+			"EWIEGA46WW/moc_ipcclient.cpp",
+			null
+		],
+		[
+			"/home/abolfazl4213/kingo-linux-vpn/qt/vpncontroller.h",
+			"Mu",
+			"EWIEGA46WW/moc_vpncontroller.cpp",
+			null
+		]
+	],
 	"HEADER_EXTENSIONS" : [ "h", "hh", "h++", "hm", "hpp", "hxx", "in", "txx" ],
 	"INCLUDE_DIR" : "/home/abolfazl4213/kingo-linux-vpn/build/qt/kingo-linux-vpn-ui_autogen/include",
 	"MOC_COMPILATION_FILE" : "/home/abolfazl4213/kingo-linux-vpn/build/qt/kingo-linux-vpn-ui_autogen/mocs_compilation.cpp",
@@ -1731,7 +1745,9 @@
 	"SETTINGS_FILE" : "/home/abolfazl4213/kingo-linux-vpn/build/qt/CMakeFiles/kingo-linux-vpn-ui_autogen.dir/AutogenUsed.txt",
 	"SOURCES" : 
 	[
-		[ "/home/abolfazl4213/kingo-linux-vpn/qt/main.cpp", "Mu", null ]
+		[ "/home/abolfazl4213/kingo-linux-vpn/qt/ipcclient.cpp", "Mu", null ],
+		[ "/home/abolfazl4213/kingo-linux-vpn/qt/main.cpp", "Mu", null ],
+		[ "/home/abolfazl4213/kingo-linux-vpn/qt/vpncontroller.cpp", "Mu", null ]
 	],
 	"USE_BETTER_GRAPH" : true,
 	"VERBOSITY" : 0

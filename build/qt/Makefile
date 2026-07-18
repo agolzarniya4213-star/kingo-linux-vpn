@@ -459,6 +459,30 @@ kingo-linux-vpn-ui_autogen/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kingo-linux-vpn-ui.dir/build.make CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_qmlcache_loader.cpp.s
 .PHONY : .rcc/qmlcache/kingo-linux-vpn-ui_qmlcache_loader.cpp.s
 
+ipcclient.o: ipcclient.cpp.o
+.PHONY : ipcclient.o
+
+# target to build an object file
+ipcclient.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kingo-linux-vpn-ui.dir/build.make CMakeFiles/kingo-linux-vpn-ui.dir/ipcclient.cpp.o
+.PHONY : ipcclient.cpp.o
+
+ipcclient.i: ipcclient.cpp.i
+.PHONY : ipcclient.i
+
+# target to preprocess a source file
+ipcclient.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kingo-linux-vpn-ui.dir/build.make CMakeFiles/kingo-linux-vpn-ui.dir/ipcclient.cpp.i
+.PHONY : ipcclient.cpp.i
+
+ipcclient.s: ipcclient.cpp.s
+.PHONY : ipcclient.s
+
+# target to generate assembly for a file
+ipcclient.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kingo-linux-vpn-ui.dir/build.make CMakeFiles/kingo-linux-vpn-ui.dir/ipcclient.cpp.s
+.PHONY : ipcclient.cpp.s
+
 kingo-linux-vpn-ui_autogen/mocs_compilation.o: kingo-linux-vpn-ui_autogen/mocs_compilation.cpp.o
 .PHONY : kingo-linux-vpn-ui_autogen/mocs_compilation.o
 
@@ -531,6 +555,30 @@ main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kingo-linux-vpn-ui.dir/build.make CMakeFiles/kingo-linux-vpn-ui.dir/main.cpp.s
 .PHONY : main.cpp.s
 
+vpncontroller.o: vpncontroller.cpp.o
+.PHONY : vpncontroller.o
+
+# target to build an object file
+vpncontroller.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kingo-linux-vpn-ui.dir/build.make CMakeFiles/kingo-linux-vpn-ui.dir/vpncontroller.cpp.o
+.PHONY : vpncontroller.cpp.o
+
+vpncontroller.i: vpncontroller.cpp.i
+.PHONY : vpncontroller.i
+
+# target to preprocess a source file
+vpncontroller.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kingo-linux-vpn-ui.dir/build.make CMakeFiles/kingo-linux-vpn-ui.dir/vpncontroller.cpp.i
+.PHONY : vpncontroller.cpp.i
+
+vpncontroller.s: vpncontroller.cpp.s
+.PHONY : vpncontroller.s
+
+# target to generate assembly for a file
+vpncontroller.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kingo-linux-vpn-ui.dir/build.make CMakeFiles/kingo-linux-vpn-ui.dir/vpncontroller.cpp.s
+.PHONY : vpncontroller.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -570,6 +618,9 @@ help:
 	@echo "... .rcc/qmlcache/kingo-linux-vpn-ui_qmlcache_loader.o"
 	@echo "... .rcc/qmlcache/kingo-linux-vpn-ui_qmlcache_loader.i"
 	@echo "... .rcc/qmlcache/kingo-linux-vpn-ui_qmlcache_loader.s"
+	@echo "... ipcclient.o"
+	@echo "... ipcclient.i"
+	@echo "... ipcclient.s"
 	@echo "... kingo-linux-vpn-ui_autogen/mocs_compilation.o"
 	@echo "... kingo-linux-vpn-ui_autogen/mocs_compilation.i"
 	@echo "... kingo-linux-vpn-ui_autogen/mocs_compilation.s"
@@ -579,6 +630,9 @@ help:
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... vpncontroller.o"
+	@echo "... vpncontroller.i"
+	@echo "... vpncontroller.s"
 .PHONY : help
 
 

@@ -13,9 +13,11 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/abolfazl4213/kingo-linux-vpn/build/qt/.qt/rcc/qrc_qmake_KingoVPN.cpp" "CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_qmake_KingoVPN.cpp.o" "gcc" "CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_qmake_KingoVPN.cpp.o.d"
   "/home/abolfazl4213/kingo-linux-vpn/build/qt/.rcc/qmlcache/kingo-linux-vpn-ui_main_qml.cpp" "CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_main_qml.cpp.o" "gcc" "CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_main_qml.cpp.o.d"
   "/home/abolfazl4213/kingo-linux-vpn/build/qt/.rcc/qmlcache/kingo-linux-vpn-ui_qmlcache_loader.cpp" "CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_qmlcache_loader.cpp.o" "gcc" "CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_qmlcache_loader.cpp.o.d"
+  "/home/abolfazl4213/kingo-linux-vpn/qt/ipcclient.cpp" "CMakeFiles/kingo-linux-vpn-ui.dir/ipcclient.cpp.o" "gcc" "CMakeFiles/kingo-linux-vpn-ui.dir/ipcclient.cpp.o.d"
   "/home/abolfazl4213/kingo-linux-vpn/build/qt/kingo-linux-vpn-ui_autogen/mocs_compilation.cpp" "CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_autogen/mocs_compilation.cpp.o" "gcc" "CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_autogen/mocs_compilation.cpp.o.d"
   "/home/abolfazl4213/kingo-linux-vpn/build/qt/kingo-linux-vpn-ui_qmltyperegistrations.cpp" "CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_qmltyperegistrations.cpp.o" "gcc" "CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_qmltyperegistrations.cpp.o.d"
   "/home/abolfazl4213/kingo-linux-vpn/qt/main.cpp" "CMakeFiles/kingo-linux-vpn-ui.dir/main.cpp.o" "gcc" "CMakeFiles/kingo-linux-vpn-ui.dir/main.cpp.o.d"
+  "/home/abolfazl4213/kingo-linux-vpn/qt/vpncontroller.cpp" "CMakeFiles/kingo-linux-vpn-ui.dir/vpncontroller.cpp.o" "gcc" "CMakeFiles/kingo-linux-vpn-ui.dir/vpncontroller.cpp.o.d"
   "" "kingo-linux-vpn-ui" "gcc" "CMakeFiles/kingo-linux-vpn-ui.dir/link.d"
   )
 

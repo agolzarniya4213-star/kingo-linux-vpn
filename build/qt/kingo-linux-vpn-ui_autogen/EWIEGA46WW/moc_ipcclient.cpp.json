@@ -1,0 +1,55 @@
+{
+    "classes": [
+        {
+            "className": "IpcClient",
+            "lineNumber": 6,
+            "object": true,
+            "qualifiedClassName": "IpcClient",
+            "signals": [
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "response",
+                            "type": "QJsonObject"
+                        }
+                    ],
+                    "index": 0,
+                    "lineNumber": 13,
+                    "name": "responseReceived",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "error",
+                            "type": "QString"
+                        }
+                    ],
+                    "index": 1,
+                    "lineNumber": 14,
+                    "name": "errorOccurred",
+                    "returnType": "void"
+                }
+            ],
+            "slots": [
+                {
+                    "access": "private",
+                    "index": 2,
+                    "lineNumber": 17,
+                    "name": "onReadyRead",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                }
+            ]
+        }
+    ],
+    "inputFile": "ipcclient.h",
+    "outputRevision": 69
+}

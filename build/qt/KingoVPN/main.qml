@@ -6,15 +6,31 @@ Window {
     height: 600
     visible: true
     title: "Kingo Linux VPN"
-    Rectangle {
-        anchors.fill: parent
-        color: "#1e1e2e"
+    color: "#1e1e2e"
+
+    Column {
+        anchors.centerIn: parent
+        spacing: 20
+
         Text {
-            anchors.centerIn: parent
-            text: "Kingo VPN\nBackend Running..."
-            color: "#cdd6f4"
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: "Status: " + (vpnController.connected ? "Connected" : "Disconnected")
+            color: vpnController.connected ? "#a6e3a1" : "#f38ba8"
             font.pointSize: 24
-            horizontalAlignment: Text.AlignHCenter
+            font.bold: true
+        }
+
+        Button {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: vpnController.connected ? "Disconnect" : "Connect (Mock Config)"
+            onClicked: {
+                if (vpnController.connected) {
+                    vpnController.disconnectVpn()
+                } else {
+                    // برای تست اولیه یک مسیر فیک ارسال می‌کنیم
+                    vpnController.connectVpn("/tmp/dummy_config.json")
+                }
+            }
         }
     }
 }
