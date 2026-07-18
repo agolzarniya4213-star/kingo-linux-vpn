@@ -16,7 +16,7 @@ public:
     bool connected() const { return m_status == "connected"; }
     QVariantList servers() const { return m_servers; }
 
-    Q_INVOKABLE void connectVpn(const QString &configPath);
+    Q_INVOKABLE void connectToServer(const QString &uri);
     Q_INVOKABLE void disconnectVpn();
     Q_INVOKABLE void refreshStatus();
     Q_INVOKABLE void fetchServers();

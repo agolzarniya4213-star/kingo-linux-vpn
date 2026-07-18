@@ -21,17 +21,11 @@ Window {
         }
 
         Button {
-            text: vpnController.connected ? "Disconnect" : "Connect (Mock Config)"
-            onClicked: {
-                if (vpnController.connected) {
-                    vpnController.disconnectVpn()
-                } else {
-                    vpnController.connectVpn("/tmp/dummy_config.json")
-                }
-            }
+            text: vpnController.connected ? "Disconnect" : "Select a server to connect"
+            enabled: vpnController.connected
+            onClicked: vpnController.disconnectVpn()
         }
 
-        // بخش مدیریت اشتراک
         TextField {
             id: subUrlField
             width: parent.width
@@ -51,7 +45,7 @@ Window {
         }
 
         Text {
-            text: "Available Servers:"
+            text: "Available Servers (Click to connect):"
             color: "#cdd6f4"
             font.pointSize: 14
             topPadding: 10
@@ -80,6 +74,14 @@ Window {
                         text: modelData.protocol + " - " + modelData.address
                         color: "#a6adc8"
                         font.pointSize: 8
+                    }
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        vpnController.connectToServer(modelData.uri)
                     }
                 }
             }

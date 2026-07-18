@@ -8,13 +8,13 @@
                     "access": "public",
                     "arguments": [
                         {
-                            "name": "configPath",
+                            "name": "uri",
                             "type": "QString"
                         }
                     ],
                     "index": 4,
                     "lineNumber": 19,
-                    "name": "connectVpn",
+                    "name": "connectToServer",
                     "returnType": "void"
                 },
                 {

@@ -39,10 +39,18 @@
                         },
                         {
                             "codegenResult": 2,
+                            "column": 22,
+                            "durationMicroseconds": 0,
+                            "functionName": "enabled",
+                            "line": 25,
+                            "message": "Could not find property \"enabled\"."
+                        },
+                        {
+                            "codegenResult": 2,
                             "column": 24,
                             "durationMicroseconds": 0,
                             "functionName": "onClicked",
-                            "line": 25,
+                            "line": 26,
                             "message": "Could not find signal \"clicked\"."
                         },
                         {
@@ -50,7 +58,7 @@
                             "column": 20,
                             "durationMicroseconds": 0,
                             "functionName": "width",
-                            "line": 37,
+                            "line": 31,
                             "message": "Could not find property \"width\"."
                         },
                         {
@@ -58,7 +66,7 @@
                             "column": 24,
                             "durationMicroseconds": 0,
                             "functionName": "onClicked",
-                            "line": 46,
+                            "line": 40,
                             "message": "Could not find signal \"clicked\"."
                         },
                         {
@@ -66,7 +74,7 @@
                             "column": 20,
                             "durationMicroseconds": 0,
                             "functionName": "width",
-                            "line": 61,
+                            "line": 55,
                             "message": ""
                         },
                         {
@@ -74,7 +82,7 @@
                             "column": 20,
                             "durationMicroseconds": 0,
                             "functionName": "model",
-                            "line": 64,
+                            "line": 58,
                             "message": "Cannot access value for name vpnController"
                         },
                         {
@@ -82,7 +90,7 @@
                             "column": 24,
                             "durationMicroseconds": 0,
                             "functionName": "width",
-                            "line": 67,
+                            "line": 61,
                             "message": ""
                         },
                         {
@@ -90,7 +98,7 @@
                             "column": 39,
                             "durationMicroseconds": 0,
                             "functionName": "centerIn",
-                            "line": 73,
+                            "line": 67,
                             "message": ""
                         },
                         {
@@ -98,7 +106,7 @@
                             "column": 31,
                             "durationMicroseconds": 0,
                             "functionName": "text",
-                            "line": 75,
+                            "line": 69,
                             "message": "Cannot access value for name modelData"
                         },
                         {
@@ -106,8 +114,32 @@
                             "column": 31,
                             "durationMicroseconds": 0,
                             "functionName": "text",
-                            "line": 80,
+                            "line": 74,
                             "message": "Cannot access value for name modelData"
+                        },
+                        {
+                            "codegenResult": 0,
+                            "column": 34,
+                            "durationMicroseconds": 0,
+                            "functionName": "cursorShape",
+                            "line": 82,
+                            "message": ""
+                        },
+                        {
+                            "codegenResult": 2,
+                            "column": 32,
+                            "durationMicroseconds": 0,
+                            "functionName": "onClicked",
+                            "line": 83,
+                            "message": "Cannot access value for name vpnController"
+                        },
+                        {
+                            "codegenResult": 0,
+                            "column": 35,
+                            "durationMicroseconds": 0,
+                            "functionName": "fill",
+                            "line": 81,
+                            "message": ""
                         }
                     ],
                     "filePath": "/home/abolfazl4213/kingo-linux-vpn/qt/main.qml"

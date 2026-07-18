@@ -7,10 +7,10 @@ VpnController::VpnController(QObject *parent) : QObject(parent), m_client(new Ip
     fetchServers();
 }
 
-void VpnController::connectVpn(const QString &configPath) {
+void VpnController::connectToServer(const QString &uri) {
     QJsonObject req;
-    req["action"] = "connect";
-    req["config_path"] = configPath;
+    req["action"] = "connect_server";
+    req["server_uri"] = uri;
     m_client->sendRequest(req);
 }
 

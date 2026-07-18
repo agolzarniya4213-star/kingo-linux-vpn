@@ -6,6 +6,7 @@ import (
     "net"
     "os"
 
+    "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/config"
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/core"
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/fetcher"
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/model"
@@ -16,6 +17,7 @@ type Request struct {
     Action     string `json:"action"`
     ConfigPath string `json:"config_path,omitempty"`
     SubURL     string `json:"sub_url,omitempty"`
+    ServerURI  string `json:"server_uri,omitempty"`
 }
 
 type Response struct {
@@ -79,8 +81,13 @@ func (s *Server) handleConnection(conn net.Conn) {
 
         var resp Response
         switch req.Action {
-        case "connect":
-            err := s.manager.Start(context.Background(), req.ConfigPath)
+        case "connect_server":
+            configPath, err := config.GenerateSingBoxConfig(req.ServerURI)
+            if err != nil {
+                resp = Response{Success: false, Message: "Config gen failed: " + err.Error()}
+                break
+            }
+            err = s.manager.Start(context.Background(), configPath)
             resp = Response{Success: err == nil, State: string(s.manager.GetState())}
             if err != nil {
                 resp.Message = err.Error()

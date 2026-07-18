@@ -47,8 +47,8 @@ template <> constexpr inline auto VpnController::qt_create_metaobjectdata<qt_met
         "onResponseReceived",
         "QJsonObject",
         "response",
-        "connectVpn",
-        "configPath",
+        "connectToServer",
+        "uri",
         "disconnectVpn",
         "refreshStatus",
         "fetchServers",
@@ -73,7 +73,7 @@ template <> constexpr inline auto VpnController::qt_create_metaobjectdata<qt_met
         QtMocHelpers::SlotData<void(const QJsonObject &)>(6, 2, QMC::AccessPrivate, QMetaType::Void, {{
             { 0x80000000 | 7, 8 },
         }}),
-        // Method 'connectVpn'
+        // Method 'connectToServer'
         QtMocHelpers::MethodData<void(const QString &)>(9, 2, QMC::AccessPublic, QMetaType::Void, {{
             { QMetaType::QString, 10 },
         }}),
@@ -120,7 +120,7 @@ void VpnController::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _i
         case 1: _t->serversChanged(); break;
         case 2: _t->errorOccurred((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
         case 3: _t->onResponseReceived((*reinterpret_cast<std::add_pointer_t<QJsonObject>>(_a[1]))); break;
-        case 4: _t->connectVpn((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
+        case 4: _t->connectToServer((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
         case 5: _t->disconnectVpn(); break;
         case 6: _t->refreshStatus(); break;
         case 7: _t->fetchServers(); break;
