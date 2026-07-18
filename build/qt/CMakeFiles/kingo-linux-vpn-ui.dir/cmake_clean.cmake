@@ -24,6 +24,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_qmltyperegistrations.cpp.o.d"
   "CMakeFiles/kingo-linux-vpn-ui.dir/main.cpp.o"
   "CMakeFiles/kingo-linux-vpn-ui.dir/main.cpp.o.d"
+  "CMakeFiles/kingo-linux-vpn-ui.dir/trayicon.cpp.o"
+  "CMakeFiles/kingo-linux-vpn-ui.dir/trayicon.cpp.o.d"
   "CMakeFiles/kingo-linux-vpn-ui.dir/vpncontroller.cpp.o"
   "CMakeFiles/kingo-linux-vpn-ui.dir/vpncontroller.cpp.o.d"
   "KingoVPN/kingo-linux-vpn-ui.qmltypes"

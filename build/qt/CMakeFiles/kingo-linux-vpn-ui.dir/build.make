@@ -85,6 +85,7 @@ kingo-linux-vpn-ui_qmltyperegistrations.cpp: /usr/lib/qt6/metatypes/qt6quick_met
 kingo-linux-vpn-ui_qmltyperegistrations.cpp: /usr/lib/qt6/metatypes/qt6gui_metatypes.json
 kingo-linux-vpn-ui_qmltyperegistrations.cpp: /usr/lib/qt6/metatypes/qt6opengl_metatypes.json
 kingo-linux-vpn-ui_qmltyperegistrations.cpp: /usr/lib/qt6/metatypes/qt6quickcontrols2_metatypes.json
+kingo-linux-vpn-ui_qmltyperegistrations.cpp: /usr/lib/qt6/metatypes/qt6widgets_metatypes.json
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/abolfazl4213/kingo-linux-vpn/build/qt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Automatic QML type registration for target kingo-linux-vpn-ui"
 	/usr/lib/qt6/qmltyperegistrar --generate-qmltypes=/home/abolfazl4213/kingo-linux-vpn/build/qt/KingoVPN/kingo-linux-vpn-ui.qmltypes --import-name=KingoVPN --major-version=1 --minor-version=0 @/home/abolfazl4213/kingo-linux-vpn/build/qt/qmltypes/kingo-linux-vpn-ui_foreign_types.txt -o /home/abolfazl4213/kingo-linux-vpn/build/qt/kingo-linux-vpn-ui_qmltyperegistrations.cpp /home/abolfazl4213/kingo-linux-vpn/build/qt/meta_types/qt6kingo-linux-vpn-ui_metatypes.json
 	/usr/bin/cmake -E make_directory /home/abolfazl4213/kingo-linux-vpn/build/qt/.qt/qmltypes
@@ -199,10 +200,24 @@ CMakeFiles/kingo-linux-vpn-ui.dir/vpncontroller.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/kingo-linux-vpn-ui.dir/vpncontroller.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/abolfazl4213/kingo-linux-vpn/qt/vpncontroller.cpp -o CMakeFiles/kingo-linux-vpn-ui.dir/vpncontroller.cpp.s
 
+CMakeFiles/kingo-linux-vpn-ui.dir/trayicon.cpp.o: CMakeFiles/kingo-linux-vpn-ui.dir/flags.make
+CMakeFiles/kingo-linux-vpn-ui.dir/trayicon.cpp.o: /home/abolfazl4213/kingo-linux-vpn/qt/trayicon.cpp
+CMakeFiles/kingo-linux-vpn-ui.dir/trayicon.cpp.o: CMakeFiles/kingo-linux-vpn-ui.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/abolfazl4213/kingo-linux-vpn/build/qt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/kingo-linux-vpn-ui.dir/trayicon.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/kingo-linux-vpn-ui.dir/trayicon.cpp.o -MF CMakeFiles/kingo-linux-vpn-ui.dir/trayicon.cpp.o.d -o CMakeFiles/kingo-linux-vpn-ui.dir/trayicon.cpp.o -c /home/abolfazl4213/kingo-linux-vpn/qt/trayicon.cpp
+
+CMakeFiles/kingo-linux-vpn-ui.dir/trayicon.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/kingo-linux-vpn-ui.dir/trayicon.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/abolfazl4213/kingo-linux-vpn/qt/trayicon.cpp > CMakeFiles/kingo-linux-vpn-ui.dir/trayicon.cpp.i
+
+CMakeFiles/kingo-linux-vpn-ui.dir/trayicon.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/kingo-linux-vpn-ui.dir/trayicon.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/abolfazl4213/kingo-linux-vpn/qt/trayicon.cpp -o CMakeFiles/kingo-linux-vpn-ui.dir/trayicon.cpp.s
+
 CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_qmltyperegistrations.cpp.o: CMakeFiles/kingo-linux-vpn-ui.dir/flags.make
 CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_qmltyperegistrations.cpp.o: kingo-linux-vpn-ui_qmltyperegistrations.cpp
 CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_qmltyperegistrations.cpp.o: CMakeFiles/kingo-linux-vpn-ui.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/abolfazl4213/kingo-linux-vpn/build/qt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_qmltyperegistrations.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/abolfazl4213/kingo-linux-vpn/build/qt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_qmltyperegistrations.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_qmltyperegistrations.cpp.o -MF CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_qmltyperegistrations.cpp.o.d -o CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_qmltyperegistrations.cpp.o -c /home/abolfazl4213/kingo-linux-vpn/build/qt/kingo-linux-vpn-ui_qmltyperegistrations.cpp
 
 CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_qmltyperegistrations.cpp.i: cmake_force
@@ -216,7 +231,7 @@ CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_qmltyperegistrations.cpp.s:
 CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_qmake_KingoVPN.cpp.o: CMakeFiles/kingo-linux-vpn-ui.dir/flags.make
 CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_qmake_KingoVPN.cpp.o: .qt/rcc/qrc_qmake_KingoVPN.cpp
 CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_qmake_KingoVPN.cpp.o: CMakeFiles/kingo-linux-vpn-ui.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/abolfazl4213/kingo-linux-vpn/build/qt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_qmake_KingoVPN.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/abolfazl4213/kingo-linux-vpn/build/qt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_qmake_KingoVPN.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_qmake_KingoVPN.cpp.o -MF CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_qmake_KingoVPN.cpp.o.d -o CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_qmake_KingoVPN.cpp.o -c /home/abolfazl4213/kingo-linux-vpn/build/qt/.qt/rcc/qrc_qmake_KingoVPN.cpp
 
 CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_qmake_KingoVPN.cpp.i: cmake_force
@@ -230,7 +245,7 @@ CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_qmake_KingoVPN.cpp.s: cmake_force
 CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_qmlcache_loader.cpp.o: CMakeFiles/kingo-linux-vpn-ui.dir/flags.make
 CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_qmlcache_loader.cpp.o: .rcc/qmlcache/kingo-linux-vpn-ui_qmlcache_loader.cpp
 CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_qmlcache_loader.cpp.o: CMakeFiles/kingo-linux-vpn-ui.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/abolfazl4213/kingo-linux-vpn/build/qt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_qmlcache_loader.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/abolfazl4213/kingo-linux-vpn/build/qt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_qmlcache_loader.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_qmlcache_loader.cpp.o -MF CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_qmlcache_loader.cpp.o.d -o CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_qmlcache_loader.cpp.o -c /home/abolfazl4213/kingo-linux-vpn/build/qt/.rcc/qmlcache/kingo-linux-vpn-ui_qmlcache_loader.cpp
 
 CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_qmlcache_loader.cpp.i: cmake_force
@@ -244,7 +259,7 @@ CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_qmlcache_load
 CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_main_qml.cpp.o: CMakeFiles/kingo-linux-vpn-ui.dir/flags.make
 CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_main_qml.cpp.o: .rcc/qmlcache/kingo-linux-vpn-ui_main_qml.cpp
 CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_main_qml.cpp.o: CMakeFiles/kingo-linux-vpn-ui.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/abolfazl4213/kingo-linux-vpn/build/qt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_main_qml.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/abolfazl4213/kingo-linux-vpn/build/qt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_main_qml.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_main_qml.cpp.o -MF CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_main_qml.cpp.o.d -o CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_main_qml.cpp.o -c /home/abolfazl4213/kingo-linux-vpn/build/qt/.rcc/qmlcache/kingo-linux-vpn-ui_main_qml.cpp
 
 CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_main_qml.cpp.i: cmake_force
@@ -258,7 +273,7 @@ CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_main_qml.cpp.
 CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_kingo-linux-vpn-ui_raw_qml_0.cpp.o: CMakeFiles/kingo-linux-vpn-ui.dir/flags.make
 CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_kingo-linux-vpn-ui_raw_qml_0.cpp.o: .qt/rcc/qrc_kingo-linux-vpn-ui_raw_qml_0.cpp
 CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_kingo-linux-vpn-ui_raw_qml_0.cpp.o: CMakeFiles/kingo-linux-vpn-ui.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/abolfazl4213/kingo-linux-vpn/build/qt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_kingo-linux-vpn-ui_raw_qml_0.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/abolfazl4213/kingo-linux-vpn/build/qt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building CXX object CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_kingo-linux-vpn-ui_raw_qml_0.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_kingo-linux-vpn-ui_raw_qml_0.cpp.o -MF CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_kingo-linux-vpn-ui_raw_qml_0.cpp.o.d -o CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_kingo-linux-vpn-ui_raw_qml_0.cpp.o -c /home/abolfazl4213/kingo-linux-vpn/build/qt/.qt/rcc/qrc_kingo-linux-vpn-ui_raw_qml_0.cpp
 
 CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_kingo-linux-vpn-ui_raw_qml_0.cpp.i: cmake_force
@@ -275,6 +290,7 @@ kingo__linux__vpn__ui_OBJECTS = \
 "CMakeFiles/kingo-linux-vpn-ui.dir/main.cpp.o" \
 "CMakeFiles/kingo-linux-vpn-ui.dir/ipcclient.cpp.o" \
 "CMakeFiles/kingo-linux-vpn-ui.dir/vpncontroller.cpp.o" \
+"CMakeFiles/kingo-linux-vpn-ui.dir/trayicon.cpp.o" \
 "CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_qmltyperegistrations.cpp.o" \
 "CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_qmake_KingoVPN.cpp.o" \
 "CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_qmlcache_loader.cpp.o" \
@@ -288,6 +304,7 @@ kingo-linux-vpn-ui: CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_autogen
 kingo-linux-vpn-ui: CMakeFiles/kingo-linux-vpn-ui.dir/main.cpp.o
 kingo-linux-vpn-ui: CMakeFiles/kingo-linux-vpn-ui.dir/ipcclient.cpp.o
 kingo-linux-vpn-ui: CMakeFiles/kingo-linux-vpn-ui.dir/vpncontroller.cpp.o
+kingo-linux-vpn-ui: CMakeFiles/kingo-linux-vpn-ui.dir/trayicon.cpp.o
 kingo-linux-vpn-ui: CMakeFiles/kingo-linux-vpn-ui.dir/kingo-linux-vpn-ui_qmltyperegistrations.cpp.o
 kingo-linux-vpn-ui: CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_qmake_KingoVPN.cpp.o
 kingo-linux-vpn-ui: CMakeFiles/kingo-linux-vpn-ui.dir/.rcc/qmlcache/kingo-linux-vpn-ui_qmlcache_loader.cpp.o
@@ -296,16 +313,17 @@ kingo-linux-vpn-ui: CMakeFiles/kingo-linux-vpn-ui.dir/.qt/rcc/qrc_kingo-linux-vp
 kingo-linux-vpn-ui: CMakeFiles/kingo-linux-vpn-ui.dir/build.make
 kingo-linux-vpn-ui: CMakeFiles/kingo-linux-vpn-ui.dir/compiler_depend.ts
 kingo-linux-vpn-ui: /usr/lib/libQt6QuickControls2.so.6.11.1
+kingo-linux-vpn-ui: /usr/lib/libQt6Widgets.so.6.11.1
 kingo-linux-vpn-ui: /usr/lib/libQt6Quick.so.6.11.1
 kingo-linux-vpn-ui: /usr/lib/libQt6OpenGL.so.6.11.1
+kingo-linux-vpn-ui: /usr/lib/libQt6Qml.so.6.11.1
+kingo-linux-vpn-ui: /usr/lib/libQt6Network.so.6.11.1
 kingo-linux-vpn-ui: /usr/lib/libQt6Gui.so.6.11.1
 kingo-linux-vpn-ui: /usr/lib/libGLX.so
 kingo-linux-vpn-ui: /usr/lib/libOpenGL.so
-kingo-linux-vpn-ui: /usr/lib/libQt6Qml.so.6.11.1
-kingo-linux-vpn-ui: /usr/lib/libQt6Network.so.6.11.1
 kingo-linux-vpn-ui: /usr/lib/libQt6Core.so.6.11.1
 kingo-linux-vpn-ui: CMakeFiles/kingo-linux-vpn-ui.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/abolfazl4213/kingo-linux-vpn/build/qt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Linking CXX executable kingo-linux-vpn-ui"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/abolfazl4213/kingo-linux-vpn/build/qt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Linking CXX executable kingo-linux-vpn-ui"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/kingo-linux-vpn-ui.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

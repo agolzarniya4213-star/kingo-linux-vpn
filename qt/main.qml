@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 
 Window {
+    id: mainWindow
     width: 400
     height: 700
     visible: true
@@ -16,11 +17,38 @@ Window {
         onTriggered: vpnController.getTraffic()
     }
 
-    // تابع کمکی برای فرمت کردن سرعت
     function formatSpeed(bytes) {
         if (bytes < 1024) return bytes + " B/s"
         if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB/s"
         return (bytes / (1024 * 1024)).toFixed(2) + " MB/s"
+    }
+
+    // جلوگیری از بسته شدن برنامه با X و مینیمایز کردن به System Tray
+    onClosing: {
+        close.accepted = false
+        hide()
+        trayIcon.showMessage("Kingo VPN", "Application minimized to tray.")
+    }
+
+    // اتصال به سیگنال‌های System Tray
+    Connections {
+        target: trayIcon
+        function onActivateRequested() {
+            mainWindow.show()
+            mainWindow.raise()
+            mainWindow.requestActivate()
+        }
+        function onConnectRequested() {
+            // در حال حاضر فقط پنجره را باز می‌کند تا سرور انتخاب شود
+            mainWindow.show()
+            mainWindow.raise()
+        }
+        function onDisconnectRequested() {
+            vpnController.disconnectVpn()
+        }
+        function onQuitRequested() {
+            Qt.quit()
+        }
     }
 
     Column {
@@ -35,37 +63,24 @@ Window {
             font.bold: true
         }
 
-        // نمایش ترافیک
         Row {
             width: parent.width
             spacing: 20
             visible: vpnController.connected
 
             Column {
-                Text {
-                    text: "Download"
-                    color: "#a6adc8"
-                    font.pointSize: 10
-                }
+                Text { text: "Download"; color: "#a6adc8"; font.pointSize: 10 }
                 Text {
                     text: formatSpeed(vpnController.downloadSpeed)
-                    color: "#89b4fa"
-                    font.pointSize: 18
-                    font.bold: true
+                    color: "#89b4fa"; font.pointSize: 18; font.bold: true
                 }
             }
 
             Column {
-                Text {
-                    text: "Upload"
-                    color: "#a6adc8"
-                    font.pointSize: 10
-                }
+                Text { text: "Upload"; color: "#a6adc8"; font.pointSize: 10 }
                 Text {
                     text: formatSpeed(vpnController.uploadSpeed)
-                    color: "#f9e2af"
-                    font.pointSize: 18
-                    font.bold: true
+                    color: "#f9e2af"; font.pointSize: 18; font.bold: true
                 }
             }
         }
@@ -88,7 +103,6 @@ Window {
         Row {
             width: parent.width
             spacing: 10
-
             Button {
                 text: "Update Subscription"
                 onClicked: {
@@ -97,7 +111,6 @@ Window {
                     }
                 }
             }
-
             Button {
                 text: "Test Latency"
                 onClicked: vpnController.testLatency()
@@ -131,7 +144,6 @@ Window {
                     Column {
                         width: parent.width - 60
                         anchors.verticalCenter: parent.verticalCenter
-
                         Text {
                             text: modelData.name
                             color: "#cdd6f4"
@@ -159,9 +171,7 @@ Window {
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        vpnController.connectToServer(modelData.uri)
-                    }
+                    onClicked: vpnController.connectToServer(modelData.uri)
                 }
             }
         }

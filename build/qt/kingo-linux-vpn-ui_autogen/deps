@@ -7,6 +7,8 @@ kingo-linux-vpn-ui_autogen/timestamp: \
 	/home/abolfazl4213/kingo-linux-vpn/qt/ipcclient.cpp \
 	/home/abolfazl4213/kingo-linux-vpn/qt/ipcclient.h \
 	/home/abolfazl4213/kingo-linux-vpn/qt/main.cpp \
+	/home/abolfazl4213/kingo-linux-vpn/qt/trayicon.cpp \
+	/home/abolfazl4213/kingo-linux-vpn/qt/trayicon.h \
 	/home/abolfazl4213/kingo-linux-vpn/qt/vpncontroller.cpp \
 	/home/abolfazl4213/kingo-linux-vpn/qt/vpncontroller.h \
 	/usr/include/alloca.h \
@@ -312,6 +314,7 @@ kingo-linux-vpn-ui_autogen/timestamp: \
 	/usr/include/qt6/QtCore/qcborcommon.h \
 	/usr/include/qt6/QtCore/qcborvalue.h \
 	/usr/include/qt6/QtCore/qchar.h \
+	/usr/include/qt6/QtCore/qcheckedint_impl.h \
 	/usr/include/qt6/QtCore/qcompare.h \
 	/usr/include/qt6/QtCore/qcompare_impl.h \
 	/usr/include/qt6/QtCore/qcomparehelpers.h \
@@ -347,11 +350,13 @@ kingo-linux-vpn-ui_autogen/timestamp: \
 	/usr/include/qt6/QtCore/qjsonparseerror.h \
 	/usr/include/qt6/QtCore/qjsonvalue.h \
 	/usr/include/qt6/QtCore/qlatin1stringview.h \
+	/usr/include/qt6/QtCore/qline.h \
 	/usr/include/qt6/QtCore/qlist.h \
 	/usr/include/qt6/QtCore/qlocale.h \
 	/usr/include/qt6/QtCore/qlogging.h \
 	/usr/include/qt6/QtCore/qmalloc.h \
 	/usr/include/qt6/QtCore/qmap.h \
+	/usr/include/qt6/QtCore/qmargins.h \
 	/usr/include/qt6/QtCore/qmath.h \
 	/usr/include/qt6/QtCore/qmetacontainer.h \
 	/usr/include/qt6/QtCore/qmetatype.h \
@@ -364,7 +369,9 @@ kingo-linux-vpn-ui_autogen/timestamp: \
 	/usr/include/qt6/QtCore/qobjectdefs_impl.h \
 	/usr/include/qt6/QtCore/qoverload.h \
 	/usr/include/qt6/QtCore/qpair.h \
+	/usr/include/qt6/QtCore/qpoint.h \
 	/usr/include/qt6/QtCore/qprocessordetection.h \
+	/usr/include/qt6/QtCore/qrect.h \
 	/usr/include/qt6/QtCore/qrefcount.h \
 	/usr/include/qt6/QtCore/qregularexpression.h \
 	/usr/include/qt6/QtCore/qscopedpointer.h \
@@ -374,6 +381,7 @@ kingo-linux-vpn-ui_autogen/timestamp: \
 	/usr/include/qt6/QtCore/qshareddata_impl.h \
 	/usr/include/qt6/QtCore/qsharedpointer.h \
 	/usr/include/qt6/QtCore/qsharedpointer_impl.h \
+	/usr/include/qt6/QtCore/qsize.h \
 	/usr/include/qt6/QtCore/qspan.h \
 	/usr/include/qt6/QtCore/qstdlibdetection.h \
 	/usr/include/qt6/QtCore/qstring.h \
@@ -420,12 +428,46 @@ kingo-linux-vpn-ui_autogen/timestamp: \
 	/usr/include/qt6/QtCore/qversiontagging.h \
 	/usr/include/qt6/QtCore/qxptype_traits.h \
 	/usr/include/qt6/QtCore/qyieldcpu.h \
+	/usr/include/qt6/QtGui/qaction.h \
+	/usr/include/qt6/QtGui/qbitmap.h \
+	/usr/include/qt6/QtGui/qbrush.h \
+	/usr/include/qt6/QtGui/qcolor.h \
+	/usr/include/qt6/QtGui/qcursor.h \
+	/usr/include/qt6/QtGui/qfont.h \
+	/usr/include/qt6/QtGui/qfontinfo.h \
+	/usr/include/qt6/QtGui/qfontmetrics.h \
+	/usr/include/qt6/QtGui/qfontvariableaxis.h \
+	/usr/include/qt6/QtGui/qicon.h \
+	/usr/include/qt6/QtGui/qimage.h \
+	/usr/include/qt6/QtGui/qkeysequence.h \
+	/usr/include/qt6/QtGui/qpaintdevice.h \
+	/usr/include/qt6/QtGui/qpalette.h \
+	/usr/include/qt6/QtGui/qpixelformat.h \
+	/usr/include/qt6/QtGui/qpixmap.h \
+	/usr/include/qt6/QtGui/qpolygon.h \
+	/usr/include/qt6/QtGui/qregion.h \
+	/usr/include/qt6/QtGui/qrgb.h \
+	/usr/include/qt6/QtGui/qrgba64.h \
+	/usr/include/qt6/QtGui/qtgui-config.h \
+	/usr/include/qt6/QtGui/qtguiexports.h \
+	/usr/include/qt6/QtGui/qtguiglobal.h \
+	/usr/include/qt6/QtGui/qtransform.h \
+	/usr/include/qt6/QtGui/qwindowdefs.h \
 	/usr/include/qt6/QtNetwork/QLocalSocket \
 	/usr/include/qt6/QtNetwork/qabstractsocket.h \
 	/usr/include/qt6/QtNetwork/qlocalsocket.h \
 	/usr/include/qt6/QtNetwork/qtnetwork-config.h \
 	/usr/include/qt6/QtNetwork/qtnetworkexports.h \
 	/usr/include/qt6/QtNetwork/qtnetworkglobal.h \
+	/usr/include/qt6/QtWidgets/QMenu \
+	/usr/include/qt6/QtWidgets/QSystemTrayIcon \
+	/usr/include/qt6/QtWidgets/qmenu.h \
+	/usr/include/qt6/QtWidgets/qsizepolicy.h \
+	/usr/include/qt6/QtWidgets/qsystemtrayicon.h \
+	/usr/include/qt6/QtWidgets/qtwidgets-config.h \
+	/usr/include/qt6/QtWidgets/qtwidgetsexports.h \
+	/usr/include/qt6/QtWidgets/qtwidgetsglobal.h \
+	/usr/include/qt6/QtWidgets/qwidget.h \
 	/usr/include/sched.h \
 	/usr/include/stdc-predef.h \
 	/usr/include/stdint.h \
@@ -1470,6 +1512,26 @@ kingo-linux-vpn-ui_autogen/timestamp: \
 	/usr/lib/cmake/Qt6QuickTools/Qt6QuickToolsTargetsPrecheck.cmake \
 	/usr/lib/cmake/Qt6QuickTools/Qt6QuickToolsVersionlessTargets.cmake \
 	/usr/lib/cmake/Qt6QuickTools/Qt6SvgToQmlMacros.cmake \
+	/usr/lib/cmake/Qt6Widgets/Qt6WidgetsAdditionalTargetInfo.cmake \
+	/usr/lib/cmake/Qt6Widgets/Qt6WidgetsConfig.cmake \
+	/usr/lib/cmake/Qt6Widgets/Qt6WidgetsConfigVersion.cmake \
+	/usr/lib/cmake/Qt6Widgets/Qt6WidgetsConfigVersionImpl.cmake \
+	/usr/lib/cmake/Qt6Widgets/Qt6WidgetsDependencies.cmake \
+	/usr/lib/cmake/Qt6Widgets/Qt6WidgetsMacros.cmake \
+	/usr/lib/cmake/Qt6Widgets/Qt6WidgetsPlugins.cmake \
+	/usr/lib/cmake/Qt6Widgets/Qt6WidgetsTargets-relwithdebinfo.cmake \
+	/usr/lib/cmake/Qt6Widgets/Qt6WidgetsTargets.cmake \
+	/usr/lib/cmake/Qt6Widgets/Qt6WidgetsTargetsPrecheck.cmake \
+	/usr/lib/cmake/Qt6Widgets/Qt6WidgetsVersionlessAliasTargets.cmake \
+	/usr/lib/cmake/Qt6WidgetsTools/Qt6WidgetsToolsAdditionalTargetInfo.cmake \
+	/usr/lib/cmake/Qt6WidgetsTools/Qt6WidgetsToolsConfig.cmake \
+	/usr/lib/cmake/Qt6WidgetsTools/Qt6WidgetsToolsConfigVersion.cmake \
+	/usr/lib/cmake/Qt6WidgetsTools/Qt6WidgetsToolsConfigVersionImpl.cmake \
+	/usr/lib/cmake/Qt6WidgetsTools/Qt6WidgetsToolsDependencies.cmake \
+	/usr/lib/cmake/Qt6WidgetsTools/Qt6WidgetsToolsTargets-relwithdebinfo.cmake \
+	/usr/lib/cmake/Qt6WidgetsTools/Qt6WidgetsToolsTargets.cmake \
+	/usr/lib/cmake/Qt6WidgetsTools/Qt6WidgetsToolsTargetsPrecheck.cmake \
+	/usr/lib/cmake/Qt6WidgetsTools/Qt6WidgetsToolsVersionlessTargets.cmake \
 	/usr/lib/gcc/x86_64-pc-linux-gnu/16/include/stdarg.h \
 	/usr/lib/gcc/x86_64-pc-linux-gnu/16/include/stdbool.h \
 	/usr/lib/gcc/x86_64-pc-linux-gnu/16/include/stddef.h \

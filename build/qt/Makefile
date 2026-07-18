@@ -555,6 +555,30 @@ main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kingo-linux-vpn-ui.dir/build.make CMakeFiles/kingo-linux-vpn-ui.dir/main.cpp.s
 .PHONY : main.cpp.s
 
+trayicon.o: trayicon.cpp.o
+.PHONY : trayicon.o
+
+# target to build an object file
+trayicon.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kingo-linux-vpn-ui.dir/build.make CMakeFiles/kingo-linux-vpn-ui.dir/trayicon.cpp.o
+.PHONY : trayicon.cpp.o
+
+trayicon.i: trayicon.cpp.i
+.PHONY : trayicon.i
+
+# target to preprocess a source file
+trayicon.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kingo-linux-vpn-ui.dir/build.make CMakeFiles/kingo-linux-vpn-ui.dir/trayicon.cpp.i
+.PHONY : trayicon.cpp.i
+
+trayicon.s: trayicon.cpp.s
+.PHONY : trayicon.s
+
+# target to generate assembly for a file
+trayicon.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kingo-linux-vpn-ui.dir/build.make CMakeFiles/kingo-linux-vpn-ui.dir/trayicon.cpp.s
+.PHONY : trayicon.cpp.s
+
 vpncontroller.o: vpncontroller.cpp.o
 .PHONY : vpncontroller.o
 
@@ -630,6 +654,9 @@ help:
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... trayicon.o"
+	@echo "... trayicon.i"
+	@echo "... trayicon.s"
 	@echo "... vpncontroller.o"
 	@echo "... vpncontroller.i"
 	@echo "... vpncontroller.s"

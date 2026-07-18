@@ -79,6 +79,7 @@ kingo-linux-vpn-ui_qmltyperegistrations.cpp: /usr/lib/qt6/metatypes/qt6quick_met
 kingo-linux-vpn-ui_qmltyperegistrations.cpp: /usr/lib/qt6/metatypes/qt6gui_metatypes.json
 kingo-linux-vpn-ui_qmltyperegistrations.cpp: /usr/lib/qt6/metatypes/qt6opengl_metatypes.json
 kingo-linux-vpn-ui_qmltyperegistrations.cpp: /usr/lib/qt6/metatypes/qt6quickcontrols2_metatypes.json
+kingo-linux-vpn-ui_qmltyperegistrations.cpp: /usr/lib/qt6/metatypes/qt6widgets_metatypes.json
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/abolfazl4213/kingo-linux-vpn/build/qt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Automatic QML type registration for target kingo-linux-vpn-ui"
 	/usr/lib/qt6/qmltyperegistrar --generate-qmltypes=/home/abolfazl4213/kingo-linux-vpn/build/qt/KingoVPN/kingo-linux-vpn-ui.qmltypes --import-name=KingoVPN --major-version=1 --minor-version=0 @/home/abolfazl4213/kingo-linux-vpn/build/qt/qmltypes/kingo-linux-vpn-ui_foreign_types.txt -o /home/abolfazl4213/kingo-linux-vpn/build/qt/kingo-linux-vpn-ui_qmltyperegistrations.cpp /home/abolfazl4213/kingo-linux-vpn/build/qt/meta_types/qt6kingo-linux-vpn-ui_metatypes.json
 	/usr/bin/cmake -E make_directory /home/abolfazl4213/kingo-linux-vpn/build/qt/.qt/qmltypes
