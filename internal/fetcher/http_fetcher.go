@@ -8,7 +8,7 @@ import (
     "net/url"
     "strings"
 
-    "kingo-linux-vpn/internal/model"
+    "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/model"
 )
 
 type HttpFetcher struct {

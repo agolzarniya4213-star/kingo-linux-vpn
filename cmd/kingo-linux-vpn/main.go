@@ -6,13 +6,13 @@ import (
     "log"
     "os"
 
-    "kingo-linux-vpn/internal/fetcher"
+    "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/fetcher"
 )
 
 func main() {
     f := fetcher.NewHttpFetcher()
     ctx := context.Background()
-    
+
     servers, err := f.Fetch(ctx, "https://raw.githubusercontent.com/kingowow/Kingo-vpn/main/merged_config.txt")
     if err != nil {
         log.Fatalf("Failed to fetch servers: %v", err)
