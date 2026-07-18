@@ -1,0 +1,22 @@
+# Build artifacts
+build/
+qt/build/
+*/CMakeFiles/
+CMakeCache.txt
+CMakeLists.txt.user
+Makefile
+cmake_install.cmake
+*.o
+*.a
+*.so
+
+# IDE & OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Go binaries
+kingo-linux-vpn
+kingo-linux-vpn-daemon
+kingo-linux-vpn-ui

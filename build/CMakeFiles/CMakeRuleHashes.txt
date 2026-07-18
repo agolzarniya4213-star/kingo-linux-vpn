@@ -1,5 +1,0 @@
-# Hashes of file build rules.
-2628ca44604adff110f24261693df23f qt/CMakeFiles/ipcclient_autogen
-2628ca44604adff110f24261693df23f qt/CMakeFiles/kingo-tray_autogen
-d8382f4a0b9669880c9e96144f1afd30 qt/ipcclient_autogen/timestamp
-4ece7fffebd6ecfd7e6a3e70954b6e6f qt/kingo-tray_autogen/timestamp

@@ -16,8 +16,11 @@ add_library(ipcclient STATIC
 target_link_libraries(ipcclient PUBLIC Qt5::Network)
 
 add_executable(kingo-tray
- \n    appcore.cpp\n    ipcclient.cpp\n    main.cpp
- \n    appcore.h\n    ipcclient.h
+    main.cpp
+    appcore.cpp
+    appcore.h
+    trayicon.cpp
+    trayicon.h
 )
 
 target_link_libraries(kingo-tray
