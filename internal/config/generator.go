@@ -32,6 +32,11 @@ func generateVlessConfig(uri string) (string, error) {
 
     // ساختار مینیمال و معتبر Sing-box
     config := map[string]interface{}{
+        "experimental": map[string]interface{}{
+            "clash_api": map[string]interface{}{
+                "external_controller": "127.0.0.1:9090",
+            },
+        },
         "inbounds": []map[string]interface{}{
             {
                 "type":        "mixed",

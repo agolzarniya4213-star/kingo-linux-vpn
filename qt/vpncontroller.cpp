@@ -45,6 +45,12 @@ void VpnController::testLatency() {
     m_client->sendRequest(req);
 }
 
+void VpnController::getTraffic() {
+    QJsonObject req;
+    req["action"] = "get_traffic";
+    m_client->sendRequest(req);
+}
+
 void VpnController::onResponseReceived(const QJsonObject &response) {
     if (response.contains("state")) {
         setStatus(response["state"].toString());
@@ -52,6 +58,11 @@ void VpnController::onResponseReceived(const QJsonObject &response) {
     if (response.contains("servers")) {
         m_servers = response["servers"].toVariant().toList();
         emit serversChanged();
+    }
+    if (response.contains("upload") || response.contains("download")) {
+        m_uploadSpeed = response["upload"].toVariant().toLongLong();
+        m_downloadSpeed = response["download"].toVariant().toLongLong();
+        emit trafficChanged();
     }
     if (response.contains("message") && !response["message"].toString().isEmpty()) {
         emit errorOccurred(response["message"].toString());

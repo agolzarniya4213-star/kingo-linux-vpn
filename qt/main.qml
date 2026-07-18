@@ -3,10 +3,25 @@ import QtQuick.Controls
 
 Window {
     width: 400
-    height: 650
+    height: 700
     visible: true
     title: "Kingo Linux VPN"
     color: "#1e1e2e"
+
+    // تایمر برای دریافت ترافیک هر 1 ثانیه
+    Timer {
+        interval: 1000
+        running: vpnController.connected
+        repeat: true
+        onTriggered: vpnController.getTraffic()
+    }
+
+    // تابع کمکی برای فرمت کردن سرعت
+    function formatSpeed(bytes) {
+        if (bytes < 1024) return bytes + " B/s"
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB/s"
+        return (bytes / (1024 * 1024)).toFixed(2) + " MB/s"
+    }
 
     Column {
         anchors.fill: parent
@@ -18,6 +33,41 @@ Window {
             color: vpnController.connected ? "#a6e3a1" : "#f38ba8"
             font.pointSize: 16
             font.bold: true
+        }
+
+        // نمایش ترافیک
+        Row {
+            width: parent.width
+            spacing: 20
+            visible: vpnController.connected
+
+            Column {
+                Text {
+                    text: "Download"
+                    color: "#a6adc8"
+                    font.pointSize: 10
+                }
+                Text {
+                    text: formatSpeed(vpnController.downloadSpeed)
+                    color: "#89b4fa"
+                    font.pointSize: 18
+                    font.bold: true
+                }
+            }
+
+            Column {
+                Text {
+                    text: "Upload"
+                    color: "#a6adc8"
+                    font.pointSize: 10
+                }
+                Text {
+                    text: formatSpeed(vpnController.uploadSpeed)
+                    color: "#f9e2af"
+                    font.pointSize: 18
+                    font.bold: true
+                }
+            }
         }
 
         Button {

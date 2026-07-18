@@ -22,10 +22,12 @@ type Request struct {
 }
 
 type Response struct {
-    Success bool           `json:"success"`
-    Message string         `json:"message"`
-    State   string         `json:"state"`
-    Servers []model.Server `json:"servers,omitempty"`
+    Success  bool           `json:"success"`
+    Message  string         `json:"message"`
+    State    string         `json:"state"`
+    Servers  []model.Server `json:"servers,omitempty"`
+    Upload   int64          `json:"upload,omitempty"`
+    Download int64          `json:"download,omitempty"`
 }
 
 type Server struct {
@@ -121,11 +123,12 @@ func (s *Server) handleConnection(conn net.Conn) {
                 resp = Response{Success: false, Message: err.Error()}
                 break
             }
-            // تست همزمان تأخیر سرورها
             testedServers := network.TestAllLatency(context.Background(), servers)
-            // ذخیره تأخیرها در دیتابیس
             _ = s.db.SaveServers(testedServers)
             resp = Response{Success: true, Servers: testedServers}
+        case "get_traffic":
+            traffic := s.manager.GetTraffic()
+            resp = Response{Success: true, Upload: traffic.Upload, Download: traffic.Download}
         default:
             resp = Response{Success: false, Message: "unknown action"}
         }

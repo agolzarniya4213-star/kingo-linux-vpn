@@ -12,29 +12,29 @@
                             "type": "QString"
                         }
                     ],
-                    "index": 4,
-                    "lineNumber": 19,
+                    "index": 5,
+                    "lineNumber": 23,
                     "name": "connectToServer",
                     "returnType": "void"
                 },
                 {
                     "access": "public",
-                    "index": 5,
-                    "lineNumber": 20,
+                    "index": 6,
+                    "lineNumber": 24,
                     "name": "disconnectVpn",
                     "returnType": "void"
                 },
                 {
                     "access": "public",
-                    "index": 6,
-                    "lineNumber": 21,
+                    "index": 7,
+                    "lineNumber": 25,
                     "name": "refreshStatus",
                     "returnType": "void"
                 },
                 {
                     "access": "public",
-                    "index": 7,
-                    "lineNumber": 22,
+                    "index": 8,
+                    "lineNumber": 26,
                     "name": "fetchServers",
                     "returnType": "void"
                 },
@@ -46,16 +46,23 @@
                             "type": "QString"
                         }
                     ],
-                    "index": 8,
-                    "lineNumber": 23,
+                    "index": 9,
+                    "lineNumber": 27,
                     "name": "addSubscription",
                     "returnType": "void"
                 },
                 {
                     "access": "public",
-                    "index": 9,
-                    "lineNumber": 24,
+                    "index": 10,
+                    "lineNumber": 28,
                     "name": "testLatency",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 11,
+                    "lineNumber": 29,
+                    "name": "getTraffic",
                     "returnType": "void"
                 }
             ],
@@ -111,6 +118,40 @@
                     "type": "QVariantList",
                     "user": false,
                     "virtual": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 3,
+                    "lineNumber": 11,
+                    "name": "uploadSpeed",
+                    "notify": "trafficChanged",
+                    "override": false,
+                    "read": "uploadSpeed",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qint64",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 4,
+                    "lineNumber": 12,
+                    "name": "downloadSpeed",
+                    "notify": "trafficChanged",
+                    "override": false,
+                    "read": "downloadSpeed",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qint64",
+                    "user": false,
+                    "virtual": false
                 }
             ],
             "qualifiedClassName": "VpnController",
@@ -118,15 +159,22 @@
                 {
                     "access": "public",
                     "index": 0,
-                    "lineNumber": 27,
+                    "lineNumber": 32,
                     "name": "statusChanged",
                     "returnType": "void"
                 },
                 {
                     "access": "public",
                     "index": 1,
-                    "lineNumber": 28,
+                    "lineNumber": 33,
                     "name": "serversChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 2,
+                    "lineNumber": 34,
+                    "name": "trafficChanged",
                     "returnType": "void"
                 },
                 {
@@ -137,8 +185,8 @@
                             "type": "QString"
                         }
                     ],
-                    "index": 2,
-                    "lineNumber": 29,
+                    "index": 3,
+                    "lineNumber": 35,
                     "name": "errorOccurred",
                     "returnType": "void"
                 }
@@ -152,8 +200,8 @@
                             "type": "QJsonObject"
                         }
                     ],
-                    "index": 3,
-                    "lineNumber": 32,
+                    "index": 4,
+                    "lineNumber": 38,
                     "name": "onResponseReceived",
                     "returnType": "void"
                 }
