@@ -1,8 +1,8 @@
 package config
 
 import (
-    "crypto/md5"
     "crypto/rand"
+    "crypto/sha256"
     "encoding/hex"
     "encoding/json"
     "fmt"
@@ -22,6 +22,8 @@ type SingBoxConfig struct {
 func GenerateSingBoxConfig(uri string) (string, string, error) {
     if strings.HasPrefix(uri, "vless://") {
         return generateVlessConfig(uri)
+    } else if strings.HasPrefix(uri, "trojan://") {
+        return generateTrojanConfig(uri)
     }
     return "", "", fmt.Errorf("unsupported protocol for config generation")
 }
@@ -40,7 +42,6 @@ func generateVlessConfig(uri string) (string, string, error) {
         return "", "", fmt.Errorf("invalid vless uri: missing uuid, host or port")
     }
 
-    // FIX BUG-041: Parse port to integer
     port, err := strconv.Atoi(portStr)
     if err != nil {
         return "", "", fmt.Errorf("invalid port format: %w", err)
@@ -49,7 +50,7 @@ func generateVlessConfig(uri string) (string, string, error) {
     outbound := map[string]interface{}{
         "type":        "vless",
         "server":      host,
-        "server_port": port, // Now integer
+        "server_port": port,
         "uuid":        uuid,
     }
 
@@ -71,7 +72,6 @@ func generateVlessConfig(uri string) (string, string, error) {
 
     transportType := u.Query().Get("type")
     if transportType == "ws" {
-        // FIX BUG-044: Fix dead code and properly assign headers
         wsOpts := map[string]interface{}{
             "path": u.Query().Get("path"),
         }
@@ -86,7 +86,49 @@ func generateVlessConfig(uri string) (string, string, error) {
         }
     }
 
-    // FIX BUG-003 & 004: Generate random secrets for Clash API and Local Proxy
+    return buildConfig(outbound)
+}
+
+// FIX BUG-042: Added Trojan config generator
+func generateTrojanConfig(uri string) (string, string, error) {
+    u, err := url.Parse(uri)
+    if err != nil {
+        return "", "", err
+    }
+
+    password := u.User.Username()
+    host := u.Hostname()
+    portStr := u.Port()
+
+    if password == "" || host == "" || portStr == "" {
+        return "", "", fmt.Errorf("invalid trojan uri: missing password, host or port")
+    }
+
+    port, err := strconv.Atoi(portStr)
+    if err != nil {
+        return "", "", fmt.Errorf("invalid port format: %w", err)
+    }
+
+    outbound := map[string]interface{}{
+        "type":        "trojan",
+        "server":      host,
+        "server_port": port,
+        "password":    password,
+    }
+
+    sni := u.Query().Get("sni")
+    if sni == "" {
+        sni = host
+    }
+    outbound["tls"] = map[string]interface{}{
+        "enabled":     true,
+        "server_name": sni,
+    }
+
+    return buildConfig(outbound)
+}
+
+func buildConfig(outbound map[string]interface{}) (string, string, error) {
     clashSecret := generateRandomString(32)
     proxyUser := generateRandomString(16)
     proxyPass := generateRandomString(32)
@@ -95,7 +137,7 @@ func generateVlessConfig(uri string) (string, string, error) {
         Experimental: map[string]interface{}{
             "clash_api": map[string]interface{}{
                 "external_controller": "127.0.0.1:9090",
-                "secret":              clashSecret, // Secured!
+                "secret":              clashSecret,
             },
         },
         DNS: map[string]interface{}{
@@ -113,7 +155,7 @@ func generateVlessConfig(uri string) (string, string, error) {
                 "type":        "mixed",
                 "listen":      "127.0.0.1",
                 "listen_port": 2080,
-                "authentication": []map[string]interface{}{ // Secured!
+                "authentication": []map[string]interface{}{
                     {"username": proxyUser, "password": proxyPass},
                 },
             },
@@ -135,13 +177,16 @@ func generateVlessConfig(uri string) (string, string, error) {
         return "", "", err
     }
     
+    // FIX BUG-032: Cleanup temp file if any subsequent step fails
     if err := os.Chmod(tmpFile.Name(), 0600); err != nil {
         tmpFile.Close()
+        os.Remove(tmpFile.Name())
         return "", "", err
     }
 
     if _, err := tmpFile.Write(jsonData); err != nil {
         tmpFile.Close()
+        os.Remove(tmpFile.Name())
         return "", "", err
     }
     tmpFile.Close()
@@ -149,8 +194,9 @@ func generateVlessConfig(uri string) (string, string, error) {
     return tmpFile.Name(), clashSecret, nil
 }
 
+// FIX BUG-033: Changed MD5 to SHA256 for cryptographic strength
 func GenerateID(uri string) string {
-    hash := md5.Sum([]byte(uri))
+    hash := sha256.Sum256([]byte(uri))
     return hex.EncodeToString(hash[:])
 }
 

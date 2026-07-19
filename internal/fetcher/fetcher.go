@@ -6,8 +6,11 @@ import (
     "encoding/json"
     "fmt"
     "io"
+    "log/slog"
+    "net"
     "net/http"
     "net/url"
+    "strconv"
     "strings"
     "time"
 
@@ -17,12 +20,39 @@ import (
 
 var httpClient = &http.Client{
     Timeout: 15 * time.Second,
+    CheckRedirect: func(req *http.Request, via []*http.Request) error {
+        return http.ErrUseLastResponse // Prevent SSRF via redirects
+    },
+}
+
+// isPublicIP checks if an IP is public (not loopback, private, or link-local)
+func isPublicIP(ip net.IP) bool {
+    if ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() {
+        return false
+    }
+    if ip4 := ip.To4(); ip4 != nil {
+        if ip4[0] == 10 || (ip4[0] == 172 && ip4[1] >= 16 && ip4[1] <= 31) || (ip4[0] == 192 && ip4[1] == 168) {
+            return false
+        }
+    }
+    return true
 }
 
 func FetchSubscription(subURL string) ([]model.Server, error) {
     parsedURL, err := url.Parse(subURL)
     if err != nil || (parsedURL.Scheme != "http" && parsedURL.Scheme != "https") {
         return nil, fmt.Errorf("invalid URL scheme: only http/https allowed")
+    }
+
+    // FIX BUG-005: SSRF Prevention
+    ips, err := net.LookupIP(parsedURL.Hostname())
+    if err != nil {
+        return nil, fmt.Errorf("failed to resolve hostname: %w", err)
+    }
+    for _, ip := range ips {
+        if !isPublicIP(ip) {
+            return nil, fmt.Errorf("internal IP addresses are blocked to prevent SSRF")
+        }
     }
 
     ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
@@ -50,6 +80,7 @@ func FetchSubscription(subURL string) ([]model.Server, error) {
 
     decoded, err := base64.StdEncoding.DecodeString(string(body))
     if err != nil {
+        slog.Warn("Base64 decode failed, falling back to plain text")
         decoded = body
     }
 
@@ -74,6 +105,8 @@ func parseURI(uri string) (model.Server, error) {
         return parseVless(uri)
     } else if strings.HasPrefix(uri, "vmess://") {
         return parseVmess(uri)
+    } else if strings.HasPrefix(uri, "trojan://") {
+        return parseTrojan(uri)
     }
     return model.Server{}, fmt.Errorf("unsupported")
 }
@@ -84,10 +117,15 @@ func parseVless(uri string) (model.Server, error) {
         return model.Server{}, err
     }
     host := u.Hostname()
-    port := 0
-    fmt.Sscanf(u.Port(), "%d", &port)
-    if host == "" || port == 0 {
+    portStr := u.Port()
+    if host == "" || portStr == "" {
         return model.Server{}, fmt.Errorf("invalid vless uri")
+    }
+    
+    // FIX BUG-049: Use strconv.Atoi with error checking
+    port, err := strconv.Atoi(portStr)
+    if err != nil {
+        return model.Server{}, fmt.Errorf("invalid port format: %w", err)
     }
     
     name := u.Fragment
@@ -122,8 +160,10 @@ func parseVmess(uri string) (model.Server, error) {
     if err := json.Unmarshal(decoded, &data); err != nil {
         return model.Server{}, fmt.Errorf("json unmarshal failed: %w", err)
     }
-    port := 0
-    fmt.Sscanf(data.Port, "%d", &port)
+    port, err := strconv.Atoi(data.Port)
+    if err != nil {
+        return model.Server{}, fmt.Errorf("invalid port format: %w", err)
+    }
     if data.Add == "" || port == 0 {
         return model.Server{}, fmt.Errorf("invalid vmess uri")
     }
@@ -133,6 +173,35 @@ func parseVmess(uri string) (model.Server, error) {
         Address:  data.Add,
         Port:     port,
         Protocol: "vmess",
+        URI:      uri,
+    }, nil
+}
+
+// FIX BUG-042: Added Trojan parser
+func parseTrojan(uri string) (model.Server, error) {
+    u, err := url.Parse(uri)
+    if err != nil {
+        return model.Server{}, err
+    }
+    host := u.Hostname()
+    portStr := u.Port()
+    if host == "" || portStr == "" {
+        return model.Server{}, fmt.Errorf("invalid trojan uri")
+    }
+    port, err := strconv.Atoi(portStr)
+    if err != nil {
+        return model.Server{}, fmt.Errorf("invalid port format: %w", err)
+    }
+    name := u.Fragment
+    if name == "" {
+        name = host
+    }
+    return model.Server{
+        ID:       config.GenerateID(uri),
+        Name:     name,
+        Address:  host,
+        Port:     port,
+        Protocol: "trojan",
         URI:      uri,
     }, nil
 }

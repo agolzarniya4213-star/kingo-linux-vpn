@@ -3,6 +3,7 @@ package storage
 import (
     "database/sql"
     "fmt"
+    "log/slog"
 
     _ "github.com/mattn/go-sqlite3"
 
@@ -14,7 +15,6 @@ type SQLiteStorage struct {
 }
 
 func NewSQLiteStorage(dbPath string) (*SQLiteStorage, error) {
-    // استفاده از WAL Mode و Busy Timeout برای جلوگیری از قفل شدن دیتابیس در درخواست‌های همزمان
     db, err := sql.Open("sqlite3", dbPath+"?_journal_mode=WAL&_busy_timeout=5000")
     if err != nil {
         return nil, err
@@ -81,6 +81,9 @@ func (s *SQLiteStorage) GetServers() ([]model.Server, error) {
     return servers, rows.Err()
 }
 
+// FIX BUG-051: Log error on Close
 func (s *SQLiteStorage) Close() {
-    s.db.Close()
+    if err := s.db.Close(); err != nil {
+        slog.Error("Failed to close database safely", "error", err)
+    }
 }

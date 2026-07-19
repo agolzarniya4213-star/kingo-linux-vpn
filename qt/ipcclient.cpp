@@ -9,7 +9,6 @@ IpcClient::IpcClient(QObject *parent) : QObject(parent), m_socket(new QLocalSock
     connect(m_socket, &QLocalSocket::disconnected, this, [this]() {
         QTimer::singleShot(3000, this, [this]() {
             if (m_socket->state() != QLocalSocket::ConnectedState && m_socket->state() != QLocalSocket::ConnectingState) {
-                // FIX: Point to the new secure socket path
                 m_socket->connectToServer("/run/kingo-vpn/kingo-vpn.sock");
             }
         });
@@ -27,7 +26,10 @@ void IpcClient::sendRequest(const QJsonObject &request) {
         m_socket->write(data);
         m_socket->flush();
     } else {
-        m_pendingRequests.enqueue(data);
+        // FIX BUG-029: Prevent unbounded queue growth (OOM prevention)
+        if (m_pendingRequests.size() < 100) {
+            m_pendingRequests.enqueue(data);
+        }
         if (m_socket->state() != QLocalSocket::ConnectingState) {
             m_socket->connectToServer("/run/kingo-vpn/kingo-vpn.sock");
         }

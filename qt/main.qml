@@ -9,6 +9,11 @@ Window {
     title: "Kingo Linux VPN"
     color: "#1e1e2e"
 
+    // FIX BUG-024: Variables to calculate real speed (Delta over time)
+    property real prevDownload: 0
+    property real prevUpload: 0
+    property real prevTime: 0
+
     Timer {
         interval: 1000
         running: vpnController.status == "connected"
@@ -17,7 +22,7 @@ Window {
     }
 
     function formatSpeed(bytes) {
-        if (bytes < 1024) return bytes + " B/s"
+        if (bytes < 1024) return bytes.toFixed(0) + " B/s"
         if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB/s"
         return (bytes / (1024 * 1024)).toFixed(2) + " MB/s"
     }
@@ -53,6 +58,22 @@ Window {
             errorText.text = error
             errorText.visible = true
         }
+        // FIX BUG-024: Calculate speed when traffic changes
+        function onTrafficChanged() {
+            var currTime = Date.now()
+            var dt = (currTime - prevTime) / 1000.0
+            
+            if (dt > 0) {
+                var dlSpeed = (vpnController.downloadSpeed - prevDownload) / dt
+                var ulSpeed = (vpnController.uploadSpeed - prevUpload) / dt
+                downloadSpeedText.text = formatSpeed(dlSpeed)
+                uploadSpeedText.text = formatSpeed(ulSpeed)
+            }
+            
+            prevDownload = vpnController.downloadSpeed
+            prevUpload = vpnController.uploadSpeed
+            prevTime = currTime
+        }
     }
 
     Column {
@@ -75,7 +96,8 @@ Window {
             Column {
                 Text { text: "Download"; color: "#a6adc8"; font.pointSize: 10 }
                 Text {
-                    text: formatSpeed(vpnController.downloadSpeed)
+                    id: downloadSpeedText
+                    text: "0 B/s"
                     color: "#89b4fa"; font.pointSize: 18; font.bold: true
                 }
             }
@@ -83,7 +105,8 @@ Window {
             Column {
                 Text { text: "Upload"; color: "#a6adc8"; font.pointSize: 10 }
                 Text {
-                    text: formatSpeed(vpnController.uploadSpeed)
+                    id: uploadSpeedText
+                    text: "0 B/s"
                     color: "#f9e2af"; font.pointSize: 18; font.bold: true
                 }
             }
@@ -97,7 +120,13 @@ Window {
                 text: vpnController.status == "connecting" ? "Connecting..." : "Auto Connect"
                 enabled: vpnController.status != "connecting"
                 highlighted: true
-                onClicked: vpnController.autoConnect()
+                onClicked: {
+                    // Reset deltas on connect
+                    prevDownload = 0
+                    prevUpload = 0
+                    prevTime = Date.now()
+                    vpnController.autoConnect()
+                }
             }
 
             Button {
