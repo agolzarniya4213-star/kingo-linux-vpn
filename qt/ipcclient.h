@@ -3,6 +3,7 @@
 #include <QLocalSocket>
 #include <QJsonObject>
 #include <QByteArray>
+#include <QQueue>
 
 class IpcClient : public QObject {
     Q_OBJECT
@@ -21,5 +22,5 @@ private slots:
 private:
     QLocalSocket *m_socket;
     QByteArray m_buffer;
-    QByteArray m_pendingRequest;
+    QQueue<QByteArray> m_pendingRequests; // صف درخواست‌ها
 };

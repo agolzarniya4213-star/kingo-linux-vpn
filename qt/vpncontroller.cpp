@@ -58,6 +58,7 @@ void VpnController::getTraffic() {
 }
 
 void VpnController::onResponseReceived(const QJsonObject &response) {
+    // بررسی دقیق وجود کلیدها برای جلوگیری از ریست شدن مقادیر
     if (response.contains("state")) {
         setStatus(response["state"].toString());
     }
@@ -65,11 +66,14 @@ void VpnController::onResponseReceived(const QJsonObject &response) {
         m_servers = response["servers"].toVariant().toList();
         emit serversChanged();
     }
-    if (response.contains("upload") || response.contains("download")) {
+    
+    // فقط اگر هر دو کلید وجود داشتند ترافیک را آپدیت کن
+    if (response.contains("upload") && response.contains("download")) {
         m_uploadSpeed = response["upload"].toVariant().toLongLong();
         m_downloadSpeed = response["download"].toVariant().toLongLong();
         emit trafficChanged();
     }
+    
     if (response.contains("message") && !response["message"].toString().isEmpty()) {
         emit errorOccurred(response["message"].toString());
     }

@@ -4,7 +4,6 @@ After=network.target
 
 [Service]
 Type=simple
-# مسیر نصب دیمون
 ExecStart=/usr/local/bin/kingo-linux-vpn-daemon
 Restart=on-failure
 RestartSec=5
@@ -13,6 +12,8 @@ RestartSec=5
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true
+# تعریف دایرکتوری مجاز برای نوشتن (برای دیتابیس SQLite)
+StateDirectory=kingo-vpn
 # برای ایجاد تونل TUN و اتصال به پورت‌های رزرو شده نیاز به این دسترسی‌ها داریم
 AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE

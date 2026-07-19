@@ -34,11 +34,12 @@ type Manager interface {
 }
 
 type SingBoxManager struct {
-    mu      sync.RWMutex
-    state   State
-    cmd     *exec.Cmd
-    traffic TrafficStats
-    cancel  context.CancelFunc
+    mu         sync.RWMutex
+    state      State
+    cmd        *exec.Cmd
+    traffic    TrafficStats
+    cancel     context.CancelFunc
+    configPath string // نگهداری مسیر فایل برای پاکسازی بعدی
 }
 
 func NewSingBoxManager() *SingBoxManager {
@@ -53,13 +54,13 @@ func (m *SingBoxManager) Start(ctx context.Context, configPath string) error {
         return nil
     }
 
-    // بررسی وجود باینری sing-box
     if _, err := exec.LookPath("sing-box"); err != nil {
         m.state = StateError
         return fmt.Errorf("sing-box binary not found in system PATH")
     }
 
     m.state = StateConnecting
+    m.configPath = configPath
     m.cmd = exec.CommandContext(ctx, "sing-box", "run", "-c", configPath)
     m.cmd.Stdout = os.Stdout
     m.cmd.Stderr = os.Stderr
@@ -69,7 +70,7 @@ func (m *SingBoxManager) Start(ctx context.Context, configPath string) error {
         return err
     }
 
-    trafficCtx, cancel := context.WithCancel(context.Background())
+    trafficCtx, cancel := context.WithCancel(ctx)
     m.cancel = cancel
 
     go func() {
@@ -82,6 +83,11 @@ func (m *SingBoxManager) Start(ctx context.Context, configPath string) error {
         if m.cancel != nil {
             m.cancel()
             m.cancel = nil
+        }
+        // پاکسازی فایل کانفیگ موقت پس از توقف پروسه
+        if m.configPath != "" {
+            os.Remove(m.configPath)
+            m.configPath = ""
         }
     }()
 
@@ -139,6 +145,12 @@ func (m *SingBoxManager) Stop() error {
     m.cmd = nil
     m.state = StateDisconnected
     m.traffic = TrafficStats{}
+    
+    // اطمینان از پاکسازی فایل
+    if m.configPath != "" {
+        os.Remove(m.configPath)
+        m.configPath = ""
+    }
     return nil
 }
 

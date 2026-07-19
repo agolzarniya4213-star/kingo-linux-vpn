@@ -51,6 +51,9 @@ func (s *Server) Start(ctx context.Context) error {
     if err != nil {
         return err
     }
+    // تنظیم دسترسی سوکت: فقط owner و group می‌توانند بخوانند و بنویسند (0660)
+    os.Chmod(s.socketPath, 0660)
+
     defer listener.Close()
 
     go func() {
@@ -79,13 +82,11 @@ func (s *Server) handleConnection(conn net.Conn) {
     encoder := json.NewEncoder(conn)
 
     for {
-        // جلوگیری از DoS: اگر کلاینت در 10 ثانیه درخواستی نفرستاد، اتصال قطع می‌شود
         conn.SetReadDeadline(time.Now().Add(10 * time.Second))
         var req Request
         if err := decoder.Decode(&req); err != nil {
             break
         }
-        // حذف تایم‌اوت برای پردازش درخواست‌های سنگین (مثل تست latency)
         conn.SetReadDeadline(time.Time{})
 
         var resp Response

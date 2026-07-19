@@ -19,6 +19,12 @@ var httpClient = &http.Client{
 }
 
 func FetchSubscription(subURL string) ([]model.Server, error) {
+    // محافظت در برابر LFI: فقط اجازه دریافت از http و https داده می‌شود
+    parsedURL, err := url.Parse(subURL)
+    if err != nil || (parsedURL.Scheme != "http" && parsedURL.Scheme != "https") {
+        return nil, fmt.Errorf("invalid URL scheme: only http/https allowed")
+    }
+
     ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
     defer cancel()
 
@@ -33,7 +39,12 @@ func FetchSubscription(subURL string) ([]model.Server, error) {
     }
     defer resp.Body.Close()
 
-    body, err := io.ReadAll(resp.Body)
+    // بررسی کد وضعیت HTTP
+    if resp.StatusCode != http.StatusOK {
+        return nil, fmt.Errorf("subscription server returned error: %s", resp.Status)
+    }
+
+    body, err := io.ReadAll(io.LimitReader(resp.Body, 10*1024*1024)) // محدودیت 10MB
     if err != nil {
         return nil, fmt.Errorf("failed to read body: %w", err)
     }
@@ -76,6 +87,9 @@ func parseVless(uri string) (model.Server, error) {
     host := u.Hostname()
     port := 0
     fmt.Sscanf(u.Port(), "%d", &port)
+    if host == "" || port == 0 {
+        return model.Server{}, fmt.Errorf("invalid vless uri")
+    }
     name := u.Query().Get("name")
     if name == "" {
         name = host
@@ -109,6 +123,9 @@ func parseVmess(uri string) (model.Server, error) {
     }
     port := 0
     fmt.Sscanf(data.Port, "%d", &port)
+    if data.Add == "" || port == 0 {
+        return model.Server{}, fmt.Errorf("invalid vmess uri")
+    }
     return model.Server{
         ID:       data.PS,
         Name:     data.PS,

@@ -14,10 +14,12 @@ type SQLiteStorage struct {
 }
 
 func NewSQLiteStorage(dbPath string) (*SQLiteStorage, error) {
-    db, err := sql.Open("sqlite3", dbPath)
+    // استفاده از WAL Mode و Busy Timeout برای جلوگیری از قفل شدن دیتابیس در درخواست‌های همزمان
+    db, err := sql.Open("sqlite3", dbPath+"?_journal_mode=WAL&_busy_timeout=5000")
     if err != nil {
         return nil, err
     }
+
     schema := `
     CREATE TABLE IF NOT EXISTS servers (
         id TEXT PRIMARY KEY,
@@ -40,15 +42,18 @@ func (s *SQLiteStorage) SaveServers(servers []model.Server) error {
         return err
     }
     defer tx.Rollback()
+
     _, err = tx.Exec("DELETE FROM servers")
     if err != nil {
         return err
     }
+
     stmt, err := tx.Prepare("INSERT INTO servers(id, name, address, port, protocol, uri, latency) VALUES(?, ?, ?, ?, ?, ?, ?)")
     if err != nil {
         return err
     }
     defer stmt.Close()
+
     for _, srv := range servers {
         _, err = stmt.Exec(srv.ID, srv.Name, srv.Address, srv.Port, srv.Protocol, srv.URI, srv.Latency)
         if err != nil {
@@ -64,6 +69,7 @@ func (s *SQLiteStorage) GetServers() ([]model.Server, error) {
         return nil, err
     }
     defer rows.Close()
+
     var servers []model.Server
     for rows.Next() {
         var srv model.Server
@@ -72,7 +78,7 @@ func (s *SQLiteStorage) GetServers() ([]model.Server, error) {
         }
         servers = append(servers, srv)
     }
-    return servers, nil
+    return servers, rows.Err()
 }
 
 func (s *SQLiteStorage) Close() {
