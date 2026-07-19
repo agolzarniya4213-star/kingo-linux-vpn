@@ -8,9 +8,9 @@
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
+    // FIX: Force Basic style to prevent native desktop widgets from ruining the Material design
     QQuickStyle::setStyle("Basic");
     
-    // Set Application Icon
     QIcon appIcon(":/assets/icon.png");
     app.setWindowIcon(appIcon);
 
@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
     VpnController *controller = new VpnController();
     engine.rootContext()->setContextProperty("vpnController", controller);
 
-    TrayIcon *tray = new TrayIcon(); // Icon is set internally now
+    TrayIcon *tray = new TrayIcon();
     engine.rootContext()->setContextProperty("trayIcon", tray);
     tray->show();
 
