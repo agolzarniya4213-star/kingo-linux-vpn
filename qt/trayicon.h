@@ -8,6 +8,7 @@ class TrayIcon : public QObject {
     Q_PROPERTY(bool visible READ visible WRITE setVisible NOTIFY visibleChanged)
 public:
     explicit TrayIcon(QObject *parent = nullptr);
+    ~TrayIcon(); // اضافه شدن دستریکتور برای پاکسازی حافظه منو
 
     bool visible() const { return m_tray->isVisible(); }
     void setVisible(bool v) { m_tray->setVisible(v); emit visibleChanged(); }

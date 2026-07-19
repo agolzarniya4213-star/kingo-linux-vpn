@@ -1,6 +1,8 @@
 package config
 
 import (
+    "crypto/md5"
+    "encoding/hex"
     "encoding/json"
     "fmt"
     "net/url"
@@ -43,14 +45,53 @@ func generateVlessConfig(uri string) (string, error) {
         "uuid":        uuid,
     }
 
-    if u.Query().Get("security") == "tls" {
+    security := u.Query().Get("security")
+    if security == "tls" {
         sni := u.Query().Get("sni")
         if sni == "" {
             sni = host
         }
+        tlsOpts := map[string]interface{}{
+            "enabled":     true,
+            "server_name": sni,
+        }
+        if fp := u.Query().Get("fp"); fp != "" {
+            tlsOpts["utls"] = map[string]interface{}{"enabled": true, "fingerprint": fp}
+        }
+        outbound["tls"] = tlsOpts
+    } else if security == "reality" {
+        sni := u.Query().Get("sni")
         outbound["tls"] = map[string]interface{}{
             "enabled":     true,
             "server_name": sni,
+            "reality": map[string]interface{}{
+                "enabled":    true,
+                "public_key": u.Query().Get("pbk"),
+                "short_id":   u.Query().Get("sid"),
+            },
+            "utls": map[string]interface{}{"enabled": true, "fingerprint": u.Query().Get("fp")},
+        }
+    }
+
+    transportType := u.Query().Get("type")
+    if transportType == "ws" {
+        wsOpts := map[string]interface{}{
+            "path": u.Query().Get("path"),
+        }
+        if hostHeader := u.Query().Get("host"); hostHeader != "" {
+            wsOpts["headers"] = map[string]interface{}{"Host": hostHeader}
+        }
+        outbound["transport"] = map[string]interface{}{"type": "ws", "path": u.Query().Get("path")}
+    } else if transportType == "grpc" {
+        outbound["transport"] = map[string]interface{}{
+            "type":         "grpc",
+            "service_name": u.Query().Get("serviceName"),
+        }
+    } else if transportType == "http" {
+        outbound["transport"] = map[string]interface{}{
+            "type": "httpupgrade",
+            "path": u.Query().Get("path"),
+            "host": u.Query().Get("host"),
         }
     }
 
@@ -60,7 +101,6 @@ func generateVlessConfig(uri string) (string, error) {
                 "external_controller": "127.0.0.1:9090",
             },
         },
-        // جلوگیری از DNS Leak: تمام درخواست‌های DNS از داخل تونل عبور می‌کنند
         DNS: map[string]interface{}{
             "servers": []map[string]interface{}{
                 {"address": "https://1.1.1.1/dns-query", "detour": "proxy"},
@@ -90,13 +130,11 @@ func generateVlessConfig(uri string) (string, error) {
         return "", err
     }
 
-    // ایجاد فایل موقت با دسترسی محدود (0600) برای جلوگیری از نشت UUID
     tmpFile, err := os.CreateTemp("", "kingo-config-*.json")
     if err != nil {
         return "", err
     }
     
-    // اعمال دسترسی امنیتی
     if err := os.Chmod(tmpFile.Name(), 0600); err != nil {
         tmpFile.Close()
         return "", err
@@ -109,4 +147,9 @@ func generateVlessConfig(uri string) (string, error) {
     tmpFile.Close()
 
     return tmpFile.Name(), nil
+}
+
+func GenerateID(uri string) string {
+    hash := md5.Sum([]byte(uri))
+    return hex.EncodeToString(hash[:])
 }

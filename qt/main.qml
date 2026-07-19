@@ -11,7 +11,7 @@ Window {
 
     Timer {
         interval: 1000
-        running: vpnController.connected
+        running: vpnController.status == "connected"
         repeat: true
         onTriggered: vpnController.getTraffic()
     }
@@ -47,14 +47,22 @@ Window {
         }
     }
 
+    Connections {
+        target: vpnController
+        function onErrorOccurred(error) {
+            errorText.text = error
+            errorText.visible = true
+        }
+    }
+
     Column {
         anchors.fill: parent
         anchors.margins: 20
         spacing: 15
 
         Text {
-            text: "Status: " + (vpnController.connected ? "Connected" : "Disconnected")
-            color: vpnController.connected ? "#a6e3a1" : "#f38ba8"
+            text: "Status: " + vpnController.status
+            color: vpnController.status == "connected" ? "#a6e3a1" : (vpnController.status == "connecting" ? "#f9e2af" : "#f38ba8")
             font.pointSize: 16
             font.bold: true
         }
@@ -62,7 +70,7 @@ Window {
         Row {
             width: parent.width
             spacing: 20
-            visible: vpnController.connected
+            visible: vpnController.status == "connected"
 
             Column {
                 Text { text: "Download"; color: "#a6adc8"; font.pointSize: 10 }
@@ -86,15 +94,46 @@ Window {
             spacing: 10
 
             Button {
-                text: "Auto Connect"
+                text: vpnController.status == "connecting" ? "Connecting..." : "Auto Connect"
+                enabled: vpnController.status != "connecting"
                 highlighted: true
                 onClicked: vpnController.autoConnect()
             }
 
             Button {
                 text: "Disconnect"
-                enabled: vpnController.connected
+                enabled: vpnController.status == "connected"
                 onClicked: vpnController.disconnectVpn()
+            }
+        }
+
+        Rectangle {
+            id: errorBox
+            width: parent.width
+            height: errorText.visible ? 40 : 0
+            color: "#f38ba8"
+            radius: 5
+            visible: errorText.visible
+            Text {
+                id: errorText
+                anchors.centerIn: parent
+                color: "#11111b"
+                font.bold: true
+                visible: false
+                onTextChanged: {
+                    if (text !== "") {
+                        visible = true
+                        errorTimer.start()
+                    }
+                }
+                Timer {
+                    id: errorTimer
+                    interval: 5000
+                    onTriggered: {
+                        errorText.visible = false
+                        errorText.text = ""
+                    }
+                }
             }
         }
 

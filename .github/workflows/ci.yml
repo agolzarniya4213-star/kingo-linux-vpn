@@ -1,0 +1,36 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+
+    - name: Install dependencies
+      run: sudo apt-get update && sudo apt-get install -y qt6-base-dev qt6-declarative-dev libgl1-mesa-dev cmake
+
+    - name: Run Go Vet
+      run: go vet ./...
+
+    - name: Run Go Tests
+      run: go test ./...
+
+    - name: Build Go Backend
+      run: go build -o build/kingo-linux-vpn-daemon ./cmd/kingo-linux-vpn/
+
+    - name: Build Qt UI
+      run: |
+        mkdir -p build/qt && cd build/qt
+        cmake ../../qt -DCMAKE_BUILD_TYPE=Release
+        cmake --build .

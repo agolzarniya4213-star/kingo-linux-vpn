@@ -11,6 +11,7 @@ import (
     "strings"
     "time"
 
+    "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/config"
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/model"
 )
 
@@ -19,7 +20,6 @@ var httpClient = &http.Client{
 }
 
 func FetchSubscription(subURL string) ([]model.Server, error) {
-    // محافظت در برابر LFI: فقط اجازه دریافت از http و https داده می‌شود
     parsedURL, err := url.Parse(subURL)
     if err != nil || (parsedURL.Scheme != "http" && parsedURL.Scheme != "https") {
         return nil, fmt.Errorf("invalid URL scheme: only http/https allowed")
@@ -39,12 +39,11 @@ func FetchSubscription(subURL string) ([]model.Server, error) {
     }
     defer resp.Body.Close()
 
-    // بررسی کد وضعیت HTTP
     if resp.StatusCode != http.StatusOK {
         return nil, fmt.Errorf("subscription server returned error: %s", resp.Status)
     }
 
-    body, err := io.ReadAll(io.LimitReader(resp.Body, 10*1024*1024)) // محدودیت 10MB
+    body, err := io.ReadAll(io.LimitReader(resp.Body, 10*1024*1024))
     if err != nil {
         return nil, fmt.Errorf("failed to read body: %w", err)
     }
@@ -90,12 +89,14 @@ func parseVless(uri string) (model.Server, error) {
     if host == "" || port == 0 {
         return model.Server{}, fmt.Errorf("invalid vless uri")
     }
-    name := u.Query().Get("name")
+    
+    name := u.Fragment
     if name == "" {
         name = host
     }
+    
     return model.Server{
-        ID:       u.Fragment,
+        ID:       config.GenerateID(uri),
         Name:     name,
         Address:  host,
         Port:     port,
@@ -127,7 +128,7 @@ func parseVmess(uri string) (model.Server, error) {
         return model.Server{}, fmt.Errorf("invalid vmess uri")
     }
     return model.Server{
-        ID:       data.PS,
+        ID:       config.GenerateID(uri),
         Name:     data.PS,
         Address:  data.Add,
         Port:     port,
