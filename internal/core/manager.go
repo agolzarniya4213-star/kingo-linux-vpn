@@ -3,6 +3,7 @@ package core
 import (
     "context"
     "encoding/json"
+    "fmt"
     "io"
     "net/http"
     "os"
@@ -52,6 +53,12 @@ func (m *SingBoxManager) Start(ctx context.Context, configPath string) error {
         return nil
     }
 
+    // بررسی وجود باینری sing-box
+    if _, err := exec.LookPath("sing-box"); err != nil {
+        m.state = StateError
+        return fmt.Errorf("sing-box binary not found in system PATH")
+    }
+
     m.state = StateConnecting
     m.cmd = exec.CommandContext(ctx, "sing-box", "run", "-c", configPath)
     m.cmd.Stdout = os.Stdout
@@ -62,7 +69,6 @@ func (m *SingBoxManager) Start(ctx context.Context, configPath string) error {
         return err
     }
 
-    // ایجاد یک context جداگانه برای مانیتورینگ ترافیک تا با توقف VPN متوقف شود
     trafficCtx, cancel := context.WithCancel(context.Background())
     m.cancel = cancel
 
@@ -80,15 +86,11 @@ func (m *SingBoxManager) Start(ctx context.Context, configPath string) error {
     }()
 
     m.state = StateConnected
-    
-    // شروع مانیتورینگ ترافیک
     go m.monitorTraffic(trafficCtx)
-
     return nil
 }
 
 func (m *SingBoxManager) monitorTraffic(ctx context.Context) {
-    // صبر برای بالا آمدن Clash API
     time.Sleep(2 * time.Second)
 
     req, _ := http.NewRequestWithContext(ctx, "GET", "http://127.0.0.1:9090/traffic", nil)

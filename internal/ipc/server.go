@@ -6,6 +6,7 @@ import (
     "net"
     "os"
     "sort"
+    "time"
 
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/config"
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/core"
@@ -78,10 +79,14 @@ func (s *Server) handleConnection(conn net.Conn) {
     encoder := json.NewEncoder(conn)
 
     for {
+        // جلوگیری از DoS: اگر کلاینت در 10 ثانیه درخواستی نفرستاد، اتصال قطع می‌شود
+        conn.SetReadDeadline(time.Now().Add(10 * time.Second))
         var req Request
         if err := decoder.Decode(&req); err != nil {
             break
         }
+        // حذف تایم‌اوت برای پردازش درخواست‌های سنگین (مثل تست latency)
+        conn.SetReadDeadline(time.Time{})
 
         var resp Response
         switch req.Action {
@@ -104,16 +109,13 @@ func (s *Server) handleConnection(conn net.Conn) {
                 break
             }
             
-            // تست همزمان تأخیر سرورها
             testedServers := network.TestAllLatency(context.Background(), servers)
             _ = s.db.SaveServers(testedServers)
             
-            // مرتب‌سازی بر اساس تأخیر (Latency)
             sort.Slice(testedServers, func(i, j int) bool {
                 return testedServers[i].Latency < testedServers[j].Latency
             })
             
-            // پیدا کردن اولین سرور قابل دسترس (Latency < 9999)
             var bestServer model.Server
             found := false
             for _, srv := range testedServers {
@@ -129,7 +131,6 @@ func (s *Server) handleConnection(conn net.Conn) {
                 break
             }
             
-            // تولید کانفیگ و اتصال به بهترین سرور
             configPath, err := config.GenerateSingBoxConfig(bestServer.URI)
             if err != nil {
                 resp = Response{Success: false, Message: "Config gen failed: " + err.Error(), Servers: testedServers}

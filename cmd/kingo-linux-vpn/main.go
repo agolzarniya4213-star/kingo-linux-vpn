@@ -5,6 +5,7 @@ import (
     "log/slog"
     "os"
     "os/signal"
+    "path/filepath"
     "syscall"
 
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/core"
@@ -13,20 +14,35 @@ import (
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/storage"
 )
 
+func getDBPath() string {
+    // اگر سرویس با دسترسی Root اجرا شود (systemd)
+    if os.Geteuid() == 0 {
+        return "/var/lib/kingo-vpn/kingo.db"
+    }
+    // اگر توسط کاربر عادی اجرا شود (run.sh)
+    home, err := os.UserHomeDir()
+    if err != nil {
+        return "kingo.db"
+    }
+    return filepath.Join(home, ".local", "share", "kingo-vpn", "kingo.db")
+}
+
 func main() {
     slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
     ctx, cancel := context.WithCancel(context.Background())
     defer cancel()
 
-    // راه‌اندازی دیتابیس
-    db, err := storage.NewSQLiteStorage("kingo.db")
+    // اطمینان از وجود پوشه دیتابیس
+    dbPath := getDBPath()
+    os.MkdirAll(filepath.Dir(dbPath), 0755)
+
+    db, err := storage.NewSQLiteStorage(dbPath)
     if err != nil {
         slog.Error("Failed to init database", "error", err)
         os.Exit(1)
     }
     defer db.Close()
 
-    // درج چند سرور تستی در صورت خالی بودن دیتابیس
     if s, _ := db.GetServers(); len(s) == 0 {
         db.SaveServers([]model.Server{
             {ID: "srv1", Name: "Germany - Frankfurt", Protocol: "vless", Address: "10.0.0.1", Port: 443},

@@ -1,6 +1,7 @@
 #include "ipcclient.h"
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QTimer>
 
 IpcClient::IpcClient(QObject *parent) : QObject(parent), m_socket(new QLocalSocket(this)) {
     connect(m_socket, &QLocalSocket::readyRead, this, &IpcClient::onReadyRead);
@@ -8,13 +9,21 @@ IpcClient::IpcClient(QObject *parent) : QObject(parent), m_socket(new QLocalSock
     connect(m_socket, &QLocalSocket::errorOccurred, this, [this](QLocalSocket::LocalSocketError socketError) {
         Q_UNUSED(socketError);
         emit errorOccurred(m_socket->errorString());
+        // تلاش مجدد برای اتصال پس از 3 ثانیه در صورت قطع شدن دیمون
+        QTimer::singleShot(3000, this, [this]() {
+            if (m_socket->state() != QLocalSocket::ConnectedState && m_socket->state() != QLocalSocket::ConnectingState) {
+                m_socket->connectToServer("/tmp/kingo-vpn.sock");
+            }
+        });
     });
 }
 
 void IpcClient::sendRequest(const QJsonObject &request) {
     if (m_socket->state() != QLocalSocket::ConnectedState) {
         m_pendingRequest = QJsonDocument(request).toJson(QJsonDocument::Compact) + "\n";
-        m_socket->connectToServer("/tmp/kingo-vpn.sock");
+        if (m_socket->state() != QLocalSocket::ConnectingState) {
+            m_socket->connectToServer("/tmp/kingo-vpn.sock");
+        }
         return;
     }
     
