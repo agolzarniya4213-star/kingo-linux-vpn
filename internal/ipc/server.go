@@ -19,10 +19,10 @@ import (
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/storage"
 )
 
-// FIX BUG-038: Protocol Versioning
-const ProtocolVersion = "1.0"
+const ProtocolVersion = "2.0"
 
 type Request struct {
+    RequestID  string `json:"request_id"`
     Version    string `json:"version"`
     Action     string `json:"action"`
     ConfigPath string `json:"config_path,omitempty"`
@@ -31,58 +31,69 @@ type Request struct {
 }
 
 type Response struct {
-    Success  bool           `json:"success"`
-    Message  string         `json:"message"`
-    State    string         `json:"state"`
-    Servers  []model.Server `json:"servers,omitempty"`
-    Upload   int64          `json:"upload,omitempty"`
-    Download int64          `json:"download,omitempty"`
+    RequestID string `json:"request_id"`
+    Success   bool           `json:"success"`
+    Message   string         `json:"message"`
+    State     string         `json:"state"`
+    Servers   []model.Server `json:"servers,omitempty"`
+    Upload    int64          `json:"upload,omitempty"`
+    Download  int64          `json:"download,omitempty"`
 }
 
 type Server struct {
-    socketPath string
-    manager    core.Manager
-    db         *storage.SQLiteStorage
+    appCfg   *config.AppConfig
+    manager  core.Manager
+    db       *storage.SQLiteStorage
 }
 
-func NewServer(socketPath string, manager core.Manager, db *storage.SQLiteStorage) *Server {
-    return &Server{socketPath: socketPath, manager: manager, db: db}
+func NewServer(appCfg *config.AppConfig, manager core.Manager, db *storage.SQLiteStorage) *Server {
+    return &Server{appCfg: appCfg, manager: manager, db: db}
 }
 
 func (s *Server) Start(ctx context.Context) error {
     socketDir := "/run/kingo-vpn"
     os.MkdirAll(socketDir, 0755)
-    s.socketPath = socketDir + "/kingo-vpn.sock"
+    socketPath := s.appCfg.IPC.SocketPath
 
-    if _, err := os.Stat(s.socketPath); err == nil {
-        os.Remove(s.socketPath)
+    if _, err := os.Stat(socketPath); err == nil {
+        os.Remove(socketPath)
     }
 
-    listener, err := net.Listen("unix", s.socketPath)
-    if err != nil {
-        return err
-    }
-    os.Chmod(s.socketPath, 0600)
-
+    listener, err := net.Listen("unix", socketPath)
+    if err != nil { return err }
+    os.Chmod(socketPath, 0600)
     defer listener.Close()
 
     go func() {
         <-ctx.Done()
         listener.Close()
-        os.Remove(s.socketPath)
+        os.Remove(socketPath)
     }()
+
+    // FIX BUG-027: Semaphore for max concurrent connections
+    sem := make(chan struct{}, s.appCfg.IPC.MaxConns)
 
     for {
         conn, err := listener.Accept()
         if err != nil {
             select {
-            case <-ctx.Done():
-                return nil
-            default:
-                continue
+            case <-ctx.Done(): return nil
+            default: continue
             }
         }
-        go s.handleConnection(conn)
+        
+        // Acquire semaphore
+        select {
+        case sem <- struct{}{}:
+            go func() {
+                defer func() { <-sem }() // Release
+                s.handleConnection(conn)
+            }()
+        default:
+            // Reject if too many connections
+            conn.Write([]byte(`{"success":false,"message":"server busy"}`))
+            conn.Close()
+        }
     }
 }
 
@@ -90,19 +101,14 @@ func (s *Server) handleConnection(conn net.Conn) {
     defer conn.Close()
 
     uc, ok := conn.(*net.UnixConn)
-    if !ok {
-        return
-    }
+    if !ok { return }
     rawConn, err := uc.SyscallConn()
-    if err != nil {
-        return
-    }
+    if err != nil { return }
+    
     var uid int = -1
     rawConn.Control(func(fd uintptr) {
         ucred, err := unix.GetsockoptUcred(int(fd), unix.SOL_SOCKET, unix.SO_PEERCRED)
-        if err == nil {
-            uid = int(ucred.Uid)
-        }
+        if err == nil { uid = int(ucred.Uid) }
     })
     if uid != 0 {
         conn.Write([]byte(`{"success":false,"message":"unauthorized"}`))
@@ -115,110 +121,89 @@ func (s *Server) handleConnection(conn net.Conn) {
     for {
         conn.SetReadDeadline(time.Now().Add(10 * time.Second))
         var req Request
-        if err := decoder.Decode(&req); err != nil {
-            break
-        }
+        if err := decoder.Decode(&req); err != nil { break }
         conn.SetReadDeadline(time.Time{})
 
         var resp Response
+        // FIX BUG-030: Echo RequestID back to client
+        resp.RequestID = req.RequestID
         
         ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
         
         switch req.Action {
         case "connect_server":
-            configPath, clashSecret, err := config.GenerateSingBoxConfig(req.ServerURI)
+            configPath, clashSecret, err := config.GenerateSingBoxConfig(req.ServerURI, s.appCfg)
             if err != nil {
-                resp = Response{Success: false, Message: "Failed to generate server configuration"}
+                resp = Response{RequestID: req.RequestID, Success: false, Message: "Failed to generate config"}
                 break
             }
             err = s.manager.Start(ctx, configPath, clashSecret)
-            resp = Response{Success: err == nil, State: string(s.manager.GetState())}
-            if err != nil {
-                resp.Message = "Failed to start VPN connection"
-            }
+            resp = Response{RequestID: req.RequestID, Success: err == nil, State: string(s.manager.GetState())}
+            if err != nil { resp.Message = "Failed to start VPN" }
 
         case "auto_connect":
             servers, err := s.db.GetServers()
             if err != nil || len(servers) == 0 {
-                resp = Response{Success: false, Message: "No servers available"}
+                resp = Response{RequestID: req.RequestID, Success: false, Message: "No servers available"}
                 break
             }
-            
             testedServers := network.TestAllLatency(ctx, servers)
             _ = s.db.SaveServers(testedServers)
-            
-            sort.Slice(testedServers, func(i, j int) bool {
-                return testedServers[i].Latency < testedServers[j].Latency
-            })
+            sort.Slice(testedServers, func(i, j int) bool { return testedServers[i].Latency < testedServers[j].Latency })
             
             var bestServer model.Server
             found := false
             for _, srv := range testedServers {
-                if srv.Latency < 9999 {
-                    bestServer = srv
-                    found = true
-                    break
-                }
+                if srv.Latency < 9999 { bestServer = srv; found = true; break }
             }
-            
             if !found {
-                resp = Response{Success: false, Message: "All servers are unreachable", Servers: testedServers}
+                resp = Response{RequestID: req.RequestID, Success: false, Message: "All unreachable", Servers: testedServers}
                 break
             }
-            
-            configPath, clashSecret, err := config.GenerateSingBoxConfig(bestServer.URI)
+            configPath, clashSecret, err := config.GenerateSingBoxConfig(bestServer.URI, s.appCfg)
             if err != nil {
-                resp = Response{Success: false, Message: "Config generation failed", Servers: testedServers}
+                resp = Response{RequestID: req.RequestID, Success: false, Message: "Config gen failed", Servers: testedServers}
                 break
             }
             err = s.manager.Start(ctx, configPath, clashSecret)
-            resp = Response{Success: err == nil, State: string(s.manager.GetState()), Servers: testedServers}
-            if err != nil {
-                resp.Message = "Failed to start VPN connection"
-            }
+            resp = Response{RequestID: req.RequestID, Success: err == nil, State: string(s.manager.GetState()), Servers: testedServers}
+            if err != nil { resp.Message = "Failed to start VPN" }
 
         case "disconnect":
             s.manager.Stop()
-            resp = Response{Success: true, State: string(s.manager.GetState())}
+            resp = Response{RequestID: req.RequestID, Success: true, State: string(s.manager.GetState())}
         case "status":
-            resp = Response{Success: true, State: string(s.manager.GetState())}
+            resp = Response{RequestID: req.RequestID, Success: true, State: string(s.manager.GetState())}
         case "get_servers":
             servers, err := s.db.GetServers()
-            resp = Response{Success: err == nil, Servers: servers}
-            if err != nil {
-                resp.Message = "Failed to retrieve servers"
-            }
+            resp = Response{RequestID: req.RequestID, Success: err == nil, Servers: servers}
+            if err != nil { resp.Message = "Failed to get servers" }
         case "add_subscription":
             servers, err := fetcher.FetchSubscription(req.SubURL)
             if err != nil {
-                resp = Response{Success: false, Message: "Failed to fetch subscription"}
+                resp = Response{RequestID: req.RequestID, Success: false, Message: "Fetch failed"}
             } else {
                 err = s.db.SaveServers(servers)
-                resp = Response{Success: err == nil, Servers: servers}
-                if err != nil {
-                    resp.Message = "Failed to save servers"
-                }
+                resp = Response{RequestID: req.RequestID, Success: err == nil, Servers: servers}
+                if err != nil { resp.Message = "Save failed" }
             }
         case "test_latency":
             servers, err := s.db.GetServers()
             if err != nil {
-                resp = Response{Success: false, Message: "Failed to retrieve servers"}
+                resp = Response{RequestID: req.RequestID, Success: false, Message: "Failed to get servers"}
                 break
             }
             testedServers := network.TestAllLatency(ctx, servers)
             _ = s.db.SaveServers(testedServers)
-            resp = Response{Success: true, Servers: testedServers}
+            resp = Response{RequestID: req.RequestID, Success: true, Servers: testedServers}
         case "get_traffic":
             traffic := s.manager.GetTraffic()
-            resp = Response{Success: true, Upload: traffic.Upload, Download: traffic.Download}
+            resp = Response{RequestID: req.RequestID, Success: true, Upload: traffic.Upload, Download: traffic.Download}
         default:
-            resp = Response{Success: false, Message: "unknown action"}
+            resp = Response{RequestID: req.RequestID, Success: false, Message: "unknown action"}
         }
         
         cancel()
-        
-        if err := encoder.Encode(resp); err != nil {
-            break
-        }
+        if err := encoder.Encode(resp); err != nil { break }
     }
 }

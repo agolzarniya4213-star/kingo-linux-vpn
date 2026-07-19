@@ -45,4 +45,5 @@ private:
     qint64 m_uploadSpeed = 0;
     qint64 m_downloadSpeed = 0;
     void setStatus(const QString &newStatus);
+    QString generateRequestID(); // اضافه شدن اعلام متد
 };

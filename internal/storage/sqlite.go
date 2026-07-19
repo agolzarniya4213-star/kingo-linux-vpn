@@ -11,20 +11,17 @@ import (
 )
 
 type SQLiteStorage struct {
-    db *sql.DB
+    db    *sql.DB
+    crypto *CryptoLayer
 }
 
-func NewSQLiteStorage(dbPath string) (*SQLiteStorage, error) {
-    // FIX BUG-023: Add WAL mode, busy timeout, and foreign keys
+func NewSQLiteStorage(dbPath string, crypto *CryptoLayer) (*SQLiteStorage, error) {
     db, err := sql.Open("sqlite3", dbPath+"?_journal_mode=WAL&_busy_timeout=5000&_foreign_keys=on")
     if err != nil {
         return nil, err
     }
-    
-    // FIX BUG-023: Limit connections for SQLite
     db.SetMaxOpenConns(1)
 
-    // FIX BUG-023: Basic schema migration
     schema := `
     CREATE TABLE IF NOT EXISTS schema_version (version INTEGER PRIMARY KEY);
     CREATE TABLE IF NOT EXISTS servers (
@@ -40,14 +37,11 @@ func NewSQLiteStorage(dbPath string) (*SQLiteStorage, error) {
     if _, err := db.Exec(schema); err != nil {
         return nil, fmt.Errorf("schema failed: %w", err)
     }
-    
-    // Set initial schema version if not exists
     db.Exec("INSERT OR IGNORE INTO schema_version (version) VALUES (1)")
 
-    return &SQLiteStorage{db: db}, nil
+    return &SQLiteStorage{db: db, crypto: crypto}, nil
 }
 
-// FIX BUG-022: Use UPSERT instead of DELETE and INSERT
 func (s *SQLiteStorage) SaveServers(servers []model.Server) error {
     tx, err := s.db.Begin()
     if err != nil {
@@ -59,12 +53,8 @@ func (s *SQLiteStorage) SaveServers(servers []model.Server) error {
         INSERT INTO servers(id, name, address, port, protocol, uri, latency) 
         VALUES(?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(id) DO UPDATE SET 
-            name=excluded.name, 
-            address=excluded.address, 
-            port=excluded.port, 
-            protocol=excluded.protocol, 
-            uri=excluded.uri, 
-            latency=excluded.latency
+            name=excluded.name, address=excluded.address, port=excluded.port, 
+            protocol=excluded.protocol, uri=excluded.uri, latency=excluded.latency
     `)
     if err != nil {
         return err
@@ -72,7 +62,8 @@ func (s *SQLiteStorage) SaveServers(servers []model.Server) error {
     defer stmt.Close()
 
     for _, srv := range servers {
-        _, err = stmt.Exec(srv.ID, srv.Name, srv.Address, srv.Port, srv.Protocol, srv.URI, srv.Latency)
+        encryptedURI := s.crypto.Encrypt(srv.URI)
+        _, err = stmt.Exec(srv.ID, srv.Name, srv.Address, srv.Port, srv.Protocol, encryptedURI, srv.Latency)
         if err != nil {
             return err
         }
@@ -90,9 +81,17 @@ func (s *SQLiteStorage) GetServers() ([]model.Server, error) {
     var servers []model.Server
     for rows.Next() {
         var srv model.Server
-        if err := rows.Scan(&srv.ID, &srv.Name, &srv.Address, &srv.Port, &srv.Protocol, &srv.URI, &srv.Latency); err != nil {
+        var encryptedURI string
+        if err := rows.Scan(&srv.ID, &srv.Name, &srv.Address, &srv.Port, &srv.Protocol, &encryptedURI, &srv.Latency); err != nil {
             return nil, err
         }
+        // Decrypt URI
+        decryptedURI, err := s.crypto.Decrypt(encryptedURI)
+        if err != nil {
+            slog.Warn("Failed to decrypt URI, using raw", "error", err)
+            decryptedURI = encryptedURI
+        }
+        srv.URI = decryptedURI
         servers = append(servers, srv)
     }
     return servers, rows.Err()

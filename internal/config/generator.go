@@ -3,6 +3,7 @@ package config
 import (
     "crypto/rand"
     "crypto/sha256"
+    "encoding/base64"
     "encoding/hex"
     "encoding/json"
     "fmt"
@@ -20,191 +21,177 @@ type SingBoxConfig struct {
     Outbounds    []map[string]interface{} `json:"outbounds"`
 }
 
-func GenerateSingBoxConfig(uri string) (string, string, error) {
+func GenerateSingBoxConfig(uri string, cfg *AppConfig) (string, string, error) {
     if strings.HasPrefix(uri, "vless://") {
-        return generateVlessConfig(uri)
+        return generateVlessConfig(uri, cfg)
     } else if strings.HasPrefix(uri, "trojan://") {
-        return generateTrojanConfig(uri)
+        return generateTrojanConfig(uri, cfg)
+    } else if strings.HasPrefix(uri, "vmess://") {
+        return generateVmessConfig(uri, cfg)
     }
     return "", "", fmt.Errorf("unsupported protocol for config generation")
 }
 
-func generateVlessConfig(uri string) (string, string, error) {
+func generateVlessConfig(uri string, cfg *AppConfig) (string, string, error) {
     u, err := url.Parse(uri)
-    if err != nil {
-        return "", "", err
-    }
+    if err != nil { return "", "", err }
 
     uuid := u.User.Username()
     host := u.Hostname()
     portStr := u.Port()
-
-    if uuid == "" || host == "" || portStr == "" {
-        return "", "", fmt.Errorf("invalid vless uri: missing uuid, host or port")
-    }
+    if uuid == "" || host == "" || portStr == "" { return "", "", fmt.Errorf("invalid vless uri") }
 
     port, err := strconv.Atoi(portStr)
-    if err != nil {
-        return "", "", fmt.Errorf("invalid port format: %w", err)
-    }
+    if err != nil { return "", "", fmt.Errorf("invalid port format") }
 
     outbound := map[string]interface{}{
-        "type":        "vless",
-        "server":      host,
-        "server_port": port,
-        "uuid":        uuid,
+        "type": "vless", "server": host, "server_port": port, "uuid": uuid,
     }
 
-    security := u.Query().Get("security")
-    if security == "tls" {
+    if u.Query().Get("security") == "tls" {
         sni := u.Query().Get("sni")
-        if sni == "" {
-            sni = host
-        }
-        tlsOpts := map[string]interface{}{
-            "enabled":     true,
-            "server_name": sni,
-        }
+        if sni == "" { sni = host }
+        tlsOpts := map[string]interface{}{"enabled": true, "server_name": sni}
         if fp := u.Query().Get("fp"); fp != "" {
             tlsOpts["utls"] = map[string]interface{}{"enabled": true, "fingerprint": fp}
         }
-        // FIX BUG-014: Support allowInsecure
-        if u.Query().Get("allowInsecure") == "1" {
-            tlsOpts["insecure"] = true
-        }
+        if u.Query().Get("allowInsecure") == "1" { tlsOpts["insecure"] = true }
         outbound["tls"] = tlsOpts
     }
 
-    transportType := u.Query().Get("type")
-    if transportType == "ws" {
-        wsOpts := map[string]interface{}{
-            "path": u.Query().Get("path"),
-        }
-        if hostHeader := u.Query().Get("host"); hostHeader != "" {
-            wsOpts["headers"] = map[string]interface{}{"Host": hostHeader}
-        }
+    if t := u.Query().Get("type"); t == "ws" {
+        wsOpts := map[string]interface{}{"path": u.Query().Get("path")}
+        if h := u.Query().Get("host"); h != "" { wsOpts["headers"] = map[string]interface{}{"Host": h} }
         outbound["transport"] = wsOpts
-    } else if transportType == "grpc" {
-        outbound["transport"] = map[string]interface{}{
-            "type":         "grpc",
-            "service_name": u.Query().Get("serviceName"),
-        }
+    } else if t == "grpc" {
+        outbound["transport"] = map[string]interface{}{"type": "grpc", "service_name": u.Query().Get("serviceName")}
     }
 
-    // FIX BUG-046: Support UDP-over-TCP
-    if u.Query().Get("uot") == "1" {
-        outbound["udp_over_tcp"] = true
-    }
-
-    return buildConfig(outbound)
+    if u.Query().Get("uot") == "1" { outbound["udp_over_tcp"] = true }
+    return buildConfig(outbound, cfg)
 }
 
-func generateTrojanConfig(uri string) (string, string, error) {
+func generateTrojanConfig(uri string, cfg *AppConfig) (string, string, error) {
     u, err := url.Parse(uri)
-    if err != nil {
-        return "", "", err
-    }
+    if err != nil { return "", "", err }
 
     password := u.User.Username()
     host := u.Hostname()
     portStr := u.Port()
-
-    if password == "" || host == "" || portStr == "" {
-        return "", "", fmt.Errorf("invalid trojan uri: missing password, host or port")
-    }
+    if password == "" || host == "" || portStr == "" { return "", "", fmt.Errorf("invalid trojan uri") }
 
     port, err := strconv.Atoi(portStr)
-    if err != nil {
-        return "", "", fmt.Errorf("invalid port format: %w", err)
-    }
+    if err != nil { return "", "", fmt.Errorf("invalid port format") }
 
     outbound := map[string]interface{}{
-        "type":        "trojan",
-        "server":      host,
-        "server_port": port,
-        "password":    password,
+        "type": "trojan", "server": host, "server_port": port, "password": password,
     }
-
     sni := u.Query().Get("sni")
-    if sni == "" {
-        sni = host
-    }
+    if sni == "" { sni = host }
     outbound["tls"] = map[string]interface{}{
-        "enabled":     true,
-        "server_name": sni,
-        "insecure":    u.Query().Get("allowInsecure") == "1",
+        "enabled": true, "server_name": sni, "insecure": u.Query().Get("allowInsecure") == "1",
     }
-
-    return buildConfig(outbound)
+    return buildConfig(outbound, cfg)
 }
 
-func buildConfig(outbound map[string]interface{}) (string, string, error) {
+// FIX BUG-042: Full VMess Support
+func generateVmessConfig(uri string, cfg *AppConfig) (string, string, error) {
+    rawJSON := strings.TrimPrefix(uri, "vmess://")
+    decoded, err := base64.StdEncoding.DecodeString(rawJSON)
+    if err != nil {
+        decoded, err = base64.URLEncoding.DecodeString(rawJSON)
+        if err != nil { return "", "", fmt.Errorf("b64 decode failed") }
+    }
+
+    var data struct {
+        PS   string `json:"ps"`
+        Add  string `json:"add"`
+        Port string `json:"port"`
+        ID   string `json:"id"`
+        AID  string `json:"aid"`
+        Net  string `json:"net"`
+        Path string `json:"path"`
+        Host string `json:"host"`
+        TLS  string `json:"tls"`
+        SNI  string `json:"sni"`
+    }
+    if err := json.Unmarshal(decoded, &data); err != nil { return "", "", fmt.Errorf("json unmarshal failed") }
+
+    port, err := strconv.Atoi(data.Port)
+    if err != nil { return "", "", fmt.Errorf("invalid port format") }
+
+    outbound := map[string]interface{}{
+        "type": "vmess", "server": data.Add, "server_port": port, 
+        "uuid": data.ID, "alter_id": data.AID, "security": "auto",
+    }
+
+    if data.TLS == "tls" {
+        sni := data.SNI
+        if sni == "" { sni = data.Add }
+        outbound["tls"] = map[string]interface{}{
+            "enabled": true, "server_name": sni, "insecure": false, // VMess usually doesn't use allowInsecure directly in this format
+        }
+    }
+
+    if data.Net == "ws" {
+        wsOpts := map[string]interface{}{"path": data.Path}
+        if data.Host != "" { wsOpts["headers"] = map[string]interface{}{"Host": data.Host} }
+        outbound["transport"] = wsOpts
+    } else if data.Net == "grpc" {
+        outbound["transport"] = map[string]interface{}{"type": "grpc", "service_name": data.Path}
+    }
+
+    return buildConfig(outbound, cfg)
+}
+
+func buildConfig(outbound map[string]interface{}, cfg *AppConfig) (string, string, error) {
     clashSecret := generateRandomString(32)
     proxyUser := generateRandomString(16)
     proxyPass := generateRandomString(32)
 
+    dnsServers := []map[string]interface{}{}
+    for i, dns := range cfg.Network.DNSServers {
+        detour := "direct"
+        if i == 0 { detour = "proxy" }
+        dnsServers = append(dnsServers, map[string]interface{}{"address": dns, "detour": detour})
+    }
+
     config := SingBoxConfig{
-        // FIX BUG-034: Set log level to warn to prevent credential leaks
-        Log: map[string]interface{}{
-            "level": "warn",
-            "timestamp": true,
-        },
+        Log: map[string]interface{}{"level": "warn", "timestamp": true},
         Experimental: map[string]interface{}{
             "clash_api": map[string]interface{}{
-                "external_controller": "127.0.0.1:9090",
-                "secret":              clashSecret,
+                "external_controller": fmt.Sprintf("127.0.0.1:%d", cfg.Network.ClashPort),
+                "secret": clashSecret,
             },
         },
         DNS: map[string]interface{}{
-            "servers": []map[string]interface{}{
-                {"address": "https://1.1.1.1/dns-query", "detour": "proxy"},
-                {"address": "8.8.8.8", "detour": "direct"},
-            },
-            "final": "proxy_dns",
-            "rules": []map[string]interface{}{
-                {"outbound": "any", "server": "direct"},
-            },
+            "servers": dnsServers, "final": "proxy_dns",
+            "rules": []map[string]interface{}{{"outbound": "any", "server": "direct"}},
         },
         Inbounds: []map[string]interface{}{
             {
-                "type":        "mixed",
-                "listen":      "127.0.0.1",
-                "listen_port": 2080,
-                "authentication": []map[string]interface{}{
-                    {"username": proxyUser, "password": proxyPass},
-                },
+                "type": "mixed", "listen": "127.0.0.1", "listen_port": cfg.Network.ProxyPort,
+                "authentication": []map[string]interface{}{{"username": proxyUser, "password": proxyPass}},
             },
         },
         Outbounds: []map[string]interface{}{
-            outbound,
-            {"type": "direct", "tag": "direct"},
-            {"type": "dns", "tag": "proxy_dns"},
+            outbound, {"type": "direct", "tag": "direct"}, {"type": "dns", "tag": "proxy_dns"},
         },
     }
 
     jsonData, err := json.MarshalIndent(config, "", "  ")
-    if err != nil {
-        return "", "", err
-    }
+    if err != nil { return "", "", err }
 
     tmpFile, err := os.CreateTemp("", "kingo-config-*.json")
-    if err != nil {
-        return "", "", err
-    }
+    if err != nil { return "", "", err }
     
     if err := os.Chmod(tmpFile.Name(), 0600); err != nil {
-        tmpFile.Close()
-        os.Remove(tmpFile.Name())
-        return "", "", err
+        tmpFile.Close(); os.Remove(tmpFile.Name()); return "", "", err
     }
-
     if _, err := tmpFile.Write(jsonData); err != nil {
-        tmpFile.Close()
-        os.Remove(tmpFile.Name())
-        return "", "", err
+        tmpFile.Close(); os.Remove(tmpFile.Name()); return "", "", err
     }
     tmpFile.Close()
-
     return tmpFile.Name(), clashSecret, nil
 }
 

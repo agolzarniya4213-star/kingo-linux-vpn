@@ -11,20 +11,22 @@ import (
 
     "github.com/coreos/go-systemd/v22/daemon"
 
+    "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/config"
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/core"
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/ipc"
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/storage"
 )
 
 func getDBPath() string {
-    if os.Geteuid() == 0 {
-        return "/var/lib/kingo-vpn/kingo.db"
-    }
-    home, err := os.UserHomeDir()
-    if err != nil {
-        return "kingo.db"
-    }
+    if os.Geteuid() == 0 { return "/var/lib/kingo-vpn/kingo.db" }
+    home, _ := os.UserHomeDir()
     return filepath.Join(home, ".local", "share", "kingo-vpn", "kingo.db")
+}
+
+func getKeyPath() string {
+    if os.Geteuid() == 0 { return "/var/lib/kingo-vpn/key.bin" }
+    home, _ := os.UserHomeDir()
+    return filepath.Join(home, ".local", "share", "kingo-vpn", "key.bin")
 }
 
 func main() {
@@ -32,34 +34,35 @@ func main() {
     ctx, cancel := context.WithCancel(context.Background())
     defer cancel()
 
+    appCfg := config.LoadConfig()
+
     dbPath := getDBPath()
-    dbDir := filepath.Dir(dbPath)
+    keyPath := getKeyPath()
     
-    // FIX BUG-006 & 048: Secure directory and file permissions
-    if err := os.MkdirAll(dbDir, 0700); err != nil {
-        slog.Error("Failed to create secure database directory", "error", err)
+    os.MkdirAll(filepath.Dir(dbPath), 0700)
+
+    // v2.0: Initialize Crypto Layer
+    crypto, err := storage.NewCryptoLayer(keyPath)
+    if err != nil {
+        slog.Error("Failed to init crypto layer", "error", err)
         os.Exit(1)
     }
 
-    db, err := storage.NewSQLiteStorage(dbPath)
+    db, err := storage.NewSQLiteStorage(dbPath, crypto)
     if err != nil {
         slog.Error("Failed to init database", "error", err)
         os.Exit(1)
     }
     defer db.Close()
-    os.Chmod(dbPath, 0600) // Restrict DB access
+    os.Chmod(dbPath, 0600)
 
     sigChan := make(chan os.Signal, 1)
     signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-    go func() {
-        <-sigChan
-        cancel()
-    }()
+    go func() { <-sigChan; cancel() }()
 
     coreManager := core.NewSingBoxManager()
-    ipcServer := ipc.NewServer("/run/kingo-vpn/kingo-vpn.sock", coreManager, db)
+    ipcServer := ipc.NewServer(appCfg, coreManager, db)
 
-    // Start IPC server in background
     go func() {
         if err := ipcServer.Start(ctx); err != nil {
             slog.Error("IPC server failed", "error", err)
@@ -67,14 +70,10 @@ func main() {
         }
     }()
 
-    // FIX BUG-025: Systemd Type=notify and Watchdog support
     daemon.SdNotify(false, daemon.SdNotifyReady)
     
-    // Watchdog ticker
     interval, err := daemon.SdWatchdogEnabled(false)
-    if err != nil || interval == 0 {
-        interval = 15 * time.Second // Fallback if not running under systemd
-    }
+    if err != nil || interval == 0 { interval = 15 * time.Second }
     ticker := time.NewTicker(interval / 2)
     defer ticker.Stop()
 
