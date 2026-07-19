@@ -3,10 +3,13 @@ package ipc
 import (
     "context"
     "encoding/json"
+    "io"
     "net"
     "os"
     "sort"
     "time"
+
+    "golang.org/x/sys/unix"
 
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/config"
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/core"
@@ -43,6 +46,10 @@ func NewServer(socketPath string, manager core.Manager, db *storage.SQLiteStorag
 }
 
 func (s *Server) Start(ctx context.Context) error {
+    socketDir := "/run/kingo-vpn"
+    os.MkdirAll(socketDir, 0755)
+    s.socketPath = socketDir + "/kingo-vpn.sock"
+
     if _, err := os.Stat(s.socketPath); err == nil {
         os.Remove(s.socketPath)
     }
@@ -51,8 +58,7 @@ func (s *Server) Start(ctx context.Context) error {
     if err != nil {
         return err
     }
-    // تنظیم دسترسی سوکت: فقط owner و group می‌توانند بخوانند و بنویسند (0660)
-    os.Chmod(s.socketPath, 0660)
+    os.Chmod(s.socketPath, 0600)
 
     defer listener.Close()
 
@@ -78,7 +84,28 @@ func (s *Server) Start(ctx context.Context) error {
 
 func (s *Server) handleConnection(conn net.Conn) {
     defer conn.Close()
-    decoder := json.NewDecoder(conn)
+
+    uc, ok := conn.(*net.UnixConn)
+    if !ok {
+        return
+    }
+    rawConn, err := uc.SyscallConn()
+    if err != nil {
+        return
+    }
+    var uid int = -1
+    rawConn.Control(func(fd uintptr) {
+        ucred, err := unix.GetsockoptUcred(int(fd), unix.SOL_SOCKET, unix.SO_PEERCRED)
+        if err == nil {
+            uid = int(ucred.Uid)
+        }
+    })
+    if uid != 0 {
+        conn.Write([]byte(`{"success":false,"message":"unauthorized"}`))
+        return
+    }
+
+    decoder := json.NewDecoder(io.LimitReader(conn, 1<<20))
     encoder := json.NewEncoder(conn)
 
     for {
@@ -92,12 +119,12 @@ func (s *Server) handleConnection(conn net.Conn) {
         var resp Response
         switch req.Action {
         case "connect_server":
-            configPath, err := config.GenerateSingBoxConfig(req.ServerURI)
+            configPath, clashSecret, err := config.GenerateSingBoxConfig(req.ServerURI)
             if err != nil {
                 resp = Response{Success: false, Message: "Config gen failed: " + err.Error()}
                 break
             }
-            err = s.manager.Start(context.Background(), configPath)
+            err = s.manager.Start(context.Background(), configPath, clashSecret)
             resp = Response{Success: err == nil, State: string(s.manager.GetState())}
             if err != nil {
                 resp.Message = err.Error()
@@ -132,12 +159,12 @@ func (s *Server) handleConnection(conn net.Conn) {
                 break
             }
             
-            configPath, err := config.GenerateSingBoxConfig(bestServer.URI)
+            configPath, clashSecret, err := config.GenerateSingBoxConfig(bestServer.URI)
             if err != nil {
                 resp = Response{Success: false, Message: "Config gen failed: " + err.Error(), Servers: testedServers}
                 break
             }
-            err = s.manager.Start(context.Background(), configPath)
+            err = s.manager.Start(context.Background(), configPath, clashSecret)
             resp = Response{Success: err == nil, State: string(s.manager.GetState()), Servers: testedServers}
             if err != nil {
                 resp.Message = err.Error()

@@ -27,7 +27,7 @@ type TrafficStats struct {
 }
 
 type Manager interface {
-    Start(ctx context.Context, configPath string) error
+    Start(ctx context.Context, configPath string, clashSecret string) error
     Stop() error
     GetState() State
     GetTraffic() TrafficStats
@@ -39,14 +39,15 @@ type SingBoxManager struct {
     cmd        *exec.Cmd
     traffic    TrafficStats
     cancel     context.CancelFunc
-    configPath string // نگهداری مسیر فایل برای پاکسازی بعدی
+    configPath string
+    clashSecret string
 }
 
 func NewSingBoxManager() *SingBoxManager {
     return &SingBoxManager{state: StateDisconnected}
 }
 
-func (m *SingBoxManager) Start(ctx context.Context, configPath string) error {
+func (m *SingBoxManager) Start(ctx context.Context, configPath string, clashSecret string) error {
     m.mu.Lock()
     defer m.mu.Unlock()
 
@@ -59,8 +60,16 @@ func (m *SingBoxManager) Start(ctx context.Context, configPath string) error {
         return fmt.Errorf("sing-box binary not found in system PATH")
     }
 
+    // FIX BUG-040: Validate config before running
+    checkCmd := exec.Command("sing-box", "check", "-c", configPath)
+    if err := checkCmd.Run(); err != nil {
+        m.state = StateError
+        return fmt.Errorf("config validation failed: %w", err)
+    }
+
     m.state = StateConnecting
     m.configPath = configPath
+    m.clashSecret = clashSecret
     m.cmd = exec.CommandContext(ctx, "sing-box", "run", "-c", configPath)
     m.cmd.Stdout = os.Stdout
     m.cmd.Stderr = os.Stderr
@@ -70,11 +79,18 @@ func (m *SingBoxManager) Start(ctx context.Context, configPath string) error {
         return err
     }
 
+    // FIX BUG-015: Capture cmd to prevent Data Race and nil-pointer dereference
+    cmd := m.cmd
     trafficCtx, cancel := context.WithCancel(ctx)
     m.cancel = cancel
 
     go func() {
-        m.cmd.Wait()
+        defer func() {
+            if r := recover(); r != nil {
+                fmt.Printf("Recovered from panic in Wait goroutine: %v\n", r)
+            }
+        }()
+        _ = cmd.Wait() // Use captured cmd
         m.mu.Lock()
         defer m.mu.Unlock()
         if m.state != StateDisconnected {
@@ -84,7 +100,6 @@ func (m *SingBoxManager) Start(ctx context.Context, configPath string) error {
             m.cancel()
             m.cancel = nil
         }
-        // پاکسازی فایل کانفیگ موقت پس از توقف پروسه
         if m.configPath != "" {
             os.Remove(m.configPath)
             m.configPath = ""
@@ -99,7 +114,16 @@ func (m *SingBoxManager) Start(ctx context.Context, configPath string) error {
 func (m *SingBoxManager) monitorTraffic(ctx context.Context) {
     time.Sleep(2 * time.Second)
 
+    m.mu.RLock()
+    secret := m.clashSecret
+    m.mu.RUnlock()
+
     req, _ := http.NewRequestWithContext(ctx, "GET", "http://127.0.0.1:9090/traffic", nil)
+    // FIX BUG-003: Add Clash API Secret for Authorization
+    if secret != "" {
+        req.Header.Set("Authorization", "Bearer "+secret)
+    }
+    
     client := &http.Client{}
     resp, err := client.Do(req)
     if err != nil {
@@ -121,6 +145,8 @@ func (m *SingBoxManager) monitorTraffic(ctx context.Context) {
                 if err == io.EOF {
                     return
                 }
+                // FIX BUG-018: Prevent busy loop on non-EOF errors
+                time.Sleep(1 * time.Second)
                 continue
             }
             m.mu.Lock()
@@ -146,7 +172,6 @@ func (m *SingBoxManager) Stop() error {
     m.state = StateDisconnected
     m.traffic = TrafficStats{}
     
-    // اطمینان از پاکسازی فایل
     if m.configPath != "" {
         os.Remove(m.configPath)
         m.configPath = ""

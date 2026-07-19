@@ -10,16 +10,13 @@ import (
 
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/core"
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/ipc"
-    "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/model"
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/storage"
 )
 
 func getDBPath() string {
-    // اگر سرویس با دسترسی Root اجرا شود (systemd)
     if os.Geteuid() == 0 {
         return "/var/lib/kingo-vpn/kingo.db"
     }
-    // اگر توسط کاربر عادی اجرا شود (run.sh)
     home, err := os.UserHomeDir()
     if err != nil {
         return "kingo.db"
@@ -32,9 +29,12 @@ func main() {
     ctx, cancel := context.WithCancel(context.Background())
     defer cancel()
 
-    // اطمینان از وجود پوشه دیتابیس
     dbPath := getDBPath()
-    os.MkdirAll(filepath.Dir(dbPath), 0755)
+    // FIX BUG-048: Check MkdirAll error
+    if err := os.MkdirAll(filepath.Dir(dbPath), 0755); err != nil {
+        slog.Error("Failed to create database directory", "error", err)
+        os.Exit(1)
+    }
 
     db, err := storage.NewSQLiteStorage(dbPath)
     if err != nil {
@@ -43,13 +43,7 @@ func main() {
     }
     defer db.Close()
 
-    if s, _ := db.GetServers(); len(s) == 0 {
-        db.SaveServers([]model.Server{
-            {ID: "srv1", Name: "Germany - Frankfurt", Protocol: "vless", Address: "10.0.0.1", Port: 443},
-            {ID: "srv2", Name: "Netherlands - Amsterdam", Protocol: "vmess", Address: "10.0.0.2", Port: 8080},
-        })
-        slog.Info("Seeded dummy servers to database")
-    }
+    // FIX BUG-007: Removed dummy seed servers for production readiness
 
     sigChan := make(chan os.Signal, 1)
     signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
@@ -59,7 +53,8 @@ func main() {
     }()
 
     coreManager := core.NewSingBoxManager()
-    ipcServer := ipc.NewServer("/tmp/kingo-vpn.sock", coreManager, db)
+    // Socket path is now hardcoded inside IPC server to /run/kingo-vpn for security
+    ipcServer := ipc.NewServer("/run/kingo-vpn/kingo-vpn.sock", coreManager, db)
 
     if err := ipcServer.Start(ctx); err != nil {
         slog.Error("IPC server failed", "error", err)
