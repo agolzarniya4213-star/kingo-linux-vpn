@@ -13,6 +13,7 @@ import (
 )
 
 type SingBoxConfig struct {
+    Log          map[string]interface{} `json:"log,omitempty"`
     Experimental map[string]interface{} `json:"experimental,omitempty"`
     DNS          map[string]interface{} `json:"dns,omitempty"`
     Inbounds     []map[string]interface{} `json:"inbounds"`
@@ -67,6 +68,10 @@ func generateVlessConfig(uri string) (string, string, error) {
         if fp := u.Query().Get("fp"); fp != "" {
             tlsOpts["utls"] = map[string]interface{}{"enabled": true, "fingerprint": fp}
         }
+        // FIX BUG-014: Support allowInsecure
+        if u.Query().Get("allowInsecure") == "1" {
+            tlsOpts["insecure"] = true
+        }
         outbound["tls"] = tlsOpts
     }
 
@@ -86,10 +91,14 @@ func generateVlessConfig(uri string) (string, string, error) {
         }
     }
 
+    // FIX BUG-046: Support UDP-over-TCP
+    if u.Query().Get("uot") == "1" {
+        outbound["udp_over_tcp"] = true
+    }
+
     return buildConfig(outbound)
 }
 
-// FIX BUG-042: Added Trojan config generator
 func generateTrojanConfig(uri string) (string, string, error) {
     u, err := url.Parse(uri)
     if err != nil {
@@ -123,6 +132,7 @@ func generateTrojanConfig(uri string) (string, string, error) {
     outbound["tls"] = map[string]interface{}{
         "enabled":     true,
         "server_name": sni,
+        "insecure":    u.Query().Get("allowInsecure") == "1",
     }
 
     return buildConfig(outbound)
@@ -134,6 +144,11 @@ func buildConfig(outbound map[string]interface{}) (string, string, error) {
     proxyPass := generateRandomString(32)
 
     config := SingBoxConfig{
+        // FIX BUG-034: Set log level to warn to prevent credential leaks
+        Log: map[string]interface{}{
+            "level": "warn",
+            "timestamp": true,
+        },
         Experimental: map[string]interface{}{
             "clash_api": map[string]interface{}{
                 "external_controller": "127.0.0.1:9090",
@@ -177,7 +192,6 @@ func buildConfig(outbound map[string]interface{}) (string, string, error) {
         return "", "", err
     }
     
-    // FIX BUG-032: Cleanup temp file if any subsequent step fails
     if err := os.Chmod(tmpFile.Name(), 0600); err != nil {
         tmpFile.Close()
         os.Remove(tmpFile.Name())
@@ -194,7 +208,6 @@ func buildConfig(outbound map[string]interface{}) (string, string, error) {
     return tmpFile.Name(), clashSecret, nil
 }
 
-// FIX BUG-033: Changed MD5 to SHA256 for cryptographic strength
 func GenerateID(uri string) string {
     hash := sha256.Sum256([]byte(uri))
     return hex.EncodeToString(hash[:])

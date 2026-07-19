@@ -15,12 +15,18 @@ type SQLiteStorage struct {
 }
 
 func NewSQLiteStorage(dbPath string) (*SQLiteStorage, error) {
-    db, err := sql.Open("sqlite3", dbPath+"?_journal_mode=WAL&_busy_timeout=5000")
+    // FIX BUG-023: Add WAL mode, busy timeout, and foreign keys
+    db, err := sql.Open("sqlite3", dbPath+"?_journal_mode=WAL&_busy_timeout=5000&_foreign_keys=on")
     if err != nil {
         return nil, err
     }
+    
+    // FIX BUG-023: Limit connections for SQLite
+    db.SetMaxOpenConns(1)
 
+    // FIX BUG-023: Basic schema migration
     schema := `
+    CREATE TABLE IF NOT EXISTS schema_version (version INTEGER PRIMARY KEY);
     CREATE TABLE IF NOT EXISTS servers (
         id TEXT PRIMARY KEY,
         name TEXT,
@@ -28,14 +34,20 @@ func NewSQLiteStorage(dbPath string) (*SQLiteStorage, error) {
         port INTEGER,
         protocol TEXT,
         uri TEXT,
-        latency INTEGER DEFAULT 0
+        latency INTEGER DEFAULT 0,
+        last_seen INTEGER DEFAULT 0
     );`
     if _, err := db.Exec(schema); err != nil {
         return nil, fmt.Errorf("schema failed: %w", err)
     }
+    
+    // Set initial schema version if not exists
+    db.Exec("INSERT OR IGNORE INTO schema_version (version) VALUES (1)")
+
     return &SQLiteStorage{db: db}, nil
 }
 
+// FIX BUG-022: Use UPSERT instead of DELETE and INSERT
 func (s *SQLiteStorage) SaveServers(servers []model.Server) error {
     tx, err := s.db.Begin()
     if err != nil {
@@ -43,12 +55,17 @@ func (s *SQLiteStorage) SaveServers(servers []model.Server) error {
     }
     defer tx.Rollback()
 
-    _, err = tx.Exec("DELETE FROM servers")
-    if err != nil {
-        return err
-    }
-
-    stmt, err := tx.Prepare("INSERT INTO servers(id, name, address, port, protocol, uri, latency) VALUES(?, ?, ?, ?, ?, ?, ?)")
+    stmt, err := tx.Prepare(`
+        INSERT INTO servers(id, name, address, port, protocol, uri, latency) 
+        VALUES(?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET 
+            name=excluded.name, 
+            address=excluded.address, 
+            port=excluded.port, 
+            protocol=excluded.protocol, 
+            uri=excluded.uri, 
+            latency=excluded.latency
+    `)
     if err != nil {
         return err
     }
@@ -81,7 +98,6 @@ func (s *SQLiteStorage) GetServers() ([]model.Server, error) {
     return servers, rows.Err()
 }
 
-// FIX BUG-051: Log error on Close
 func (s *SQLiteStorage) Close() {
     if err := s.db.Close(); err != nil {
         slog.Error("Failed to close database safely", "error", err)

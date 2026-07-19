@@ -4,21 +4,27 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
-Type=simple
+# FIX BUG-025 & 026: Type=notify, Watchdog, and Restart=always
+Type=notify
+WatchdogSec=30s
+
 User=kingo-vpn
 Group=kingo-vpn
 
 ExecStart=/usr/local/bin/kingo-linux-vpn-daemon
 Restart=always
 RestartSec=5
+StartLimitBurst=3
+StartLimitIntervalSec=60
 
-# FIX BUG-008 & 053: Extensive Systemd Hardening
+# Security Hardening
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/var/lib/kingo-vpn /run/kingo-vpn
+ReadWritePaths=/var/lib/kingo-vpn /run/kingo-vpn /var/log/kingo-vpn
 RuntimeDirectory=kingo-vpn
 StateDirectory=kingo-vpn
+LogsDirectory=kingo-vpn
 PrivateTmp=true
 PrivateDevices=true
 ProtectKernelTunables=true
@@ -38,7 +44,6 @@ MemoryDenyWriteExecute=true
 SystemCallFilter=@system-service
 SystemCallErrorNumber=EPERM
 
-# Capabilities: Only grant what is strictly necessary for VPN (TUN + Ports)
 AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 

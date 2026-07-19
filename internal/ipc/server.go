@@ -19,7 +19,11 @@ import (
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/storage"
 )
 
+// FIX BUG-038: Protocol Versioning
+const ProtocolVersion = "1.0"
+
 type Request struct {
+    Version    string `json:"version"`
     Action     string `json:"action"`
     ConfigPath string `json:"config_path,omitempty"`
     SubURL     string `json:"sub_url,omitempty"`
@@ -117,17 +121,20 @@ func (s *Server) handleConnection(conn net.Conn) {
         conn.SetReadDeadline(time.Time{})
 
         var resp Response
+        
+        ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+        
         switch req.Action {
         case "connect_server":
             configPath, clashSecret, err := config.GenerateSingBoxConfig(req.ServerURI)
             if err != nil {
-                resp = Response{Success: false, Message: "Config gen failed: " + err.Error()}
+                resp = Response{Success: false, Message: "Failed to generate server configuration"}
                 break
             }
-            err = s.manager.Start(context.Background(), configPath, clashSecret)
+            err = s.manager.Start(ctx, configPath, clashSecret)
             resp = Response{Success: err == nil, State: string(s.manager.GetState())}
             if err != nil {
-                resp.Message = err.Error()
+                resp.Message = "Failed to start VPN connection"
             }
 
         case "auto_connect":
@@ -137,7 +144,7 @@ func (s *Server) handleConnection(conn net.Conn) {
                 break
             }
             
-            testedServers := network.TestAllLatency(context.Background(), servers)
+            testedServers := network.TestAllLatency(ctx, servers)
             _ = s.db.SaveServers(testedServers)
             
             sort.Slice(testedServers, func(i, j int) bool {
@@ -161,13 +168,13 @@ func (s *Server) handleConnection(conn net.Conn) {
             
             configPath, clashSecret, err := config.GenerateSingBoxConfig(bestServer.URI)
             if err != nil {
-                resp = Response{Success: false, Message: "Config gen failed: " + err.Error(), Servers: testedServers}
+                resp = Response{Success: false, Message: "Config generation failed", Servers: testedServers}
                 break
             }
-            err = s.manager.Start(context.Background(), configPath, clashSecret)
+            err = s.manager.Start(ctx, configPath, clashSecret)
             resp = Response{Success: err == nil, State: string(s.manager.GetState()), Servers: testedServers}
             if err != nil {
-                resp.Message = err.Error()
+                resp.Message = "Failed to start VPN connection"
             }
 
         case "disconnect":
@@ -179,26 +186,26 @@ func (s *Server) handleConnection(conn net.Conn) {
             servers, err := s.db.GetServers()
             resp = Response{Success: err == nil, Servers: servers}
             if err != nil {
-                resp.Message = err.Error()
+                resp.Message = "Failed to retrieve servers"
             }
         case "add_subscription":
             servers, err := fetcher.FetchSubscription(req.SubURL)
             if err != nil {
-                resp = Response{Success: false, Message: err.Error()}
+                resp = Response{Success: false, Message: "Failed to fetch subscription"}
             } else {
                 err = s.db.SaveServers(servers)
                 resp = Response{Success: err == nil, Servers: servers}
                 if err != nil {
-                    resp.Message = err.Error()
+                    resp.Message = "Failed to save servers"
                 }
             }
         case "test_latency":
             servers, err := s.db.GetServers()
             if err != nil {
-                resp = Response{Success: false, Message: err.Error()}
+                resp = Response{Success: false, Message: "Failed to retrieve servers"}
                 break
             }
-            testedServers := network.TestAllLatency(context.Background(), servers)
+            testedServers := network.TestAllLatency(ctx, servers)
             _ = s.db.SaveServers(testedServers)
             resp = Response{Success: true, Servers: testedServers}
         case "get_traffic":
@@ -207,6 +214,11 @@ func (s *Server) handleConnection(conn net.Conn) {
         default:
             resp = Response{Success: false, Message: "unknown action"}
         }
-        encoder.Encode(resp)
+        
+        cancel()
+        
+        if err := encoder.Encode(resp); err != nil {
+            break
+        }
     }
 }
