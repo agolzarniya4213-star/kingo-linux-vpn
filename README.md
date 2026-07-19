@@ -1,64 +1,91 @@
 
-```markdown
-# Kingo Linux VPN
+<div align="center">
 
-A modern, secure, and high-performance VPN client for Linux, built with Go and Qt6/QML. It leverages the `sing-box` core to support modern protocols like VLESS, VMess, and Trojan.
+# 🛡️ Kingo Linux VPN
 
-## ✨ Features
+### A Modern, Secure, and High-Performance VPN Client for Linux
 
-- **Modern UI:** Built with Qt6/QML, featuring a dark theme and system tray integration.
-- **High-Performance Core:** Powered by `sing-box` for optimal speed and reliability.
-- **Smart Auto-Connect:** Automatically tests server latency and connects to the fastest available server.
-- **Real-time Traffic Monitoring:** Live upload/download speed display via Clash API.
-- **Subscription Management:** Fetches and parses V2Ray standard subscription links (Base64).
-- **System Integration:** Runs as a secure background service using `systemd` with restricted capabilities.
-- **Local Storage:** SQLite database for persisting server configurations.
+![Go](https://img.shields.io/badge/Go-1.21+-00ADD8?logo=go&logoColor=white)
+![Qt](https://img.shields.io/badge/Qt-6-41CD52?logo=qt&logoColor=white)
+![Sing-box](https://img.shields.io/badge/Core-Sing--box-blueviolet)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-## 🏗 Architecture
+</div>
 
-The project follows a strict Client-Daemon architecture:
+## 📖 Overview
+Kingo Linux VPN is an enterprise-grade, lightweight VPN client designed specifically for Linux environments. Built with a strict **Client-Daemon architecture**, it separates the privileged network operations (Daemon) from the user interface (Client) to ensure maximum security and stability.
 
-- **Backend (Go):** Runs as a `systemd` service (`kingo-daemon`). Manages the `sing-box` process, handles subscription fetching, latency testing, and stores data in SQLite. Communicates with the UI via Unix Domain Sockets (UDS) using JSON.
-- **Frontend (C++/Qt6):** Runs in user space. Provides a rich GUI, handles system tray interactions, and sends commands to the backend via UDS.
+## ✨ Key Features
+- 🚀 **High-Performance Core:** Powered by `sing-box` for optimal speed and modern protocol support (VLESS, VMess, Trojan).
+- 🎨 **Modern QML UI:** Built with Qt6/QML, featuring a dark theme, responsive design, and System Tray integration.
+- 🧠 **Smart Auto-Connect:** Automatically tests server latency and connects to the fastest available server.
+- 📊 **Real-time Monitoring:** Live upload/download speed display via Clash API.
+- 🔒 **Systemd Integration:** Runs as a hardened background service with strict capability bounding (`CAP_NET_ADMIN`).
+- 💾 **Local Storage:** SQLite database for persisting server configurations and latency history.
 
-## 🚀 Building from Source
+## 🏗️ Architecture
+
+```text
++-------------------------------------------------------------+
+|                    User Space (Run as User)                 |
+|                                                             |
+|  +-------------------+              +--------------------+  |
+|  |   Qt6/QML UI      |  <== UDS ==> |  Go IPC Server     |  |
+|  | (C++ Bridge)      |  (JSON)      |  (Local Listener)  |  |
+|  +-------------------+              +---------+----------+  |
+|                                               |             |
+|                                    +----------+----------+  |
+|                                    |  Business Logic     |  |
+|                                    +---------------------+  |
++-------------------------------------------------------------+
+                                               |
+                                     (Systemd / Polkit)
+                                               |
++-------------------------------------------------------------+
+|                Privileged Space (Run as Root)               |
+|                                                             |
+|  +-------------------+              +--------------------+  |
+|  |  Go Daemon        | -----------> | Sing-box Engine    |  |
+|  | (Process Manager) | <----------- | (TUN/Proxy Engine) |  |
+|  +-------------------+              +--------------------+  |
++-------------------------------------------------------------+
+```
+
+## 🛠️ Building from Source
 
 ### Prerequisites
 - Go 1.21+
 - Qt6 (Quick, QuickControls2, Gui, Network, Widgets)
 - CMake 3.16+
-- `sing-box` installed and in system PATH
+- `sing-box` binary installed and in system PATH
 
 ### Build Instructions
 ```bash
-# Build Go Backend
+# 1. Build Go Backend
 go build -o build/kingo-linux-vpn-daemon ./cmd/kingo-linux-vpn/
 
-# Build Qt UI
+# 2. Build Qt UI
 mkdir -p build/qt && cd build/qt
 cmake ../../qt -DCMAKE_BUILD_TYPE=Release
 cmake --build .
 cd ../..
+
+# 3. Run the application
+./run.sh
 ```
 
-## 📦 Installation
-
-To install the application system-wide:
+## 📦 System Installation
+To install the application system-wide (registers in application menu and starts daemon on boot):
 ```bash
 sudo ./scripts/install.sh
 ```
-This will install the binaries, setup the `systemd` service, and add the application to your desktop menu.
 
-## 🛡 Security
-
-The daemon runs with strict `systemd` hardening:
-- `ProtectSystem=strict`
-- `ProtectHome=true`
-- `NoNewPrivileges=true`
-- Only requires `CAP_NET_ADMIN` and `CAP_NET_BIND_SERVICE` capabilities for TUN mode and port binding.
+## 🛡️ Security Hardening
+The daemon runs with strict `systemd` hardening rules to minimize attack surface:
+- `ProtectSystem=strict`: The daemon cannot modify system files.
+- `ProtectHome=true`: User home directories are inaccessible.
+- `NoNewPrivileges=true`: Prevents privilege escalation.
+- `AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE`: Only grants network administration rights, dropping all other root privileges.
 
 ## 📄 License
-
-This project is licensed under the MIT License.
-```
-
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
