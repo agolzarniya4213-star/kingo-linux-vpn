@@ -57,6 +57,13 @@ void VpnController::addSubscription(const QString &url) {
     m_client->sendRequest(req);
 }
 
+void VpnController::clearServers() {
+    QJsonObject req;
+    req["request_id"] = generateRequestID();
+    req["action"] = "clear_servers";
+    m_client->sendRequest(req);
+}
+
 void VpnController::testLatency() {
     QJsonObject req;
     req["request_id"] = generateRequestID();
@@ -72,9 +79,6 @@ void VpnController::getTraffic() {
 }
 
 void VpnController::onResponseReceived(const QJsonObject &response) {
-    // Note: In a fully async UI, we would map response["request_id"] to a callback.
-    // Since QML updates are atomic based on state, we process directly.
-    
     if (response.contains("state")) {
         setStatus(response["state"].toString());
     }

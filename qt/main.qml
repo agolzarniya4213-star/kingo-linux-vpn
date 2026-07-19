@@ -5,18 +5,17 @@ import QtQuick.Layouts
 Window {
     id: mainWindow
     width: 420
-    height: 780
+    height: 820
     visible: true
     title: "Kingo VPN"
-    color: "#0A0A0F" // Deep Cyber Black
+    color: "#080810"
 
     onClosing: (close) => {
         close.accepted = false
         hide()
-        trayIcon.showMessage("Kingo VPN", "Application minimized to tray.")
+        trayIcon.showMessage("Kingo VPN", "Minimized to tray.")
     }
 
-    // Defensive checks to prevent null crashes during initialization
     property string connStatus: vpnController ? vpnController.status : "loading"
     property var serverList: vpnController ? vpnController.servers : []
     property real prevDownload: 0
@@ -35,6 +34,13 @@ Window {
         if (bytes < 1024) return bytes.toFixed(0) + " B/s"
         if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB/s"
         return (bytes / 1048576).toFixed(2) + " MB/s"
+    }
+
+    function getPingColor(latency) {
+        if (latency == 9999 || latency == 0) return "#555555"
+        if (latency < 150) return "#00FF9D"
+        if (latency < 300) return "#FFCC00"
+        return "#FF3366"
     }
 
     Connections {
@@ -68,129 +74,171 @@ Window {
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 24
-        spacing: 18
+        spacing: 16
 
         // Header
         RowLayout {
             Layout.fillWidth: true
-            Layout.topMargin: 10
-
-            Rectangle {
-                width: 32; height: 32
-                color: "#00FF9D"
-                radius: 6
-                Text { text: "K"; color: "#0A0A0F"; font.bold: true; font.pixelSize: 20; anchors.centerIn: parent }
-            }
-            
             Text {
                 text: "KINGO VPN"
                 color: "#FFFFFF"
-                font.pixelSize: 20
+                font.pixelSize: 22
                 font.bold: true
                 font.letterSpacing: 2
-                Layout.leftMargin: 10
             }
-            
             Item { Layout.fillWidth: true }
-            
-            Text {
-                text: "v2.0"
-                color: "#4A4A5A"
-                font.pixelSize: 12
-            }
-        }
-
-        // Main Status Card
-        Rectangle {
-            Layout.fillWidth: true
-            height: 220
-            color: "#14141B"
-            radius: 16
-            border.color: "#22222E"
-            border.width: 1
-
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: 20
-                spacing: 12
-
-                Text {
-                    text: "STATUS"
-                    color: "#5A5A6A"
+            Button {
+                text: "Best Server"
+                background: Rectangle {
+                    color: "#1A1A24"
+                    radius: 6
+                    border.color: "#00FF9D"
+                    border.width: 1
+                }
+                contentItem: Text {
+                    text: parent.text
+                    color: "#00FF9D"
                     font.pixelSize: 11
                     font.bold: true
-                    font.letterSpacing: 1
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
                 }
-
-                Text {
-                    text: connStatus.toUpperCase()
-                    color: connStatus == "connected" ? "#00FF9D" : (connStatus == "connecting" ? "#FFCC00" : "#FF3366")
-                    font.pixelSize: 32
-                    font.bold: true
-                    font.letterSpacing: 1
-                }
-
-                // Speed Stats Row
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.topMargin: 10
-                    spacing: 20
-                    visible: connStatus == "connected"
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        height: 60
-                        color: "#1A1A24"
-                        radius: 10
-                        
-                        ColumnLayout {
-                            anchors.centerIn: parent
-                            Text { text: "DOWNLOAD"; color: "#5A5A6A"; font.pixelSize: 9; font.bold: true; Layout.alignment: Qt.AlignHCenter }
-                            Text { id: downloadSpeedText; text: "0 B/s"; color: "#00FF9D"; font.pixelSize: 16; font.bold: true; Layout.alignment: Qt.AlignHCenter }
-                        }
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        height: 60
-                        color: "#1A1A24"
-                        radius: 10
-                        
-                        ColumnLayout {
-                            anchors.centerIn: parent
-                            Text { text: "UPLOAD"; color: "#5A5A6A"; font.pixelSize: 9; font.bold: true; Layout.alignment: Qt.AlignHCenter }
-                            Text { id: uploadSpeedText; text: "0 B/s"; color: "#FFFFFF"; font.pixelSize: 16; font.bold: true; Layout.alignment: Qt.AlignHCenter }
-                        }
-                    }
+                onClicked: {
+                    prevDownload = 0
+                    prevUpload = 0
+                    prevTime = Date.now()
+                    vpnController.autoConnect()
                 }
             }
         }
 
-        // Connect Button (Modern Hexagon-like Capsule)
-        Button {
+        // Circular Connect Button & Status
+        ColumnLayout {
             Layout.fillWidth: true
-            height: 56
-            enabled: connStatus != "connecting"
-            
-            background: Rectangle {
-                color: connStatus == "connected" ? "#FF3366" : "#00FF9D"
-                radius: 12
+            Layout.topMargin: 20
+            spacing: 12
+
+            Rectangle {
+                Layout.alignment: Qt.AlignHCenter
+                width: 140
+                height: 140
+                radius: 70
+                color: "transparent"
+                border.width: 4
+                border.color: connStatus == "connected" ? "#00FF9D" : (connStatus == "connecting" ? "#FFCC00" : "#FF3366")
+
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: 120
+                    height: 120
+                    radius: 60
+                    color: connStatus == "connected" ? "#00FF9D" : (connStatus == "connecting" ? "#FFCC00" : "#FF3366")
+                    opacity: connStatus == "connecting" ? 0.5 : 1.0
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: connStatus == "connecting" ? "..." : (connStatus == "connected" ? "ON" : "OFF")
+                        color: "#080810"
+                        font.pixelSize: 32
+                        font.bold: true
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            if (connStatus == "connected") {
+                                vpnController.disconnectVpn()
+                            } else if (connStatus != "connecting") {
+                                prevDownload = 0
+                                prevUpload = 0
+                                prevTime = Date.now()
+                                vpnController.autoConnect()
+                            }
+                        }
+                    }
+
+                    SequentialAnimation on scale {
+                        running: connStatus == "connecting"
+                        loops: Animation.Infinite
+                        NumberAnimation { to: 1.1; duration: 500; easing.type: Easing.InOutQuad }
+                        NumberAnimation { to: 1.0; duration: 500; easing.type: Easing.InOutQuad }
+                    }
+                }
             }
-            contentItem: Text {
-                text: connStatus == "connecting" ? "INITIALIZING..." : (connStatus == "connected" ? "DISCONNECT" : "CONNECT")
-                color: "#0A0A0F"
+
+            Text {
+                Layout.fillWidth: true
+                Layout.topMargin: 10
+                text: connStatus.toUpperCase()
+                color: "#FFFFFF"
                 font.pixelSize: 16
                 font.bold: true
-                font.letterSpacing: 2
+                font.letterSpacing: 1
                 horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
             }
-            onClicked: {
-                if (connStatus == "connected") {
-                    vpnController.disconnectVpn()
-                } else {
-                    prevDownload = 0; prevUpload = 0; prevTime = Date.now()
-                    vpnController.autoConnect()
+
+            // Speed Stats
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.topMargin: 5
+                spacing: 16
+                visible: connStatus == "connected"
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 50
+                    color: "#12121A"
+                    radius: 8
+                    border.color: "#1F1F2A"
+                    border.width: 1
+
+                    ColumnLayout {
+                        anchors.centerIn: parent
+                        Text {
+                            text: "DOWNLOAD"
+                            color: "#555566"
+                            font.pixelSize: 8
+                            font.bold: true
+                            Layout.alignment: Qt.AlignHCenter
+                        }
+                        Text {
+                            id: downloadSpeedText
+                            text: "0 B/s"
+                            color: "#00FF9D"
+                            font.pixelSize: 14
+                            font.bold: true
+                            Layout.alignment: Qt.AlignHCenter
+                        }
+                    }
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 50
+                    color: "#12121A"
+                    radius: 8
+                    border.color: "#1F1F2A"
+                    border.width: 1
+
+                    ColumnLayout {
+                        anchors.centerIn: parent
+                        Text {
+                            text: "UPLOAD"
+                            color: "#555566"
+                            font.pixelSize: 8
+                            font.bold: true
+                            Layout.alignment: Qt.AlignHCenter
+                        }
+                        Text {
+                            id: uploadSpeedText
+                            text: "0 B/s"
+                            color: "#FFFFFF"
+                            font.pixelSize: 14
+                            font.bold: true
+                            Layout.alignment: Qt.AlignHCenter
+                        }
+                    }
                 }
             }
         }
@@ -199,83 +247,170 @@ Window {
         Rectangle {
             id: errorBox
             Layout.fillWidth: true
-            height: 40
+            height: 35
             color: "#33000000"
-            radius: 8
+            radius: 6
             visible: false
             border.color: "#FF3366"
             border.width: 1
-            
-            Text { id: errorText; anchors.centerIn: parent; color: "#FF3366"; font.bold: true; font.pixelSize: 12 }
-            Timer { id: errorTimer; interval: 5000; onTriggered: errorBox.visible = false }
-        }
 
-        // Subscription Input
-        TextField {
-            id: subUrlField
-            Layout.fillWidth: true
-            height: 45
-            placeholderText: "Enter Subscription URL..."
-            color: "#FFFFFF"
-            font.pixelSize: 13
-            text: "https://raw.githubusercontent.com/MhdiTaheri/VpnHub/main/sub"
-            background: Rectangle {
-                color: "#14141B"; radius: 8
-                border.color: subUrlField.activeFocus ? "#00FF9D" : "#22222E"; border.width: 1
+            Text {
+                id: errorText
+                anchors.centerIn: parent
+                color: "#FF3366"
+                font.bold: true
+                font.pixelSize: 11
+            }
+            Timer {
+                id: errorTimer
+                interval: 5000
+                onTriggered: errorBox.visible = false
             }
         }
 
-        // Server List Section
+        // Subscription Management
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 8
+
+            TextField {
+                id: subUrlField
+                Layout.fillWidth: true
+                height: 40
+                placeholderText: "Subscription URL..."
+                color: "#FFFFFF"
+                font.pixelSize: 12
+                text: "https://raw.githubusercontent.com/MhdiTaheri/VpnHub/main/sub"
+                background: Rectangle {
+                    color: "#12121A"
+                    radius: 6
+                    border.color: subUrlField.activeFocus ? "#00FF9D" : "#1F1F2A"
+                    border.width: 1
+                }
+            }
+
+            Button {
+                text: "Update"
+                implicitWidth: 70
+                implicitHeight: 40
+                background: Rectangle {
+                    color: "#1A1A24"
+                    radius: 6
+                    border.color: "#00FF9D"
+                    border.width: 1
+                }
+                contentItem: Text {
+                    text: parent.text
+                    color: "#00FF9D"
+                    font.pixelSize: 11
+                    font.bold: true
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                onClicked: {
+                    if (subUrlField.text.length > 0) vpnController.addSubscription(subUrlField.text)
+                }
+            }
+
+            Button {
+                text: "Clear"
+                implicitWidth: 50
+                implicitHeight: 40
+                background: Rectangle {
+                    color: "#1A1A24"
+                    radius: 6
+                    border.color: "#FF3366"
+                    border.width: 1
+                }
+                contentItem: Text {
+                    text: parent.text
+                    color: "#FF3366"
+                    font.pixelSize: 11
+                    font.bold: true
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                onClicked: {
+                    vpnController.clearServers()
+                }
+            }
+        }
+
+        // Server List with Scroll
         Text {
-            text: "AVAILABLE NODES"
-            color: "#5A5A6A"
-            font.pixelSize: 11
+            text: "SERVERS"
+            color: "#555566"
+            font.pixelSize: 10
             font.bold: true
             font.letterSpacing: 1
             Layout.topMargin: 5
         }
 
-        ListView {
+        ScrollView {
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
-            model: serverList
+            ScrollBar.vertical.policy: ScrollBar.AsNeeded
 
-            delegate: Rectangle {
-                width: ListView.view.width
-                height: 60
-                color: "#14141B"
-                radius: 10
-                border.color: "#22222E"
-                border.width: 1
-                Layout.bottomMargin: 8
+            ListView {
+                width: parent.width
+                height: parent.height
+                model: serverList
+                spacing: 8
 
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.margins: 14
-                    spacing: 12
+                delegate: Rectangle {
+                    width: parent.width
+                    height: 55
+                    color: "#12121A"
+                    radius: 8
+                    border.color: "#1F1F2A"
+                    border.width: 1
 
-                    Rectangle {
-                        width: 8; height: 8
-                        radius: 4
-                        color: modelData.latency < 100 ? "#00FF9D" : (modelData.latency < 300 ? "#FFCC00" : "#FF3366")
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.margins: 12
+                        spacing: 10
+
+                        Rectangle {
+                            width: 8
+                            height: 8
+                            radius: 4
+                            color: getPingColor(modelData.latency)
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 1
+                            Text {
+                                text: modelData.name
+                                color: "#FFFFFF"
+                                font.bold: true
+                                font.pixelSize: 12
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                            }
+                            Text {
+                                text: modelData.protocol.toUpperCase() + " • " + modelData.address
+                                color: "#555566"
+                                font.pixelSize: 9
+                            }
+                        }
+
+                        Text {
+                            text: modelData.latency == 9999 ? "N/A" : (modelData.latency == 0 ? "-" : modelData.latency + "ms")
+                            color: getPingColor(modelData.latency)
+                            font.bold: true
+                            font.pixelSize: 11
+                        }
                     }
 
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: 2
-                        Text { text: modelData.name; color: "#FFFFFF"; font.bold: true; font.pixelSize: 13; elide: Text.ElideRight; Layout.fillWidth: true }
-                        Text { text: modelData.protocol.toUpperCase() + " • " + modelData.address; color: "#5A5A6A"; font.pixelSize: 10 }
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            vpnController.connectToServer(modelData.uri)
+                        }
                     }
-                    Text {
-                        text: modelData.latency == 9999 ? "N/A" : (modelData.latency == 0 ? "-" : modelData.latency + "ms")
-                        color: "#5A5A6A"; font.bold: true; font.pixelSize: 11
-                    }
-                }
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: { prevDownload = 0; prevUpload = 0; prevTime = Date.now(); vpnController.connectToServer(modelData.uri) }
                 }
             }
         }

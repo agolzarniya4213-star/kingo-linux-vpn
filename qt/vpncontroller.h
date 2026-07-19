@@ -26,6 +26,7 @@ public:
     Q_INVOKABLE void refreshStatus();
     Q_INVOKABLE void fetchServers();
     Q_INVOKABLE void addSubscription(const QString &url);
+    Q_INVOKABLE void clearServers();
     Q_INVOKABLE void testLatency();
     Q_INVOKABLE void getTraffic();
 
@@ -45,5 +46,5 @@ private:
     qint64 m_uploadSpeed = 0;
     qint64 m_downloadSpeed = 0;
     void setStatus(const QString &newStatus);
-    QString generateRequestID(); // اضافه شدن اعلام متد
+    QString generateRequestID();
 };
