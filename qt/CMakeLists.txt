@@ -7,7 +7,6 @@ set(CMAKE_AUTOMOC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Quick QuickControls2 Gui Network Widgets)
 
-# FIX BUG-013: Standardize binary name to kingo-linux-vpn-ui
 qt_add_executable(kingo-linux-vpn-ui
     main.cpp
     ipcclient.h ipcclient.cpp

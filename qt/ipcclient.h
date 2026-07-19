@@ -22,5 +22,7 @@ private slots:
 private:
     QLocalSocket *m_socket;
     QByteArray m_buffer;
-    QQueue<QByteArray> m_pendingRequests; // صف درخواست‌ها
+    QQueue<QByteArray> m_pendingRequests;
+    bool m_useTmpPath;
+    void attemptConnection();
 };

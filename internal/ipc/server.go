@@ -6,6 +6,7 @@ import (
     "io"
     "net"
     "os"
+    "path/filepath"
     "sort"
     "time"
 
@@ -41,9 +42,9 @@ type Response struct {
 }
 
 type Server struct {
-    appCfg   *config.AppConfig
-    manager  core.Manager
-    db       *storage.SQLiteStorage
+    appCfg  *config.AppConfig
+    manager core.Manager
+    db      *storage.SQLiteStorage
 }
 
 func NewServer(appCfg *config.AppConfig, manager core.Manager, db *storage.SQLiteStorage) *Server {
@@ -51,46 +52,52 @@ func NewServer(appCfg *config.AppConfig, manager core.Manager, db *storage.SQLit
 }
 
 func (s *Server) Start(ctx context.Context) error {
+    // FIX: Fallback to /tmp for non-root users to avoid permission denied
     socketDir := "/run/kingo-vpn"
+    if os.Geteuid() != 0 {
+        socketDir = "/tmp/kingo-vpn"
+    }
     os.MkdirAll(socketDir, 0755)
-    socketPath := s.appCfg.IPC.SocketPath
+    s.appCfg.IPC.SocketPath = filepath.Join(socketDir, "kingo-vpn.sock")
 
-    if _, err := os.Stat(socketPath); err == nil {
-        os.Remove(socketPath)
+    if _, err := os.Stat(s.appCfg.IPC.SocketPath); err == nil {
+        os.Remove(s.appCfg.IPC.SocketPath)
     }
 
-    listener, err := net.Listen("unix", socketPath)
-    if err != nil { return err }
-    os.Chmod(socketPath, 0600)
+    listener, err := net.Listen("unix", s.appCfg.IPC.SocketPath)
+    if err != nil {
+        return err
+    }
+    os.Chmod(s.appCfg.IPC.SocketPath, 0660)
+
     defer listener.Close()
 
     go func() {
         <-ctx.Done()
         listener.Close()
-        os.Remove(socketPath)
+        os.Remove(s.appCfg.IPC.SocketPath)
     }()
 
-    // FIX BUG-027: Semaphore for max concurrent connections
     sem := make(chan struct{}, s.appCfg.IPC.MaxConns)
 
     for {
         conn, err := listener.Accept()
         if err != nil {
             select {
-            case <-ctx.Done(): return nil
-            default: continue
+            case <-ctx.Done():
+                return nil
+            default:
+                continue
             }
         }
         
-        // Acquire semaphore
         select {
         case sem <- struct{}{}:
             go func() {
-                defer func() { <-sem }() // Release
+                defer func() { <-sem }()
                 s.handleConnection(conn)
             }()
         default:
-            // Reject if too many connections
             conn.Write([]byte(`{"success":false,"message":"server busy"}`))
             conn.Close()
         }
@@ -110,7 +117,9 @@ func (s *Server) handleConnection(conn net.Conn) {
         ucred, err := unix.GetsockoptUcred(int(fd), unix.SOL_SOCKET, unix.SO_PEERCRED)
         if err == nil { uid = int(ucred.Uid) }
     })
-    if uid != 0 {
+    
+    // Allow same user or root
+    if uid != 0 && uid != os.Getuid() {
         conn.Write([]byte(`{"success":false,"message":"unauthorized"}`))
         return
     }
@@ -125,9 +134,7 @@ func (s *Server) handleConnection(conn net.Conn) {
         conn.SetReadDeadline(time.Time{})
 
         var resp Response
-        // FIX BUG-030: Echo RequestID back to client
         resp.RequestID = req.RequestID
-        
         ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
         
         switch req.Action {

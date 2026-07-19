@@ -3,20 +3,29 @@
 #include <QJsonObject>
 #include <QTimer>
 
-IpcClient::IpcClient(QObject *parent) : QObject(parent), m_socket(new QLocalSocket(this)) {
+IpcClient::IpcClient(QObject *parent) : QObject(parent), m_socket(new QLocalSocket(this)), m_useTmpPath(false) {
     connect(m_socket, &QLocalSocket::readyRead, this, &IpcClient::onReadyRead);
     connect(m_socket, &QLocalSocket::connected, this, &IpcClient::onConnected);
     connect(m_socket, &QLocalSocket::disconnected, this, [this]() {
         QTimer::singleShot(3000, this, [this]() {
-            if (m_socket->state() != QLocalSocket::ConnectedState && m_socket->state() != QLocalSocket::ConnectingState) {
-                m_socket->connectToServer("/run/kingo-vpn/kingo-vpn.sock");
-            }
+            attemptConnection();
         });
     });
     connect(m_socket, &QLocalSocket::errorOccurred, this, [this](QLocalSocket::LocalSocketError socketError) {
         Q_UNUSED(socketError);
-        emit errorOccurred(m_socket->errorString());
+        // If /run fails, fallback to /tmp on next attempt
+        m_useTmpPath = !m_useTmpPath;
+        QTimer::singleShot(1000, this, [this]() {
+            attemptConnection();
+        });
     });
+}
+
+void IpcClient::attemptConnection() {
+    if (m_socket->state() != QLocalSocket::ConnectedState && m_socket->state() != QLocalSocket::ConnectingState) {
+        QString path = m_useTmpPath ? "/tmp/kingo-vpn/kingo-vpn.sock" : "/run/kingo-vpn/kingo-vpn.sock";
+        m_socket->connectToServer(path);
+    }
 }
 
 void IpcClient::sendRequest(const QJsonObject &request) {
@@ -26,13 +35,10 @@ void IpcClient::sendRequest(const QJsonObject &request) {
         m_socket->write(data);
         m_socket->flush();
     } else {
-        // FIX BUG-029: Prevent unbounded queue growth (OOM prevention)
         if (m_pendingRequests.size() < 100) {
             m_pendingRequests.enqueue(data);
         }
-        if (m_socket->state() != QLocalSocket::ConnectingState) {
-            m_socket->connectToServer("/run/kingo-vpn/kingo-vpn.sock");
-        }
+        attemptConnection();
     }
 }
 
