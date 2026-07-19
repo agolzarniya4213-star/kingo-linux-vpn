@@ -14,6 +14,7 @@ import (
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/config"
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/core"
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/ipc"
+    "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/model"
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/storage"
 )
 
@@ -41,7 +42,6 @@ func main() {
     
     os.MkdirAll(filepath.Dir(dbPath), 0700)
 
-    // v2.0: Initialize Crypto Layer
     crypto, err := storage.NewCryptoLayer(keyPath)
     if err != nil {
         slog.Error("Failed to init crypto layer", "error", err)
@@ -55,6 +55,15 @@ func main() {
     }
     defer db.Close()
     os.Chmod(dbPath, 0600)
+
+    // FIX: Seed public test servers if DB is empty (like Hiddify)
+    if servers, _ := db.GetServers(); len(servers) == 0 {
+        slog.Info("Seeding default public servers...")
+        db.SaveServers([]model.Server{
+            {ID: "pub1", Name: "Public - Germany (VLESS)", Protocol: "vless", Address: "speedtest.tele2.net", Port: 443, URI: "vless://uuid@speedtest.tele2.net:443?security=tls&type=ws&path=%2F#Germany-Test"},
+            {ID: "pub2", Name: "Public - Cloudflare (VLESS)", Protocol: "vless", Address: "1.1.1.1", Port: 443, URI: "vless://uuid@1.1.1.1:443?security=tls&type=ws&path=%2F#Cloudflare-Test"},
+        })
+    }
 
     sigChan := make(chan os.Signal, 1)
     signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)

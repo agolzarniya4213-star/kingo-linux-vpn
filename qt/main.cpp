@@ -1,4 +1,4 @@
-#include <QApplication> // FIX: Changed from QGuiApplication to QApplication
+#include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QQuickStyle>
@@ -9,7 +9,9 @@
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
-    QQuickStyle::setStyle("Basic");
+    
+    // FIX: Force Material style for a modern look like Hiddify
+    QQuickStyle::setStyle("Material");
 
     QQmlApplicationEngine engine;
     
