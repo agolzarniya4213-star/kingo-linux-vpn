@@ -1,5 +1,0 @@
-module KingoVPN
-typeinfo kingo-linux-vpn-ui.qmltypes
-prefer :/KingoVPN/
-depends QtQuick
-

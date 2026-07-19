@@ -1,0 +1,22 @@
+# Build artifacts
+build/
+bin/
+*.o
+*.obj
+
+# Go specific
+*.test
+*.out
+kingo.db
+
+# Qt specific
+*.qmlc
+*.qmltc
+*.qmltyperegistrations.cpp
+qmldir.files
+
+# IDE & OS files
+.vscode/
+.idea/
+*.swp
+.DS_Store

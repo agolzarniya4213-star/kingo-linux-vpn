@@ -1,3 +1,0 @@
-/home/abolfazl4213/kingo-linux-vpn/build/qt/kingo-linux-vpn-ui_autogen/include/../EWIEGA46WW/moc_ipcclient.cpp.json
-/home/abolfazl4213/kingo-linux-vpn/build/qt/kingo-linux-vpn-ui_autogen/include/../EWIEGA46WW/moc_trayicon.cpp.json
-/home/abolfazl4213/kingo-linux-vpn/build/qt/kingo-linux-vpn-ui_autogen/include/../EWIEGA46WW/moc_vpncontroller.cpp.json
