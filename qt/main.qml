@@ -1,5 +1,5 @@
 import QtQuick
-import QtQuick.Controls.Basic
+import QtQuick.Controls
 import QtQuick.Layouts
 
 ApplicationWindow {
@@ -8,7 +8,7 @@ ApplicationWindow {
     height: 860
     visible: true
     title: "Kingo VPN"
-    color: "#070D18" // Deep Navy Background
+    color: "#070D18"
 
     onClosing: (close) => {
         close.accepted = false
@@ -16,7 +16,6 @@ ApplicationWindow {
         trayIcon.showMessage("Kingo VPN", "Minimized to tray.")
     }
 
-    // Max Width 780px Centered
     Item {
         id: container
         anchors.centerIn: parent
@@ -24,18 +23,19 @@ ApplicationWindow {
         height: parent.height
 
         property string connStatus: vpnController ? vpnController.status : "loading"
-        property int currentTab: 1 // 0: Favorites, 1: Servers, 2: Custom
+        property int currentTab: 1
         property string selectedServerID: ""
         property real prevDownload: 0
         property real prevUpload: 0
         property real prevTime: 0
 
-        readonly color cardColor: "#1A2636"
-        readonly color cardBorderColor: "#243245"
-        readonly color accentColor: "#18CFFF"
-        readonly color textColor: "#FFFFFF"
-        readonly color subTextColor: "#8899AA"
-        readonly color successColor: "#4CAF50"
+        // FIX: Removed 'readonly' to prevent qmlimportscanner syntax errors
+        property color cardColor: "#1A2636"
+        property color cardBorderColor: "#243245"
+        property color accentColor: "#18CFFF"
+        property color textColor: "#FFFFFF"
+        property color subTextColor: "#8899AA"
+        property color successColor: "#4CAF50"
 
         Timer {
             interval: 1000
@@ -135,9 +135,8 @@ ApplicationWindow {
         ColumnLayout {
             anchors.fill: parent
             anchors.margins: 24
-            spacing: 16 // Reduced vertical spacing
+            spacing: 16
 
-            // 1. Logo / Title
             Text {
                 text: "Kingo VPN"
                 color: textColor
@@ -146,7 +145,6 @@ ApplicationWindow {
                 Layout.alignment: Qt.AlignHCenter
             }
 
-            // 2. Status
             Text {
                 text: getStatusText()
                 color: getButtonColor()
@@ -162,14 +160,12 @@ ApplicationWindow {
                 Layout.alignment: Qt.AlignHCenter
             }
 
-            // 3. Power Button (180px Circle)
             Item {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: 10
                 width: 180
                 height: 180
 
-                // Outer Ring
                 Rectangle {
                     anchors.fill: parent
                     radius: width / 2
@@ -179,20 +175,18 @@ ApplicationWindow {
                     Behavior on border.color { ColorAnimation { duration: 300 } }
                 }
 
-                // Inner Circle
                 Rectangle {
                     id: innerCircle
                     anchors.centerIn: parent
                     width: 160
                     height: 160
                     radius: width / 2
-                    color: "#0E1A2C" // Dark Navy Inside
+                    color: "#0E1A2C"
                     border.color: cardBorderColor
                     border.width: 1
                     scale: powerMouseArea.pressed ? 0.95 : 1.0
                     Behavior on scale { NumberAnimation { duration: 100; easing.type: Easing.OutCubic } }
 
-                    // Pulse Effect
                     Rectangle {
                         anchors.fill: parent
                         radius: parent.radius
@@ -215,7 +209,7 @@ ApplicationWindow {
 
                     Text {
                         anchors.centerIn: parent
-                        text: "⏻" // Power Symbol
+                        text: "⏻"
                         color: "#FFFFFF"
                         font.pixelSize: 60
                     }
@@ -238,7 +232,6 @@ ApplicationWindow {
                 }
             }
 
-            // 4. Best Server Text
             Text {
                 text: "Best Server (Auto Connect)"
                 color: accentColor
@@ -257,7 +250,6 @@ ApplicationWindow {
                 }
             }
 
-            // 5. Server Card (Rounded 22px, Shadow)
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
@@ -266,27 +258,17 @@ ApplicationWindow {
                 border.color: cardBorderColor
                 border.width: 1
 
-                // Fake Soft Shadow
-                Rectangle {
-                    anchors.fill: parent
-                    anchors.topMargin: 2
-                    color: "#00000000"
-                    radius: 22
-                    z: -1
-                }
-
                 ColumnLayout {
                     anchors.fill: parent
-                    anchors.margins: 24 // Padding 24px
+                    anchors.margins: 24
                     spacing: 16
 
-                    // Header
                     RowLayout {
                         Layout.fillWidth: true
                         Text {
                             text: "Server List"
                             color: textColor
-                            font.pixelSize: 24
+                            font.pixelSize: 28
                             font.weight: Font.Bold
                         }
                         Item { Layout.fillWidth: true }
@@ -298,7 +280,6 @@ ApplicationWindow {
                         }
                     }
 
-                    // Tabs (Rounded 18px)
                     Rectangle {
                         Layout.fillWidth: true
                         height: 44
@@ -342,7 +323,6 @@ ApplicationWindow {
                         }
                     }
 
-                    // Get Active Servers Button (Gradient Cyan, 18px Radius)
                     Rectangle {
                         Layout.fillWidth: true
                         height: 48
@@ -371,7 +351,6 @@ ApplicationWindow {
                         }
                     }
 
-                    // Server ListView
                     ListView {
                         id: serverListView
                         Layout.fillWidth: true
@@ -384,7 +363,7 @@ ApplicationWindow {
                         delegate: Rectangle {
                             width: serverListView.width
                             height: 60
-                            radius: 16 // Server Item 16px Radius
+                            radius: 16
                             color: selectedServerID === modelData.id ? "#243245" : "#0E1A2C"
                             border.color: selectedServerID === modelData.id ? accentColor : "transparent"
                             border.width: 1
@@ -435,7 +414,6 @@ ApplicationWindow {
             }
         }
 
-        // Settings Overlay (Pixel Perfect Android About)
         Rectangle {
             id: settingsView
             anchors.fill: parent
@@ -469,10 +447,7 @@ ApplicationWindow {
                 RowLayout {
                     Layout.fillWidth: true
                     Text { text: "Choose which apps use the VPN"; color: subTextColor; font.pixelSize: 14; Layout.fillWidth: true }
-                    Switch {
-                        checked: false
-                        onToggled: { }
-                    }
+                    Switch { checked: false; onToggled: { } }
                 }
 
                 Rectangle { Layout.fillWidth: true; height: 1; color: "#243245"; Layout.topMargin: 20 }
