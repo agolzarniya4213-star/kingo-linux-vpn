@@ -4,6 +4,7 @@
 #include <QGuiApplication>
 #include <QClipboard>
 #include <QTimer>
+#include <QJsonObject>
 #include "ipcclient.h"
 
 class VpnController : public QObject {
@@ -68,7 +69,7 @@ private:
     QString m_connectionTime = "00:00:00";
     qint64 m_connectTime = 0;
     QTimer *m_timer;
-    
+
     void setStatus(const QString &newStatus);
     void appendLog(const QString &log);
     QString generateRequestID();
