@@ -18,7 +18,6 @@ import (
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/storage"
 )
 
-// کانفیگ‌های پیش‌فرض (مشتق شده از نسخه اندروید کینگو)
 const defaultSubscriptionURL = "https://raw.githubusercontent.com/MhdiTaheri/VpnHub/main/sub"
 
 func getDBPath() string {
@@ -52,7 +51,6 @@ func main() {
     defer db.Close()
     os.Chmod(dbPath, 0600)
 
-    // اگر دیتابیس خالی بود، کانفیگ‌های پیش‌فرض را به‌صورت خودکار دریافت کن
     if servers, _ := db.GetServers(); len(servers) == 0 {
         slog.Info("DB is empty. Fetching default servers...")
         servers, err := fetcher.FetchSubscription(defaultSubscriptionURL)
