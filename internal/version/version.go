@@ -1,4 +1,4 @@
 package version
 
 // Version is set via -ldflags during build
-var Version = "v2.0-dev"
+var Version = "v0.5"

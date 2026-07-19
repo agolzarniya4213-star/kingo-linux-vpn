@@ -5,6 +5,7 @@ import (
     "encoding/json"
     "io"
     "net"
+    "net/http" // FIX: Corrected import path
     "os"
     "path/filepath"
     "sort"
@@ -20,25 +21,24 @@ import (
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/storage"
 )
 
-const ProtocolVersion = "2.0"
+const ProtocolVersion = "0.5"
 
 type Request struct {
-    RequestID  string `json:"request_id"`
-    Version    string `json:"version"`
-    Action     string `json:"action"`
-    ConfigPath string `json:"config_path,omitempty"`
-    SubURL     string `json:"sub_url,omitempty"`
-    ServerURI  string `json:"server_uri,omitempty"`
+    RequestID string `json:"request_id"`
+    Action    string `json:"action"`
+    SubURL    string `json:"sub_url,omitempty"`
+    ServerURI string `json:"server_uri,omitempty"`
 }
 
 type Response struct {
-    RequestID string `json:"request_id"`
-    Success   bool           `json:"success"`
-    Message   string         `json:"message"`
-    State     string         `json:"state"`
-    Servers   []model.Server `json:"servers,omitempty"`
-    Upload    int64          `json:"upload,omitempty"`
-    Download  int64          `json:"download,omitempty"`
+    RequestID string          `json:"request_id"`
+    Success   bool            `json:"success"`
+    Message   string          `json:"message"`
+    State     string          `json:"state"`
+    Servers   []model.Server  `json:"servers,omitempty"`
+    Upload    int64           `json:"upload,omitempty"`
+    Download  int64           `json:"download,omitempty"`
+    IP        string          `json:"ip,omitempty"`
 }
 
 type Server struct {
@@ -104,29 +104,21 @@ func (s *Server) handleConnection(conn net.Conn) {
         switch req.Action {
         case "connect_server":
             configPath, clashSecret, err := config.GenerateSingBoxConfig(req.ServerURI, s.appCfg)
-            if err != nil {
-                resp = Response{RequestID: req.RequestID, Success: false, Message: "Config Error: " + err.Error()}
-                break
-            }
+            if err != nil { resp = Response{RequestID: req.RequestID, Success: false, Message: "Config Error: " + err.Error()}; break }
             err = s.manager.Start(ctx, configPath, clashSecret)
             resp = Response{RequestID: req.RequestID, Success: err == nil, State: string(s.manager.GetState())}
-            if err != nil { resp.Message = "VPN Start Failed: " + err.Error() } // Return actual error to UI
+            if err != nil { resp.Message = "VPN Start Failed: " + err.Error() }
 
         case "auto_connect":
             servers, err := s.db.GetServers()
-            if err != nil || len(servers) == 0 {
-                resp = Response{RequestID: req.RequestID, Success: false, Message: "No servers available"}
-                break
-            }
+            if err != nil || len(servers) == 0 { resp = Response{RequestID: req.RequestID, Success: false, Message: "No servers available"}; break }
             testedServers := network.TestAllLatency(ctx, servers)
             _ = s.db.SaveServers(testedServers)
             sort.Slice(testedServers, func(i, j int) bool { return testedServers[i].Latency < testedServers[j].Latency })
-            
             var bestServer model.Server
             found := false
             for _, srv := range testedServers { if srv.Latency < 9999 { bestServer = srv; found = true; break } }
             if !found { resp = Response{RequestID: req.RequestID, Success: false, Message: "All unreachable", Servers: testedServers}; break }
-            
             configPath, clashSecret, err := config.GenerateSingBoxConfig(bestServer.URI, s.appCfg)
             if err != nil { resp = Response{RequestID: req.RequestID, Success: false, Message: "Config gen failed", Servers: testedServers}; break }
             err = s.manager.Start(ctx, configPath, clashSecret)
@@ -144,11 +136,11 @@ func (s *Server) handleConnection(conn net.Conn) {
         case "add_subscription":
             servers, err := fetcher.FetchSubscription(req.SubURL)
             if err != nil { resp = Response{RequestID: req.RequestID, Success: false, Message: "Fetch failed"} } else {
+                for i := range servers { servers[i].Category = "servers" }
                 err = s.db.SaveServers(servers)
                 resp = Response{RequestID: req.RequestID, Success: err == nil, Servers: servers}
             }
         case "clear_servers":
-            // FIX: Added clear servers action
             err := s.db.SaveServers([]model.Server{})
             resp = Response{RequestID: req.RequestID, Success: err == nil, Servers: []model.Server{}}
         case "test_latency":
@@ -160,6 +152,17 @@ func (s *Server) handleConnection(conn net.Conn) {
         case "get_traffic":
             traffic := s.manager.GetTraffic()
             resp = Response{RequestID: req.RequestID, Success: true, Upload: traffic.Upload, Download: traffic.Download}
+        case "get_ip":
+            // FIX: Use standard net/http package correctly
+            client := &http.Client{Timeout: 5 * time.Second}
+            ipResp, err := client.Get("https://api.ipify.org?format=text")
+            if err != nil {
+                resp = Response{RequestID: req.RequestID, Success: false, Message: "Failed to get IP"}
+            } else {
+                defer ipResp.Body.Close()
+                ipBytes, _ := io.ReadAll(ipResp.Body)
+                resp = Response{RequestID: req.RequestID, Success: true, IP: string(ipBytes)}
+            }
         default:
             resp = Response{RequestID: req.RequestID, Success: false, Message: "unknown action"}
         }

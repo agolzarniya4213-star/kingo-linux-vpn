@@ -4,11 +4,35 @@
 
 VpnController::VpnController(QObject *parent) : QObject(parent), m_client(new IpcClient(this)) {
     connect(m_client, &IpcClient::responseReceived, this, &VpnController::onResponseReceived);
-    connect(m_client, &IpcClient::errorOccurred, this, [this](const QString &err){
-        appendLog("IPC Error: " + err);
-    });
+    connect(m_client, &IpcClient::errorOccurred, this, [this](const QString &err){ appendLog("IPC Error: " + err); });
+    
+    m_timer = new QTimer(this);
+    m_timer->setInterval(1000);
+    connect(m_timer, &QTimer::timeout, this, &VpnController::updateConnectionTime);
+    
     refreshStatus();
     fetchServers();
+}
+
+QVariantList VpnController::filterServers(const QString &category) const {
+    QVariantList filtered;
+    for (const auto &srv : m_allServers) {
+        if (srv.toMap().value("category").toString() == category) {
+            filtered.append(srv);
+        }
+    }
+    return filtered;
+}
+
+void VpnController::updateConnectionTime() {
+    if (m_status == "connected" && m_connectTime > 0) {
+        qint64 elapsed = QDateTime::currentSecsSinceEpoch() - m_connectTime;
+        int h = elapsed / 3600;
+        int m = (elapsed % 3600) / 60;
+        int s = elapsed % 60;
+        m_connectionTime = QString::asprintf("%02d:%02d:%02d", h, m, s);
+        emit timeChanged();
+    }
 }
 
 void VpnController::appendLog(const QString &log) {
@@ -56,10 +80,8 @@ void VpnController::addSubscription(const QString &url) {
 
 void VpnController::clearServers() {
     appendLog("Clearing servers...");
-    // FIX: Clear local list immediately for instant UI feedback
-    m_servers.clear();
+    m_allServers.clear();
     emit serversChanged();
-    
     QJsonObject req; req["request_id"] = generateRequestID(); req["action"] = "clear_servers";
     m_client->sendRequest(req);
 }
@@ -75,19 +97,28 @@ void VpnController::getTraffic() {
     m_client->sendRequest(req);
 }
 
+void VpnController::getIP() {
+    QJsonObject req; req["request_id"] = generateRequestID(); req["action"] = "get_ip";
+    m_client->sendRequest(req);
+}
+
 void VpnController::onResponseReceived(const QJsonObject &response) {
     if (response.contains("state")) {
         setStatus(response["state"].toString());
     }
     if (response.contains("servers")) {
-        m_servers = response["servers"].toVariant().toList();
+        m_allServers = response["servers"].toVariant().toList();
         emit serversChanged();
-        appendLog("Server list updated (" + QString::number(m_servers.size()) + " items).");
+        appendLog("Server list updated (" + QString::number(m_allServers.size()) + " items).");
     }
     if (response.contains("upload") && response.contains("download")) {
         m_uploadSpeed = response["upload"].toVariant().toLongLong();
         m_downloadSpeed = response["download"].toVariant().toLongLong();
         emit trafficChanged();
+    }
+    if (response.contains("ip") && !response["ip"].toString().isEmpty()) {
+        m_ipAddress = response["ip"].toString();
+        emit ipChanged();
     }
     if (response.contains("success") && !response["success"].toBool()) {
         if (response.contains("message") && !response["message"].toString().isEmpty()) {
@@ -102,5 +133,17 @@ void VpnController::setStatus(const QString &newStatus) {
         m_status = newStatus;
         emit statusChanged();
         appendLog("Status changed to: " + newStatus.toUpper());
+        
+        if (newStatus == "connected") {
+            m_connectTime = QDateTime::currentSecsSinceEpoch();
+            m_timer->start();
+            getIP();
+        } else {
+            m_timer->stop();
+            m_connectionTime = "00:00:00";
+            m_ipAddress = "0.0.0.0";
+            emit timeChanged();
+            emit ipChanged();
+        }
     }
 }

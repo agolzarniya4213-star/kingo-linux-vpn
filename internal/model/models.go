@@ -8,11 +8,5 @@ type Server struct {
     Protocol string `json:"protocol"`
     URI      string `json:"uri"`
     Latency  int    `json:"latency"`
-}
-
-type Subscription struct {
-    ID     string `json:"id"`
-    URL    string `json:"url"`
-    Name   string `json:"name"`
-    Update int64  `json:"update"`
+    Category string `json:"category"` // "favorites", "servers", "custom"
 }
