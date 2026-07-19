@@ -4,6 +4,7 @@
 
 IpcClient::IpcClient(QObject *parent) : QObject(parent), m_socket(new QLocalSocket(this)) {
     connect(m_socket, &QLocalSocket::readyRead, this, &IpcClient::onReadyRead);
+    connect(m_socket, &QLocalSocket::connected, this, &IpcClient::onConnected);
     connect(m_socket, &QLocalSocket::errorOccurred, this, [this](QLocalSocket::LocalSocketError socketError) {
         Q_UNUSED(socketError);
         emit errorOccurred(m_socket->errorString());
@@ -12,15 +13,21 @@ IpcClient::IpcClient(QObject *parent) : QObject(parent), m_socket(new QLocalSock
 
 void IpcClient::sendRequest(const QJsonObject &request) {
     if (m_socket->state() != QLocalSocket::ConnectedState) {
+        m_pendingRequest = QJsonDocument(request).toJson(QJsonDocument::Compact) + "\n";
         m_socket->connectToServer("/tmp/kingo-vpn.sock");
+        return;
     }
     
-    if (m_socket->state() == QLocalSocket::ConnectingState || m_socket->state() == QLocalSocket::ConnectedState) {
-        QJsonDocument doc(request);
-        m_socket->write(doc.toJson(QJsonDocument::Compact) + "\n");
+    QByteArray data = QJsonDocument(request).toJson(QJsonDocument::Compact) + "\n";
+    m_socket->write(data);
+    m_socket->flush();
+}
+
+void IpcClient::onConnected() {
+    if (!m_pendingRequest.isEmpty()) {
+        m_socket->write(m_pendingRequest);
         m_socket->flush();
-    } else {
-        emit errorOccurred("Failed to connect to daemon.");
+        m_pendingRequest.clear();
     }
 }
 

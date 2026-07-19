@@ -8,7 +8,12 @@ import (
     "strings"
 )
 
-// GenerateSingBoxConfig یک لینک VLESS را گرفته و یک فایل کانفیگ Sing-box می‌سازد
+type SingBoxConfig struct {
+    Experimental map[string]interface{} `json:"experimental,omitempty"`
+    Inbounds     []map[string]interface{} `json:"inbounds"`
+    Outbounds    []map[string]interface{} `json:"outbounds"`
+}
+
 func GenerateSingBoxConfig(uri string) (string, error) {
     if strings.HasPrefix(uri, "vless://") {
         return generateVlessConfig(uri)
@@ -30,40 +35,38 @@ func generateVlessConfig(uri string) (string, error) {
         return "", fmt.Errorf("invalid vless uri: missing uuid, host or port")
     }
 
-    // ساختار مینیمال و معتبر Sing-box
-    config := map[string]interface{}{
-        "experimental": map[string]interface{}{
+    outbound := map[string]interface{}{
+        "type":        "vless",
+        "server":      host,
+        "server_port": port,
+        "uuid":        uuid,
+    }
+
+    if u.Query().Get("security") == "tls" {
+        sni := u.Query().Get("sni")
+        if sni == "" {
+            sni = host
+        }
+        outbound["tls"] = map[string]interface{}{
+            "enabled":     true,
+            "server_name": sni,
+        }
+    }
+
+    config := SingBoxConfig{
+        Experimental: map[string]interface{}{
             "clash_api": map[string]interface{}{
                 "external_controller": "127.0.0.1:9090",
             },
         },
-        "inbounds": []map[string]interface{}{
+        Inbounds: []map[string]interface{}{
             {
                 "type":        "mixed",
                 "listen":      "127.0.0.1",
                 "listen_port": 2080,
             },
         },
-        "outbounds": []map[string]interface{}{
-            {
-                "type":        "vless",
-                "server":      host,
-                "server_port": port,
-                "uuid":        uuid,
-            },
-        },
-    }
-
-    // افزودن TLS در صورت وجود پارامتر security=tls
-    if u.Query().Get("security") == "tls" {
-        sni := u.Query().Get("sni")
-        if sni == "" {
-            sni = host
-        }
-        config["outbounds"].([]map[string]interface{})[0]["tls"] = map[string]interface{}{
-            "enabled":     true,
-            "server_name": sni,
-        }
+        Outbounds: []map[string]interface{}{outbound},
     }
 
     jsonData, err := json.MarshalIndent(config, "", "  ")

@@ -2,6 +2,7 @@
 #include <QObject>
 #include <QLocalSocket>
 #include <QJsonObject>
+#include <QByteArray>
 
 class IpcClient : public QObject {
     Q_OBJECT
@@ -15,8 +16,10 @@ signals:
 
 private slots:
     void onReadyRead();
+    void onConnected();
 
 private:
     QLocalSocket *m_socket;
     QByteArray m_buffer;
+    QByteArray m_pendingRequest;
 };

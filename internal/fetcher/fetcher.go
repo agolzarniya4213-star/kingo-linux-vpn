@@ -1,6 +1,7 @@
 package fetcher
 
 import (
+    "context"
     "encoding/base64"
     "encoding/json"
     "fmt"
@@ -8,12 +9,25 @@ import (
     "net/http"
     "net/url"
     "strings"
+    "time"
 
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/model"
 )
 
+var httpClient = &http.Client{
+    Timeout: 15 * time.Second,
+}
+
 func FetchSubscription(subURL string) ([]model.Server, error) {
-    resp, err := http.Get(subURL)
+    ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+    defer cancel()
+
+    req, err := http.NewRequestWithContext(ctx, "GET", subURL, nil)
+    if err != nil {
+        return nil, fmt.Errorf("failed to create request: %w", err)
+    }
+
+    resp, err := httpClient.Do(req)
     if err != nil {
         return nil, fmt.Errorf("failed to fetch: %w", err)
     }
