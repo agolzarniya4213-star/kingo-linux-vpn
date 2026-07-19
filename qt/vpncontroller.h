@@ -10,6 +10,7 @@ class VpnController : public QObject {
     Q_PROPERTY(QVariantList servers READ servers NOTIFY serversChanged)
     Q_PROPERTY(qint64 uploadSpeed READ uploadSpeed NOTIFY trafficChanged)
     Q_PROPERTY(qint64 downloadSpeed READ downloadSpeed NOTIFY trafficChanged)
+    Q_PROPERTY(QString logs READ logs NOTIFY logsChanged)
 
 public:
     explicit VpnController(QObject *parent = nullptr);
@@ -19,6 +20,7 @@ public:
     QVariantList servers() const { return m_servers; }
     qint64 uploadSpeed() const { return m_uploadSpeed; }
     qint64 downloadSpeed() const { return m_downloadSpeed; }
+    QString logs() const { return m_logs; }
 
     Q_INVOKABLE void connectToServer(const QString &uri);
     Q_INVOKABLE void autoConnect();
@@ -34,6 +36,7 @@ signals:
     void statusChanged();
     void serversChanged();
     void trafficChanged();
+    void logsChanged();
     void errorOccurred(const QString &error);
 
 private slots:
@@ -45,6 +48,8 @@ private:
     QVariantList m_servers;
     qint64 m_uploadSpeed = 0;
     qint64 m_downloadSpeed = 0;
+    QString m_logs = "Kingo VPN v1.5 Initialized.\n";
     void setStatus(const QString &newStatus);
+    void appendLog(const QString &log);
     QString generateRequestID();
 };

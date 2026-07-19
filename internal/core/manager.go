@@ -72,16 +72,15 @@ func findSingBox() (string, error) {
             }
         }
     }
-    return "", fmt.Errorf("sing-box binary not found")
+    return "", fmt.Errorf("sing-box binary not found in PATH or local directories")
 }
 
 func (m *SingBoxManager) Start(ctx context.Context, configPath string, clashSecret string) error {
     m.mu.Lock()
     defer m.mu.Unlock()
 
-    if m.failureCount >= 3 && time.Since(m.lastFailure) < 1*time.Minute {
-        return fmt.Errorf("circuit breaker tripped: too many failures")
-    }
+    // FIX: Reset failure count on manual start attempt to prevent permanent lockout
+    m.failureCount = 0
 
     if m.state == StateConnected || m.state == StateConnecting {
         return nil
@@ -94,11 +93,10 @@ func (m *SingBoxManager) Start(ctx context.Context, configPath string, clashSecr
     }
 
     checkCmd := exec.Command(singBoxPath, "check", "-c", configPath)
-    if err := checkCmd.Run(); err != nil {
+    checkOutput, err := checkCmd.CombinedOutput()
+    if err != nil {
         m.setState(StateError)
-        m.failureCount++
-        m.lastFailure = time.Now()
-        return fmt.Errorf("invalid config: %w", err)
+        return fmt.Errorf("config validation failed: %v, output: %s", err, string(checkOutput))
     }
 
     m.setState(StateConnecting)
@@ -118,8 +116,6 @@ func (m *SingBoxManager) Start(ctx context.Context, configPath string, clashSecr
 
     if err := m.cmd.Start(); err != nil {
         m.setState(StateError)
-        m.failureCount++
-        m.lastFailure = time.Now()
         return err
     }
 
@@ -155,15 +151,13 @@ func (m *SingBoxManager) verifyConnection(ctx context.Context) {
         if err == nil && resp.StatusCode == 200 {
             resp.Body.Close()
             m.mu.Lock()
-            if m.state == StateConnecting { m.setState(StateConnected); m.failureCount = 0 }
+            if m.state == StateConnecting { m.setState(StateConnected) }
             m.mu.Unlock()
             return
         }
     }
     m.mu.Lock()
     m.setState(StateError)
-    m.failureCount++
-    m.lastFailure = time.Now()
     if m.cancel != nil { m.cancel() }
     m.mu.Unlock()
 }
