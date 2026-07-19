@@ -10,7 +10,7 @@
                             "column": 5,
                             "durationMicroseconds": 0,
                             "functionName": "formatSpeed",
-                            "line": 20,
+                            "line": 19,
                             "message": "Functions without type annotations won't be compiled"
                         },
                         {
@@ -18,7 +18,7 @@
                             "column": 16,
                             "durationMicroseconds": 0,
                             "functionName": "onClosing",
-                            "line": 27,
+                            "line": 25,
                             "message": "Cannot access value for name trayIcon"
                         },
                         {
@@ -26,7 +26,7 @@
                             "column": 18,
                             "durationMicroseconds": 0,
                             "functionName": "running",
-                            "line": 15,
+                            "line": 14,
                             "message": "Cannot access value for name vpnController"
                         },
                         {
@@ -34,7 +34,7 @@
                             "column": 22,
                             "durationMicroseconds": 0,
                             "functionName": "onTriggered",
-                            "line": 17,
+                            "line": 16,
                             "message": "Cannot access value for name vpnController"
                         },
                         {
@@ -42,7 +42,7 @@
                             "column": 17,
                             "durationMicroseconds": 0,
                             "functionName": "target",
-                            "line": 35,
+                            "line": 32,
                             "message": "Cannot access value for name trayIcon"
                         },
                         {
@@ -50,7 +50,7 @@
                             "column": 9,
                             "durationMicroseconds": 0,
                             "functionName": "onActivateRequested",
-                            "line": 36,
+                            "line": 33,
                             "message": ""
                         },
                         {
@@ -58,7 +58,7 @@
                             "column": 9,
                             "durationMicroseconds": 0,
                             "functionName": "onConnectRequested",
-                            "line": 41,
+                            "line": 38,
                             "message": ""
                         },
                         {
@@ -66,7 +66,7 @@
                             "column": 9,
                             "durationMicroseconds": 0,
                             "functionName": "onDisconnectRequested",
-                            "line": 46,
+                            "line": 42,
                             "message": "Cannot access value for name vpnController"
                         },
                         {
@@ -74,7 +74,7 @@
                             "column": 9,
                             "durationMicroseconds": 0,
                             "functionName": "onQuitRequested",
-                            "line": 49,
+                            "line": 45,
                             "message": ""
                         },
                         {
@@ -82,7 +82,7 @@
                             "column": 23,
                             "durationMicroseconds": 0,
                             "functionName": "fill",
-                            "line": 55,
+                            "line": 51,
                             "message": ""
                         },
                         {
@@ -90,7 +90,7 @@
                             "column": 19,
                             "durationMicroseconds": 0,
                             "functionName": "text",
-                            "line": 60,
+                            "line": 56,
                             "message": "Cannot access value for name vpnController"
                         },
                         {
@@ -98,7 +98,7 @@
                             "column": 20,
                             "durationMicroseconds": 0,
                             "functionName": "color",
-                            "line": 61,
+                            "line": 57,
                             "message": "Cannot access value for name vpnController"
                         },
                         {
@@ -106,7 +106,7 @@
                             "column": 20,
                             "durationMicroseconds": 0,
                             "functionName": "width",
-                            "line": 67,
+                            "line": 63,
                             "message": ""
                         },
                         {
@@ -114,7 +114,7 @@
                             "column": 22,
                             "durationMicroseconds": 0,
                             "functionName": "visible",
-                            "line": 69,
+                            "line": 65,
                             "message": "Cannot access value for name vpnController"
                         },
                         {
@@ -122,7 +122,7 @@
                             "column": 27,
                             "durationMicroseconds": 0,
                             "functionName": "text",
-                            "line": 74,
+                            "line": 70,
                             "message": "Cannot access value for name vpnController"
                         },
                         {
@@ -130,28 +130,20 @@
                             "column": 27,
                             "durationMicroseconds": 0,
                             "functionName": "text",
-                            "line": 82,
+                            "line": 78,
                             "message": "Cannot access value for name vpnController"
                         },
                         {
-                            "codegenResult": 2,
-                            "column": 19,
+                            "codegenResult": 0,
+                            "column": 20,
                             "durationMicroseconds": 0,
-                            "functionName": "text",
-                            "line": 89,
-                            "message": "Could not find property \"text\"."
+                            "functionName": "width",
+                            "line": 85,
+                            "message": ""
                         },
                         {
                             "codegenResult": 2,
-                            "column": 22,
-                            "durationMicroseconds": 0,
-                            "functionName": "enabled",
-                            "line": 90,
-                            "message": "Could not find property \"enabled\"."
-                        },
-                        {
-                            "codegenResult": 2,
-                            "column": 24,
+                            "column": 28,
                             "durationMicroseconds": 0,
                             "functionName": "onClicked",
                             "line": 91,
@@ -159,10 +151,26 @@
                         },
                         {
                             "codegenResult": 2,
+                            "column": 26,
+                            "durationMicroseconds": 0,
+                            "functionName": "enabled",
+                            "line": 96,
+                            "message": "Could not find property \"enabled\"."
+                        },
+                        {
+                            "codegenResult": 2,
+                            "column": 28,
+                            "durationMicroseconds": 0,
+                            "functionName": "onClicked",
+                            "line": 97,
+                            "message": "Could not find signal \"clicked\"."
+                        },
+                        {
+                            "codegenResult": 2,
                             "column": 20,
                             "durationMicroseconds": 0,
                             "functionName": "width",
-                            "line": 96,
+                            "line": 103,
                             "message": "Could not find property \"width\"."
                         },
                         {
@@ -170,7 +178,7 @@
                             "column": 20,
                             "durationMicroseconds": 0,
                             "functionName": "width",
-                            "line": 104,
+                            "line": 111,
                             "message": ""
                         },
                         {
@@ -178,7 +186,7 @@
                             "column": 28,
                             "durationMicroseconds": 0,
                             "functionName": "onClicked",
-                            "line": 108,
+                            "line": 115,
                             "message": "Could not find signal \"clicked\"."
                         },
                         {
@@ -186,7 +194,7 @@
                             "column": 28,
                             "durationMicroseconds": 0,
                             "functionName": "onClicked",
-                            "line": 116,
+                            "line": 123,
                             "message": "Could not find signal \"clicked\"."
                         },
                         {
@@ -194,7 +202,7 @@
                             "column": 20,
                             "durationMicroseconds": 0,
                             "functionName": "width",
-                            "line": 128,
+                            "line": 135,
                             "message": ""
                         },
                         {
@@ -202,7 +210,7 @@
                             "column": 20,
                             "durationMicroseconds": 0,
                             "functionName": "model",
-                            "line": 131,
+                            "line": 138,
                             "message": "Cannot access value for name vpnController"
                         },
                         {
@@ -210,7 +218,7 @@
                             "column": 24,
                             "durationMicroseconds": 0,
                             "functionName": "width",
-                            "line": 134,
+                            "line": 141,
                             "message": ""
                         },
                         {
@@ -218,7 +226,7 @@
                             "column": 35,
                             "durationMicroseconds": 0,
                             "functionName": "fill",
-                            "line": 140,
+                            "line": 147,
                             "message": ""
                         },
                         {
@@ -226,7 +234,7 @@
                             "column": 32,
                             "durationMicroseconds": 0,
                             "functionName": "width",
-                            "line": 145,
+                            "line": 152,
                             "message": ""
                         },
                         {
@@ -234,31 +242,7 @@
                             "column": 49,
                             "durationMicroseconds": 0,
                             "functionName": "verticalCenter",
-                            "line": 146,
-                            "message": ""
-                        },
-                        {
-                            "codegenResult": 2,
-                            "column": 35,
-                            "durationMicroseconds": 0,
-                            "functionName": "text",
-                            "line": 148,
-                            "message": "Cannot access value for name modelData"
-                        },
-                        {
-                            "codegenResult": 0,
-                            "column": 36,
-                            "durationMicroseconds": 0,
-                            "functionName": "elide",
-                            "line": 151,
-                            "message": ""
-                        },
-                        {
-                            "codegenResult": 0,
-                            "column": 36,
-                            "durationMicroseconds": 0,
-                            "functionName": "width",
-                            "line": 152,
+                            "line": 153,
                             "message": ""
                         },
                         {
@@ -271,10 +255,34 @@
                         },
                         {
                             "codegenResult": 0,
+                            "column": 36,
+                            "durationMicroseconds": 0,
+                            "functionName": "elide",
+                            "line": 158,
+                            "message": ""
+                        },
+                        {
+                            "codegenResult": 0,
+                            "column": 36,
+                            "durationMicroseconds": 0,
+                            "functionName": "width",
+                            "line": 159,
+                            "message": ""
+                        },
+                        {
+                            "codegenResult": 2,
+                            "column": 35,
+                            "durationMicroseconds": 0,
+                            "functionName": "text",
+                            "line": 162,
+                            "message": "Cannot access value for name modelData"
+                        },
+                        {
+                            "codegenResult": 0,
                             "column": 46,
                             "durationMicroseconds": 0,
                             "functionName": "horizontalAlignment",
-                            "line": 164,
+                            "line": 171,
                             "message": ""
                         },
                         {
@@ -282,7 +290,7 @@
                             "column": 31,
                             "durationMicroseconds": 0,
                             "functionName": "text",
-                            "line": 165,
+                            "line": 172,
                             "message": "Cannot access value for name modelData"
                         },
                         {
@@ -290,7 +298,7 @@
                             "column": 32,
                             "durationMicroseconds": 0,
                             "functionName": "color",
-                            "line": 166,
+                            "line": 173,
                             "message": "Cannot access value for name modelData"
                         },
                         {
@@ -298,7 +306,7 @@
                             "column": 49,
                             "durationMicroseconds": 0,
                             "functionName": "verticalCenter",
-                            "line": 163,
+                            "line": 170,
                             "message": ""
                         },
                         {
@@ -306,7 +314,7 @@
                             "column": 34,
                             "durationMicroseconds": 0,
                             "functionName": "cursorShape",
-                            "line": 173,
+                            "line": 180,
                             "message": ""
                         },
                         {
@@ -314,7 +322,7 @@
                             "column": 32,
                             "durationMicroseconds": 0,
                             "functionName": "onClicked",
-                            "line": 174,
+                            "line": 181,
                             "message": "Cannot access value for name vpnController"
                         },
                         {
@@ -322,7 +330,7 @@
                             "column": 35,
                             "durationMicroseconds": 0,
                             "functionName": "fill",
-                            "line": 172,
+                            "line": 179,
                             "message": ""
                         }
                     ],

@@ -9,7 +9,6 @@ Window {
     title: "Kingo Linux VPN"
     color: "#1e1e2e"
 
-    // تایمر برای دریافت ترافیک هر 1 ثانیه
     Timer {
         interval: 1000
         running: vpnController.connected
@@ -23,14 +22,12 @@ Window {
         return (bytes / (1024 * 1024)).toFixed(2) + " MB/s"
     }
 
-    // جلوگیری از بسته شدن برنامه با X و مینیمایز کردن به System Tray
     onClosing: {
         close.accepted = false
         hide()
         trayIcon.showMessage("Kingo VPN", "Application minimized to tray.")
     }
 
-    // اتصال به سیگنال‌های System Tray
     Connections {
         target: trayIcon
         function onActivateRequested() {
@@ -39,7 +36,6 @@ Window {
             mainWindow.requestActivate()
         }
         function onConnectRequested() {
-            // در حال حاضر فقط پنجره را باز می‌کند تا سرور انتخاب شود
             mainWindow.show()
             mainWindow.raise()
         }
@@ -85,10 +81,21 @@ Window {
             }
         }
 
-        Button {
-            text: vpnController.connected ? "Disconnect" : "Select a server to connect"
-            enabled: vpnController.connected
-            onClicked: vpnController.disconnectVpn()
+        Row {
+            width: parent.width
+            spacing: 10
+
+            Button {
+                text: "Auto Connect"
+                highlighted: true
+                onClicked: vpnController.autoConnect()
+            }
+
+            Button {
+                text: "Disconnect"
+                enabled: vpnController.connected
+                onClicked: vpnController.disconnectVpn()
+            }
         }
 
         TextField {
@@ -104,7 +111,7 @@ Window {
             width: parent.width
             spacing: 10
             Button {
-                text: "Update Subscription"
+                text: "Update Sub"
                 onClicked: {
                     if (subUrlField.text.length > 0) {
                         vpnController.addSubscription(subUrlField.text)
@@ -112,13 +119,13 @@ Window {
                 }
             }
             Button {
-                text: "Test Latency"
+                text: "Test Ping"
                 onClicked: vpnController.testLatency()
             }
         }
 
         Text {
-            text: "Available Servers (Click to connect):"
+            text: "Available Servers:"
             color: "#cdd6f4"
             font.pointSize: 14
             topPadding: 10

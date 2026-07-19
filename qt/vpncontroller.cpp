@@ -14,6 +14,12 @@ void VpnController::connectToServer(const QString &uri) {
     m_client->sendRequest(req);
 }
 
+void VpnController::autoConnect() {
+    QJsonObject req;
+    req["action"] = "auto_connect";
+    m_client->sendRequest(req);
+}
+
 void VpnController::disconnectVpn() {
     QJsonObject req;
     req["action"] = "disconnect";

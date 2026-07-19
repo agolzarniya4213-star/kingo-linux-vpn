@@ -21,6 +21,7 @@ public:
     qint64 downloadSpeed() const { return m_downloadSpeed; }
 
     Q_INVOKABLE void connectToServer(const QString &uri);
+    Q_INVOKABLE void autoConnect();
     Q_INVOKABLE void disconnectVpn();
     Q_INVOKABLE void refreshStatus();
     Q_INVOKABLE void fetchServers();

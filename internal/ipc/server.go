@@ -5,6 +5,7 @@ import (
     "encoding/json"
     "net"
     "os"
+    "sort"
 
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/config"
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/core"
@@ -95,6 +96,51 @@ func (s *Server) handleConnection(conn net.Conn) {
             if err != nil {
                 resp.Message = err.Error()
             }
+
+        case "auto_connect":
+            servers, err := s.db.GetServers()
+            if err != nil || len(servers) == 0 {
+                resp = Response{Success: false, Message: "No servers available"}
+                break
+            }
+            
+            // تست همزمان تأخیر سرورها
+            testedServers := network.TestAllLatency(context.Background(), servers)
+            _ = s.db.SaveServers(testedServers)
+            
+            // مرتب‌سازی بر اساس تأخیر (Latency)
+            sort.Slice(testedServers, func(i, j int) bool {
+                return testedServers[i].Latency < testedServers[j].Latency
+            })
+            
+            // پیدا کردن اولین سرور قابل دسترس (Latency < 9999)
+            var bestServer model.Server
+            found := false
+            for _, srv := range testedServers {
+                if srv.Latency < 9999 {
+                    bestServer = srv
+                    found = true
+                    break
+                }
+            }
+            
+            if !found {
+                resp = Response{Success: false, Message: "All servers are unreachable", Servers: testedServers}
+                break
+            }
+            
+            // تولید کانفیگ و اتصال به بهترین سرور
+            configPath, err := config.GenerateSingBoxConfig(bestServer.URI)
+            if err != nil {
+                resp = Response{Success: false, Message: "Config gen failed: " + err.Error(), Servers: testedServers}
+                break
+            }
+            err = s.manager.Start(context.Background(), configPath)
+            resp = Response{Success: err == nil, State: string(s.manager.GetState()), Servers: testedServers}
+            if err != nil {
+                resp.Message = err.Error()
+            }
+
         case "disconnect":
             s.manager.Stop()
             resp = Response{Success: true, State: string(s.manager.GetState())}
