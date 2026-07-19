@@ -81,6 +81,24 @@ Window {
         }
     }
 
+    // Custom Reusable Button Component with Animations
+    Component {
+        id: animatedButton
+        Button {
+            id: control
+            scale: pressed ? 0.95 : 1.0
+            Behavior on scale { NumberAnimation { duration: 100; easing.type: Easing.OutCubic } }
+            contentItem: Text {
+                text: control.text
+                color: control.textColor
+                font.pixelSize: 11
+                font.bold: true
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
+        }
+    }
+
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 20
@@ -98,7 +116,7 @@ Window {
             }
             Item { Layout.fillWidth: true }
             Text {
-                text: "v1.6"
+                text: "v1.7"
                 color: subTextColor
                 font.pixelSize: 12
             }
@@ -127,6 +145,7 @@ Window {
                 scale: connectMouseArea.pressed ? 0.95 : 1.0
                 Behavior on scale { NumberAnimation { duration: 100; easing.type: Easing.OutCubic } }
 
+                // Pulse Effect
                 Rectangle {
                     anchors.fill: parent
                     radius: parent.radius
@@ -159,10 +178,11 @@ Window {
                     id: connectMouseArea
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
+                    enabled: connStatus != "connecting"
                     onClicked: {
                         if (connStatus == "connected") {
                             vpnController.disconnectVpn()
-                        } else if (connStatus != "connecting") {
+                        } else {
                             prevDownload = 0
                             prevUpload = 0
                             prevTime = Date.now()
@@ -232,25 +252,31 @@ Window {
                 text: "https://raw.githubusercontent.com/MhdiTaheri/VpnHub/main/sub"
                 background: Rectangle { color: cardColor; radius: 6; border.color: subUrlField.activeFocus ? accentColor : "#334155"; border.width: 1 }
             }
-            Button {
-                text: "Update"
-                implicitWidth: 70
-                implicitHeight: 40
-                background: Rectangle { color: cardColor; radius: 6; border.color: accentColor; border.width: 1 }
-                contentItem: Text { text: parent.text; color: accentColor; font.pixelSize: 11; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                onClicked: { if (subUrlField.text.length > 0) vpnController.addSubscription(subUrlField.text) }
+            
+            Loader {
+                sourceComponent: animatedButton
+                Layout.alignment: Qt.AlignVCenter
+                property string text: "Update"
+                property color textColor: accentColor
+                property bool enabled: true
+                onLoaded: { item.text = "Update"; item.background = Qt.createQmlObject('import QtQuick; Rectangle { color: "#1E293B"; radius: 6; border.color: "#3B82F6"; border.width: 1 }', item); }
+                Binding { target: item; property: "text"; value: "Update" }
+                Binding { target: item; property: "onClicked"; value: function() { if (subUrlField.text.length > 0) vpnController.addSubscription(subUrlField.text) } }
             }
-            Button {
-                text: "Clear"
-                implicitWidth: 50
-                implicitHeight: 40
-                background: Rectangle { color: cardColor; radius: 6; border.color: errorColor; border.width: 1 }
-                contentItem: Text { text: parent.text; color: errorColor; font.pixelSize: 11; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                onClicked: { vpnController.clearServers() }
+
+            Loader {
+                sourceComponent: animatedButton
+                Layout.alignment: Qt.AlignVCenter
+                property string text: "Clear"
+                property color textColor: errorColor
+                property bool enabled: true
+                onLoaded: { item.text = "Clear"; item.background = Qt.createQmlObject('import QtQuick; Rectangle { color: "#1E293B"; radius: 6; border.color: "#EF4444"; border.width: 1 }', item); }
+                Binding { target: item; property: "text"; value: "Clear" }
+                Binding { target: item; property: "onClicked"; value: function() { vpnController.clearServers() } }
             }
         }
 
-        // Server List (Native Scrolling, no nested ScrollView)
+        // Server List
         ListView {
             id: serverListView
             Layout.fillWidth: true
@@ -258,12 +284,15 @@ Window {
             clip: true
             model: serverList
             spacing: 8
+            ScrollBar.vertical: ScrollBar { active: true; policy: ScrollBar.AsNeeded }
 
             header: Rectangle {
                 width: serverListView.width
                 height: 55
                 color: accentColor
                 radius: 8
+                scale: headerMouseArea.pressed ? 0.98 : 1.0
+                Behavior on scale { NumberAnimation { duration: 100 } }
                 RowLayout {
                     anchors.fill: parent
                     anchors.margins: 12
@@ -277,6 +306,7 @@ Window {
                     }
                 }
                 MouseArea {
+                    id: headerMouseArea
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
@@ -293,6 +323,8 @@ Window {
                 radius: 8
                 border.color: "#334155"
                 border.width: 1
+                scale: delegateMouseArea.pressed ? 0.98 : 1.0
+                Behavior on scale { NumberAnimation { duration: 100 } }
                 RowLayout {
                     anchors.fill: parent
                     anchors.margins: 12
@@ -307,6 +339,7 @@ Window {
                     Text { text: modelData.latency == 9999 ? "N/A" : (modelData.latency == 0 ? "-" : modelData.latency + "ms"); color: getPingColor(modelData.latency); font.bold: true; font.pixelSize: 11 }
                 }
                 MouseArea {
+                    id: delegateMouseArea
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
@@ -323,9 +356,12 @@ Window {
             spacing: 8
             Text { text: "LOGS"; color: subTextColor; font.pixelSize: 10; font.bold: true; font.letterSpacing: 1 }
             Item { Layout.fillWidth: true }
+            
             Button {
                 text: "Copy Logs"
                 implicitHeight: 25
+                scale: pressed ? 0.95 : 1.0
+                Behavior on scale { NumberAnimation { duration: 100 } }
                 background: Rectangle { color: cardColor; radius: 4; border.color: "#334155"; border.width: 1 }
                 contentItem: Text { text: parent.text; color: accentColor; font.pixelSize: 10; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                 onClicked: { vpnController.copyLogs() }
@@ -334,23 +370,28 @@ Window {
 
         Rectangle {
             Layout.fillWidth: true
-            height: 80
+            height: 100
             color: "#0B1120"
             radius: 8
             border.color: "#334155"
             border.width: 1
+            clip: true
 
-            // FIX: TextEdit allows text selection and copying
-            TextEdit {
+            ScrollView {
                 anchors.fill: parent
                 anchors.margins: 8
-                text: vpnController.logs
-                color: subTextColor
-                font.family: "Monospace"
-                font.pixelSize: 10
-                wrapMode: TextEdit.WrapAnywhere
-                readOnly: true
-                selectByMouse: true
+                ScrollBar.vertical.policy: ScrollBar.AsNeeded
+                
+                TextArea {
+                    text: vpnController.logs
+                    color: subTextColor
+                    font.family: "Monospace"
+                    font.pixelSize: 10
+                    wrapMode: TextArea.WrapAnywhere
+                    readOnly: true
+                    selectByMouse: true
+                    background: Rectangle { color: "transparent" }
+                }
             }
         }
     }

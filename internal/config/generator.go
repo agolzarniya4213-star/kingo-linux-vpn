@@ -194,7 +194,7 @@ func buildConfig(outbound map[string]interface{}, cfg *AppConfig) (string, strin
             {
                 "type": "mixed", "tag": "mixed-in",
                 "listen": "127.0.0.1", "listen_port": cfg.Network.ProxyPort,
-                "authentication": []map[string]interface{}{{"username": proxyUser, "password": proxyPass}},
+                "users": []map[string]interface{}{{"username": proxyUser, "password": proxyPass}},
             },
         },
         Outbounds: []map[string]interface{}{
