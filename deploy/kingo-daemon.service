@@ -1,0 +1,21 @@
+[Unit]
+Description=Kingo Linux VPN Daemon
+After=network.target
+
+[Service]
+Type=simple
+# مسیر نصب دیمون
+ExecStart=/usr/local/bin/kingo-linux-vpn-daemon
+Restart=on-failure
+RestartSec=5
+
+# امنیت: محدود کردن دسترسی‌های سرویس
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+# برای ایجاد تونل TUN و اتصال به پورت‌های رزرو شده نیاز به این دسترسی‌ها داریم
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target

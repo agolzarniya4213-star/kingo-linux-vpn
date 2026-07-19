@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Kingo Linux VPN
+Comment=Modern VPN Client for Linux
+Exec=/usr/local/bin/kingo-linux-vpn-ui
+Icon=network-vpn
+Terminal=false
+Type=Application
+Categories=Network;
