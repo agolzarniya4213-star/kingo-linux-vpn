@@ -6,10 +6,10 @@ import QtQuick.Layouts
 Window {
     id: mainWindow
     width: 400
-    height: 700
+    height: 750
     visible: true
     title: "Kingo VPN"
-    color: "#1e1e2e" // Catppuccin Dark background like Hiddify
+    color: "#101016" // Hiddify Dark Background
 
     // Fix Qt6 Syntax: Explicitly declare parameters
     onClosing: (close) => {
@@ -17,6 +17,10 @@ Window {
         hide()
         trayIcon.showMessage("Kingo VPN", "Application minimized to tray.")
     }
+
+    property real prevDownload: 0
+    property real prevUpload: 0
+    property real prevTime: 0
 
     Timer {
         interval: 1000
@@ -32,11 +36,6 @@ Window {
         return (bytes / (1024 * 1024)).toFixed(2) + " MB/s"
     }
 
-    // Real-time speed calculation
-    property real prevDownload: 0
-    property real prevUpload: 0
-    property real prevTime: 0
-
     Connections {
         target: trayIcon
         function onActivateRequested() {
@@ -44,21 +43,13 @@ Window {
             mainWindow.raise()
             mainWindow.requestActivate()
         }
-        function onConnectRequested() {
-            mainWindow.show()
-            mainWindow.raise()
-        }
-        function onDisconnectRequested() {
-            vpnController.disconnectVpn()
-        }
-        function onQuitRequested() {
-            Qt.quit()
-        }
+        function onConnectRequested() { mainWindow.show(); mainWindow.raise() }
+        function onDisconnectRequested() { vpnController.disconnectVpn() }
+        function onQuitRequested() { Qt.quit() }
     }
 
     Connections {
         target: vpnController
-        // Fix Qt6 Syntax: Explicitly declare parameters
         function onErrorOccurred(error) {
             errorText.text = error
             errorBox.visible = true
@@ -85,18 +76,19 @@ Window {
         // Header
         Label {
             text: "Kingo VPN"
-            color: "#cdd6f4"
+            color: "#FFFFFF"
             font.pixelSize: 28
             font.bold: true
             Layout.alignment: Qt.AlignHCenter
+            Layout.topMargin: 20
         }
 
-        // Status Card
+        // Status Card (Hiddify Style)
         Rectangle {
             Layout.fillWidth: true
-            height: 160
-            color: "#313244"
-            radius: 16
+            height: 180
+            color: "#1E1E2A"
+            radius: 24
 
             ColumnLayout {
                 anchors.fill: parent
@@ -105,7 +97,7 @@ Window {
 
                 Label {
                     text: vpnController.status.toUpperCase()
-                    color: vpnController.status == "connected" ? "#a6e3a1" : (vpnController.status == "connecting" ? "#f9e2af" : "#f38ba8")
+                    color: vpnController.status == "connected" ? "#3DDC84" : (vpnController.status == "connecting" ? "#FFCC00" : "#FF5252")
                     font.pixelSize: 20
                     font.bold: true
                     Layout.alignment: Qt.AlignHCenter
@@ -113,21 +105,21 @@ Window {
 
                 RowLayout {
                     Layout.alignment: Qt.AlignHCenter
-                    spacing: 24
+                    spacing: 40
                     visible: vpnController.status == "connected"
 
                     ColumnLayout {
                         spacing: 2
                         Label {
                             text: "Download"
-                            color: "#a6adc8"
+                            color: "#B0B0B0"
                             font.pixelSize: 12
                             Layout.alignment: Qt.AlignHCenter
                         }
                         Label {
                             id: downloadSpeedText
                             text: "0 B/s"
-                            color: "#89b4fa"
+                            color: "#3DDC84"
                             font.pixelSize: 18
                             font.bold: true
                             Layout.alignment: Qt.AlignHCenter
@@ -138,14 +130,14 @@ Window {
                         spacing: 2
                         Label {
                             text: "Upload"
-                            color: "#a6adc8"
+                            color: "#B0B0B0"
                             font.pixelSize: 12
                             Layout.alignment: Qt.AlignHCenter
                         }
                         Label {
                             id: uploadSpeedText
                             text: "0 B/s"
-                            color: "#f9e2af"
+                            color: "#FFCC00"
                             font.pixelSize: 18
                             font.bold: true
                             Layout.alignment: Qt.AlignHCenter
@@ -158,15 +150,22 @@ Window {
         // Big Connect Button (Hiddify Style)
         Button {
             Layout.fillWidth: true
-            height: 56
-            text: vpnController.status == "connecting" ? "Connecting..." : (vpnController.status == "connected" ? "Disconnect" : "Auto Connect")
+            height: 60
             enabled: vpnController.status != "connecting"
             
-            Material.background: vpnController.status == "connected" ? "#f38ba8" : "#a6e3a1"
-            Material.foreground: "#1e1e2e"
-            font.pixelSize: 18
-            font.bold: true
-            radius: 16
+            background: Rectangle {
+                color: vpnController.status == "connected" ? "#FF5252" : "#3DDC84"
+                radius: 30
+            }
+            
+            contentItem: Text {
+                text: vpnController.status == "connecting" ? "Connecting..." : (vpnController.status == "connected" ? "DISCONNECT" : "CONNECT")
+                color: "#101016"
+                font.pixelSize: 18
+                font.bold: true
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
 
             onClicked: {
                 if (vpnController.status == "connected") {
@@ -185,14 +184,14 @@ Window {
             id: errorBox
             Layout.fillWidth: true
             height: 40
-            color: "#f38ba8"
-            radius: 8
+            color: "#FF5252"
+            radius: 12
             visible: false
             
             Label {
                 id: errorText
                 anchors.centerIn: parent
-                color: "#1e1e2e"
+                color: "#FFFFFF"
                 font.bold: true
             }
             
@@ -207,15 +206,16 @@ Window {
         TextField {
             id: subUrlField
             Layout.fillWidth: true
-            height: 48
+            height: 50
             placeholderText: "Enter Subscription URL..."
-            color: "#cdd6f4"
+            color: "#FFFFFF"
             font.pixelSize: 14
+            text: "https://raw.githubusercontent.com/MhdiTaheri/VpnHub/main/sub"
             
             background: Rectangle {
-                color: "#313244"
-                radius: 12
-                border.color: subUrlField.activeFocus ? "#89b4fa" : "transparent"
+                color: "#1E1E2A"
+                radius: 16
+                border.color: subUrlField.activeFocus ? "#3DDC84" : "transparent"
                 border.width: 2
             }
         }
@@ -224,10 +224,19 @@ Window {
             Layout.fillWidth: true
             height: 44
             text: "Update Subscription"
-            Material.background: "#313244"
-            Material.foreground: "#cdd6f4"
-            font.pixelSize: 14
-            radius: 12
+            
+            background: Rectangle {
+                color: "#2A2A3A"
+                radius: 16
+            }
+            contentItem: Text {
+                text: parent.text
+                color: "#FFFFFF"
+                font.bold: true
+                font.pixelSize: 14
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
             
             onClicked: {
                 if (subUrlField.text.length > 0) {
@@ -239,7 +248,7 @@ Window {
         // Servers List
         Label {
             text: "Available Servers"
-            color: "#a6adc8"
+            color: "#B0B0B0"
             font.pixelSize: 14
             font.bold: true
             Layout.topMargin: 10
@@ -253,56 +262,51 @@ Window {
 
             delegate: Rectangle {
                 width: ListView.view.width
-                height: 60
-                color: "transparent"
-                
-                Rectangle {
+                height: 65
+                color: "#1E1E2A"
+                radius: 16
+                Layout.bottomMargin: 10
+
+                RowLayout {
                     anchors.fill: parent
-                    anchors.margins: 2
-                    color: "#313244"
-                    radius: 12
+                    anchors.margins: 16
+                    spacing: 12
 
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.margins: 12
-                        spacing: 12
-
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            spacing: 2
-                            
-                            Label {
-                                text: modelData.name
-                                color: "#cdd6f4"
-                                font.bold: true
-                                font.pixelSize: 14
-                                elide: Text.ElideRight
-                                Layout.fillWidth: true
-                            }
-                            Label {
-                                text: modelData.protocol + " - " + modelData.address
-                                color: "#a6adc8"
-                                font.pixelSize: 11
-                            }
-                        }
-
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 2
+                        
                         Label {
-                            text: modelData.latency == 9999 ? "N/A" : (modelData.latency == 0 ? "-" : modelData.latency + "ms")
-                            color: modelData.latency < 100 ? "#a6e3a1" : (modelData.latency < 300 ? "#f9e2af" : "#f38ba8")
+                            text: modelData.name
+                            color: "#FFFFFF"
                             font.bold: true
-                            font.pixelSize: 12
+                            font.pixelSize: 14
+                            elide: Text.ElideRight
+                            Layout.fillWidth: true
+                        }
+                        Label {
+                            text: modelData.protocol + " - " + modelData.address
+                            color: "#B0B0B0"
+                            font.pixelSize: 11
                         }
                     }
 
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            prevDownload = 0
-                            prevUpload = 0
-                            prevTime = Date.now()
-                            vpnController.connectToServer(modelData.uri)
-                        }
+                    Label {
+                        text: modelData.latency == 9999 ? "N/A" : (modelData.latency == 0 ? "-" : modelData.latency + "ms")
+                        color: modelData.latency < 100 ? "#3DDC84" : (modelData.latency < 300 ? "#FFCC00" : "#FF5252")
+                        font.bold: true
+                        font.pixelSize: 12
+                    }
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        prevDownload = 0
+                        prevUpload = 0
+                        prevTime = Date.now()
+                        vpnController.connectToServer(modelData.uri)
                     }
                 }
             }

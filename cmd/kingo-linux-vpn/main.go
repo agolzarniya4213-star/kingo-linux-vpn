@@ -56,7 +56,7 @@ func main() {
     defer db.Close()
     os.Chmod(dbPath, 0600)
 
-    // FIX: Seed public test servers if DB is empty (like Hiddify)
+    // FIX: Seed public test servers if DB is empty (mimicking Android default)
     if servers, _ := db.GetServers(); len(servers) == 0 {
         slog.Info("Seeding default public servers...")
         db.SaveServers([]model.Server{
