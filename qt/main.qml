@@ -8,7 +8,7 @@ Window {
     height: 850
     visible: true
     title: "Kingo VPN"
-    color: "#0F172A"
+    color: "#0D1117" // GitHub Dark Background
 
     onClosing: (close) => {
         close.accepted = false
@@ -22,14 +22,16 @@ Window {
     property real prevUpload: 0
     property real prevTime: 0
 
-    readonly property color bgColor: "#0F172A"
-    readonly property color cardColor: "#1E293B"
-    readonly property color accentColor: "#3B82F6"
-    readonly property color textColor: "#F1F5F9"
-    readonly property color subTextColor: "#94A3B8"
-    readonly property color successColor: "#10B981"
-    readonly property color errorColor: "#EF4444"
-    readonly property color warningColor: "#F59E0B"
+    // GitHub Dark Theme Palette
+    readonly property color bgColor: "#0D1117"
+    readonly property color cardColor: "#161B22"
+    readonly property color borderColor: "#30363D"
+    readonly property color accentColor: "#58A6FF" // GitHub Blue
+    readonly property color textColor: "#C9D1D9"
+    readonly property color subTextColor: "#8B949E"
+    readonly property color successColor: "#3FB950" // GitHub Green
+    readonly property color errorColor: "#F85149"   // GitHub Red
+    readonly property color warningColor: "#D29922" // GitHub Yellow
 
     Timer {
         interval: 1000
@@ -81,21 +83,18 @@ Window {
         }
     }
 
-    // Custom Reusable Button Component with Animations
-    Component {
-        id: animatedButton
-        Button {
-            id: control
-            scale: pressed ? 0.95 : 1.0
-            Behavior on scale { NumberAnimation { duration: 100; easing.type: Easing.OutCubic } }
-            contentItem: Text {
-                text: control.text
-                color: control.textColor
-                font.pixelSize: 11
-                font.bold: true
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-            }
+    // Reusable Button Component
+    component ActionButton : Button {
+        id: btn
+        scale: pressed ? 0.95 : 1.0
+        Behavior on scale { NumberAnimation { duration: 100; easing.type: Easing.OutCubic } }
+        contentItem: Text {
+            text: btn.text
+            color: btn.textColor
+            font.pixelSize: 11
+            font.bold: true
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
         }
     }
 
@@ -116,13 +115,13 @@ Window {
             }
             Item { Layout.fillWidth: true }
             Text {
-                text: "v1.7"
+                text: "v1.8"
                 color: subTextColor
                 font.pixelSize: 12
             }
         }
 
-        // Circular Connect Button with Animations
+        // Circular Connect Button with Glows
         Rectangle {
             Layout.alignment: Qt.AlignHCenter
             Layout.topMargin: 10
@@ -145,7 +144,6 @@ Window {
                 scale: connectMouseArea.pressed ? 0.95 : 1.0
                 Behavior on scale { NumberAnimation { duration: 100; easing.type: Easing.OutCubic } }
 
-                // Pulse Effect
                 Rectangle {
                     anchors.fill: parent
                     radius: parent.radius
@@ -214,7 +212,7 @@ Window {
                 height: 45
                 color: cardColor
                 radius: 8
-                border.color: "#334155"
+                border.color: borderColor
                 border.width: 1
                 ColumnLayout {
                     anchors.centerIn: parent
@@ -228,7 +226,7 @@ Window {
                 height: 45
                 color: cardColor
                 radius: 8
-                border.color: "#334155"
+                border.color: borderColor
                 border.width: 1
                 ColumnLayout {
                     anchors.centerIn: parent
@@ -250,29 +248,25 @@ Window {
                 color: textColor
                 font.pixelSize: 12
                 text: "https://raw.githubusercontent.com/MhdiTaheri/VpnHub/main/sub"
-                background: Rectangle { color: cardColor; radius: 6; border.color: subUrlField.activeFocus ? accentColor : "#334155"; border.width: 1 }
+                background: Rectangle { color: cardColor; radius: 6; border.color: subUrlField.activeFocus ? accentColor : borderColor; border.width: 1 }
             }
             
-            Loader {
-                sourceComponent: animatedButton
-                Layout.alignment: Qt.AlignVCenter
-                property string text: "Update"
+            ActionButton {
+                text: "Update"
                 property color textColor: accentColor
-                property bool enabled: true
-                onLoaded: { item.text = "Update"; item.background = Qt.createQmlObject('import QtQuick; Rectangle { color: "#1E293B"; radius: 6; border.color: "#3B82F6"; border.width: 1 }', item); }
-                Binding { target: item; property: "text"; value: "Update" }
-                Binding { target: item; property: "onClicked"; value: function() { if (subUrlField.text.length > 0) vpnController.addSubscription(subUrlField.text) } }
+                implicitWidth: 70
+                implicitHeight: 40
+                background: Rectangle { color: cardColor; radius: 6; border.color: accentColor; border.width: 1 }
+                onClicked: { if (subUrlField.text.length > 0) vpnController.addSubscription(subUrlField.text) }
             }
 
-            Loader {
-                sourceComponent: animatedButton
-                Layout.alignment: Qt.AlignVCenter
-                property string text: "Clear"
+            ActionButton {
+                text: "Clear"
                 property color textColor: errorColor
-                property bool enabled: true
-                onLoaded: { item.text = "Clear"; item.background = Qt.createQmlObject('import QtQuick; Rectangle { color: "#1E293B"; radius: 6; border.color: "#EF4444"; border.width: 1 }', item); }
-                Binding { target: item; property: "text"; value: "Clear" }
-                Binding { target: item; property: "onClicked"; value: function() { vpnController.clearServers() } }
+                implicitWidth: 50
+                implicitHeight: 40
+                background: Rectangle { color: cardColor; radius: 6; border.color: errorColor; border.width: 1 }
+                onClicked: { vpnController.clearServers() }
             }
         }
 
@@ -321,7 +315,7 @@ Window {
                 height: 50
                 color: cardColor
                 radius: 8
-                border.color: "#334155"
+                border.color: borderColor
                 border.width: 1
                 scale: delegateMouseArea.pressed ? 0.98 : 1.0
                 Behavior on scale { NumberAnimation { duration: 100 } }
@@ -357,13 +351,11 @@ Window {
             Text { text: "LOGS"; color: subTextColor; font.pixelSize: 10; font.bold: true; font.letterSpacing: 1 }
             Item { Layout.fillWidth: true }
             
-            Button {
+            ActionButton {
                 text: "Copy Logs"
+                property color textColor: accentColor
                 implicitHeight: 25
-                scale: pressed ? 0.95 : 1.0
-                Behavior on scale { NumberAnimation { duration: 100 } }
-                background: Rectangle { color: cardColor; radius: 4; border.color: "#334155"; border.width: 1 }
-                contentItem: Text { text: parent.text; color: accentColor; font.pixelSize: 10; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                background: Rectangle { color: cardColor; radius: 4; border.color: borderColor; border.width: 1 }
                 onClicked: { vpnController.copyLogs() }
             }
         }
@@ -371,9 +363,9 @@ Window {
         Rectangle {
             Layout.fillWidth: true
             height: 100
-            color: "#0B1120"
+            color: "#010409" // Deep console black
             radius: 8
-            border.color: "#334155"
+            border.color: borderColor
             border.width: 1
             clip: true
 

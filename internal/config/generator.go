@@ -2,8 +2,8 @@ package config
 
 import (
     "crypto/rand"
-	"encoding/base64"
     "crypto/sha256"
+    "encoding/base64"
     "encoding/hex"
     "encoding/json"
     "fmt"
@@ -49,7 +49,6 @@ func generateVlessConfig(uri string, cfg *AppConfig) (string, string, error) {
         "server": host, "server_port": port, "uuid": uuid,
     }
 
-    // FIX: Add flow for XTLS/Reality
     if flow := u.Query().Get("flow"); flow != "" {
         outbound["flow"] = flow
     }
@@ -171,11 +170,10 @@ func buildConfig(outbound map[string]interface{}, cfg *AppConfig) (string, strin
     proxyUser := generateRandomString(16)
     proxyPass := generateRandomString(32)
 
-    dnsServers := []map[string]interface{}{}
-    for i, dns := range cfg.Network.DNSServers {
-        detour := "direct"
-        if i == 0 { detour = "proxy" }
-        dnsServers = append(dnsServers, map[string]interface{}{"address": dns, "detour": detour})
+    // FIX: Use strict DNS tags for sing-box v1.8
+    dnsServers := []map[string]interface{}{
+        {"tag": "dns-remote", "address": "https://1.1.1.1/dns-query", "detour": "proxy"},
+        {"tag": "dns-direct", "address": "8.8.8.8", "detour": "direct"},
     }
 
     config := SingBoxConfig{
@@ -187,20 +185,22 @@ func buildConfig(outbound map[string]interface{}, cfg *AppConfig) (string, strin
             },
         },
         DNS: map[string]interface{}{
-            "servers": dnsServers, "final": "proxy_dns",
-            "rules": []map[string]interface{}{{"outbound": "any", "server": "direct"}},
+            "servers": dnsServers,
+            "rules": []map[string]interface{}{{"outbound": "any", "server": "dns-direct"}},
+            "final": "dns-remote", // FIX: Point to a valid server tag
+            "strategy": "ipv4_only",
         },
         Inbounds: []map[string]interface{}{
             {
                 "type": "mixed", "tag": "mixed-in",
                 "listen": "127.0.0.1", "listen_port": cfg.Network.ProxyPort,
-                "users": []map[string]interface{}{{"username": proxyUser, "password": proxyPass}},
+                "users": []map[string]interface{}{{"username": proxyUser, "password": proxyPass}}, // FIX: 'users' instead of 'authentication'
             },
         },
         Outbounds: []map[string]interface{}{
             outbound, 
             {"type": "direct", "tag": "direct"}, 
-            {"type": "dns", "tag": "proxy_dns"},
+            {"type": "dns", "tag": "dns-out"},
         },
     }
 
