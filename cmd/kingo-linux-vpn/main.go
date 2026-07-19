@@ -17,6 +17,7 @@ import (
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/ipc"
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/model"
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/storage"
+    "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/version"
 )
 
 const defaultSubscriptionURL = "https://raw.githubusercontent.com/MhdiTaheri/VpnHub/main/sub"
@@ -35,6 +36,8 @@ func getKeyPath() string {
 
 func main() {
     slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
+    slog.Info("Starting Kingo Linux VPN", "version", version.Version)
+    
     ctx, cancel := context.WithCancel(context.Background())
     defer cancel()
 
@@ -60,7 +63,6 @@ func main() {
             slog.Info("Default servers fetched successfully.")
         } else {
             slog.Warn("Failed to fetch default servers. Seeding local fallback configs...")
-            // Fallback static configs if network fails on first run
             db.SaveServers([]model.Server{
                 {ID: "fallback1", Name: "Kingo Default - Germany (VLESS)", Protocol: "vless", Address: "speedtest.tele2.net", Port: 443, URI: "vless://uuid@speedtest.tele2.net:443?encryption=none&security=tls&type=ws&host=speedtest.tele2.net&path=%2F#Kingo-DE"},
                 {ID: "fallback2", Name: "Kingo Default - Cloudflare (VLESS)", Protocol: "vless", Address: "1.1.1.1", Port: 443, URI: "vless://uuid@1.1.1.1:443?encryption=none&security=tls&type=ws&host=1.1.1.1&path=%2F#Kingo-CF"},

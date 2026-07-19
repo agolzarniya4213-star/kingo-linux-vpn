@@ -167,10 +167,16 @@ func generateVmessConfig(uri string, cfg *AppConfig) (string, string, error) {
 
 func buildConfig(outbound map[string]interface{}, cfg *AppConfig) (string, string, error) {
     clashSecret := generateRandomString(32)
-    proxyUser := generateRandomString(16)
-    proxyPass := generateRandomString(32)
 
-    // FIX: Use strict DNS tags for sing-box v1.8
+    // FIX: TUN Inbound for System-wide traffic routing
+    inbounds := []map[string]interface{}{
+        {
+            "type": "tun", "tag": "tun-in",
+            "interface_name": "kingo0", "auto_route": true, "auto_detect_interface": true,
+        },
+    }
+
+    // FIX: Explicit DNS tags
     dnsServers := []map[string]interface{}{
         {"tag": "dns-remote", "address": "https://1.1.1.1/dns-query", "detour": "proxy"},
         {"tag": "dns-direct", "address": "8.8.8.8", "detour": "direct"},
@@ -187,16 +193,10 @@ func buildConfig(outbound map[string]interface{}, cfg *AppConfig) (string, strin
         DNS: map[string]interface{}{
             "servers": dnsServers,
             "rules": []map[string]interface{}{{"outbound": "any", "server": "dns-direct"}},
-            "final": "dns-remote", // FIX: Point to a valid server tag
+            "final": "dns-remote", 
             "strategy": "ipv4_only",
         },
-        Inbounds: []map[string]interface{}{
-            {
-                "type": "mixed", "tag": "mixed-in",
-                "listen": "127.0.0.1", "listen_port": cfg.Network.ProxyPort,
-                "users": []map[string]interface{}{{"username": proxyUser, "password": proxyPass}}, // FIX: 'users' instead of 'authentication'
-            },
-        },
+        Inbounds: inbounds,
         Outbounds: []map[string]interface{}{
             outbound, 
             {"type": "direct", "tag": "direct"}, 

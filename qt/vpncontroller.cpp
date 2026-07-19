@@ -56,6 +56,10 @@ void VpnController::addSubscription(const QString &url) {
 
 void VpnController::clearServers() {
     appendLog("Clearing servers...");
+    // FIX: Clear local list immediately for instant UI feedback
+    m_servers.clear();
+    emit serversChanged();
+    
     QJsonObject req; req["request_id"] = generateRequestID(); req["action"] = "clear_servers";
     m_client->sendRequest(req);
 }

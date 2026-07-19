@@ -21,11 +21,10 @@ import (
 var httpClient = &http.Client{
     Timeout: 15 * time.Second,
     CheckRedirect: func(req *http.Request, via []*http.Request) error {
-        return http.ErrUseLastResponse // Prevent SSRF via redirects
+        return http.ErrUseLastResponse
     },
 }
 
-// isPublicIP checks if an IP is public (not loopback, private, or link-local)
 func isPublicIP(ip net.IP) bool {
     if ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() {
         return false
@@ -41,10 +40,9 @@ func isPublicIP(ip net.IP) bool {
 func FetchSubscription(subURL string) ([]model.Server, error) {
     parsedURL, err := url.Parse(subURL)
     if err != nil || (parsedURL.Scheme != "http" && parsedURL.Scheme != "https") {
-        return nil, fmt.Errorf("invalid URL scheme: only http/https allowed")
+        return nil, fmt.Errorf("invalid URL scheme")
     }
 
-    // FIX BUG-005: SSRF Prevention
     ips, err := net.LookupIP(parsedURL.Hostname())
     if err != nil {
         return nil, fmt.Errorf("failed to resolve hostname: %w", err)
@@ -62,6 +60,9 @@ func FetchSubscription(subURL string) ([]model.Server, error) {
     if err != nil {
         return nil, fmt.Errorf("failed to create request: %w", err)
     }
+    
+    // FIX: Add User-Agent to bypass GitHub raw restrictions
+    req.Header.Set("User-Agent", "KingoVPN/2.0")
 
     resp, err := httpClient.Do(req)
     if err != nil {
@@ -113,33 +114,19 @@ func parseURI(uri string) (model.Server, error) {
 
 func parseVless(uri string) (model.Server, error) {
     u, err := url.Parse(uri)
-    if err != nil {
-        return model.Server{}, err
-    }
+    if err != nil { return model.Server{}, err }
     host := u.Hostname()
     portStr := u.Port()
-    if host == "" || portStr == "" {
-        return model.Server{}, fmt.Errorf("invalid vless uri")
-    }
+    if host == "" || portStr == "" { return model.Server{}, fmt.Errorf("invalid vless uri") }
     
-    // FIX BUG-049: Use strconv.Atoi with error checking
     port, err := strconv.Atoi(portStr)
-    if err != nil {
-        return model.Server{}, fmt.Errorf("invalid port format: %w", err)
-    }
+    if err != nil { return model.Server{}, fmt.Errorf("invalid port format") }
     
     name := u.Fragment
-    if name == "" {
-        name = host
-    }
+    if name == "" { name = host }
     
     return model.Server{
-        ID:       config.GenerateID(uri),
-        Name:     name,
-        Address:  host,
-        Port:     port,
-        Protocol: "vless",
-        URI:      uri,
+        ID: config.GenerateID(uri), Name: name, Address: host, Port: port, Protocol: "vless", URI: uri,
     }, nil
 }
 
@@ -148,60 +135,38 @@ func parseVmess(uri string) (model.Server, error) {
     decoded, err := base64.StdEncoding.DecodeString(rawJSON)
     if err != nil {
         decoded, err = base64.URLEncoding.DecodeString(rawJSON)
-        if err != nil {
-            return model.Server{}, fmt.Errorf("b64 decode failed: %w", err)
-        }
+        if err != nil { return model.Server{}, fmt.Errorf("b64 decode failed") }
     }
     var data struct {
         PS   string `json:"ps"`
         Add  string `json:"add"`
         Port string `json:"port"`
     }
-    if err := json.Unmarshal(decoded, &data); err != nil {
-        return model.Server{}, fmt.Errorf("json unmarshal failed: %w", err)
-    }
+    if err := json.Unmarshal(decoded, &data); err != nil { return model.Server{}, fmt.Errorf("json unmarshal failed") }
+    
     port, err := strconv.Atoi(data.Port)
-    if err != nil {
-        return model.Server{}, fmt.Errorf("invalid port format: %w", err)
-    }
-    if data.Add == "" || port == 0 {
-        return model.Server{}, fmt.Errorf("invalid vmess uri")
-    }
+    if err != nil { return model.Server{}, fmt.Errorf("invalid port format") }
+    if data.Add == "" || port == 0 { return model.Server{}, fmt.Errorf("invalid vmess uri") }
+    
     return model.Server{
-        ID:       config.GenerateID(uri),
-        Name:     data.PS,
-        Address:  data.Add,
-        Port:     port,
-        Protocol: "vmess",
-        URI:      uri,
+        ID: config.GenerateID(uri), Name: data.PS, Address: data.Add, Port: port, Protocol: "vmess", URI: uri,
     }, nil
 }
 
-// FIX BUG-042: Added Trojan parser
 func parseTrojan(uri string) (model.Server, error) {
     u, err := url.Parse(uri)
-    if err != nil {
-        return model.Server{}, err
-    }
+    if err != nil { return model.Server{}, err }
     host := u.Hostname()
     portStr := u.Port()
-    if host == "" || portStr == "" {
-        return model.Server{}, fmt.Errorf("invalid trojan uri")
-    }
+    if host == "" || portStr == "" { return model.Server{}, fmt.Errorf("invalid trojan uri") }
+    
     port, err := strconv.Atoi(portStr)
-    if err != nil {
-        return model.Server{}, fmt.Errorf("invalid port format: %w", err)
-    }
+    if err != nil { return model.Server{}, fmt.Errorf("invalid port format") }
+    
     name := u.Fragment
-    if name == "" {
-        name = host
-    }
+    if name == "" { name = host }
+    
     return model.Server{
-        ID:       config.GenerateID(uri),
-        Name:     name,
-        Address:  host,
-        Port:     port,
-        Protocol: "trojan",
-        URI:      uri,
+        ID: config.GenerateID(uri), Name: name, Address: host, Port: port, Protocol: "trojan", URI: uri,
     }, nil
 }

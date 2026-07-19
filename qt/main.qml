@@ -8,7 +8,7 @@ Window {
     height: 850
     visible: true
     title: "Kingo VPN"
-    color: "#0D1117" // GitHub Dark Background
+    color: "#0D1117"
 
     onClosing: (close) => {
         close.accepted = false
@@ -18,20 +18,20 @@ Window {
 
     property string connStatus: vpnController ? vpnController.status : "loading"
     property var serverList: vpnController ? vpnController.servers : []
+    property string selectedServerID: ""
     property real prevDownload: 0
     property real prevUpload: 0
     property real prevTime: 0
 
-    // GitHub Dark Theme Palette
     readonly property color bgColor: "#0D1117"
     readonly property color cardColor: "#161B22"
     readonly property color borderColor: "#30363D"
-    readonly property color accentColor: "#58A6FF" // GitHub Blue
+    readonly property color accentColor: "#58A6FF"
     readonly property color textColor: "#C9D1D9"
     readonly property color subTextColor: "#8B949E"
-    readonly property color successColor: "#3FB950" // GitHub Green
-    readonly property color errorColor: "#F85149"   // GitHub Red
-    readonly property color warningColor: "#D29922" // GitHub Yellow
+    readonly property color successColor: "#3FB950"
+    readonly property color errorColor: "#F85149"
+    readonly property color warningColor: "#D29922"
 
     Timer {
         interval: 1000
@@ -59,6 +59,12 @@ Window {
         if (connStatus == "connecting") return warningColor
         return accentColor
     }
+    
+    function getButtonText() {
+        if (connStatus == "connecting") return "CONNECTING..."
+        if (connStatus == "connected") return "DISCONNECT"
+        return "CONNECT"
+    }
 
     Connections {
         target: trayIcon
@@ -83,7 +89,62 @@ Window {
         }
     }
 
-    // Reusable Button Component
+    // Custom Confirmation Dialog Component
+    Popup {
+        id: confirmDialog
+        property string dialogTitle: ""
+        property string dialogText: ""
+        property var onAcceptedAction: null
+        
+        anchors.centerIn: parent
+        width: 300
+        height: 150
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
+        background: Rectangle { color: cardColor; radius: 12; border.color: borderColor; border.width: 1 }
+        
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: 16
+            spacing: 10
+            
+            Text {
+                text: confirmDialog.dialogTitle
+                color: textColor
+                font.bold: true
+                font.pixelSize: 14
+            }
+            Text {
+                text: confirmDialog.dialogText
+                color: subTextColor
+                font.pixelSize: 12
+                wrapMode: Text.WordWrap
+                Layout.fillWidth: true
+            }
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 10
+                Item { Layout.fillWidth: true }
+                Button {
+                    text: "Cancel"
+                    background: Rectangle { color: "transparent"; radius: 6 }
+                    contentItem: Text { text: parent.text; color: subTextColor; font.pixelSize: 11; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                    onClicked: confirmDialog.close()
+                }
+                Button {
+                    text: "OK"
+                    background: Rectangle { color: accentColor; radius: 6 }
+                    contentItem: Text { text: parent.text; color: "#FFFFFF"; font.pixelSize: 11; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                    onClicked: {
+                        if (confirmDialog.onAcceptedAction) confirmDialog.onAcceptedAction()
+                        confirmDialog.close()
+                    }
+                }
+            }
+        }
+    }
+
     component ActionButton : Button {
         id: btn
         scale: pressed ? 0.95 : 1.0
@@ -115,7 +176,7 @@ Window {
             }
             Item { Layout.fillWidth: true }
             Text {
-                text: "v1.8"
+                text: "v2.0"
                 color: subTextColor
                 font.pixelSize: 12
             }
@@ -166,7 +227,7 @@ Window {
 
                 Text {
                     anchors.centerIn: parent
-                    text: connStatus == "connecting" ? "..." : (connStatus == "connected" ? "DISCONNECT" : "CONNECT")
+                    text: getButtonText()
                     color: "#FFFFFF"
                     font.pixelSize: 16
                     font.bold: true
@@ -176,11 +237,13 @@ Window {
                     id: connectMouseArea
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
-                    enabled: connStatus != "connecting"
                     onClicked: {
                         if (connStatus == "connected") {
-                            vpnController.disconnectVpn()
-                        } else {
+                            confirmDialog.dialogTitle = "Disconnect VPN"
+                            confirmDialog.dialogText = "Are you sure you want to disconnect?"
+                            confirmDialog.onAcceptedAction = function() { vpnController.disconnectVpn() }
+                            confirmDialog.open()
+                        } else if (connStatus != "connecting") {
                             prevDownload = 0
                             prevUpload = 0
                             prevTime = Date.now()
@@ -252,7 +315,7 @@ Window {
             }
             
             ActionButton {
-                text: "Update"
+                text: "➕ Add"
                 property color textColor: accentColor
                 implicitWidth: 70
                 implicitHeight: 40
@@ -266,7 +329,12 @@ Window {
                 implicitWidth: 50
                 implicitHeight: 40
                 background: Rectangle { color: cardColor; radius: 6; border.color: errorColor; border.width: 1 }
-                onClicked: { vpnController.clearServers() }
+                onClicked: { 
+                    confirmDialog.dialogTitle = "Clear Servers"
+                    confirmDialog.dialogText = "Are you sure you want to clear all servers?"
+                    confirmDialog.onAcceptedAction = function() { vpnController.clearServers() }
+                    confirmDialog.open()
+                }
             }
         }
 
@@ -291,6 +359,7 @@ Window {
                     anchors.fill: parent
                     anchors.margins: 12
                     spacing: 10
+                    Text { text: "🚀"; font.pixelSize: 16 }
                     Rectangle { width: 8; height: 8; radius: 4; color: "#FFFFFF" }
                     ColumnLayout {
                         Layout.fillWidth: true
@@ -305,6 +374,7 @@ Window {
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
                         prevDownload = 0; prevUpload = 0; prevTime = Date.now()
+                        selectedServerID = "best"
                         vpnController.autoConnect()
                     }
                 }
@@ -313,10 +383,10 @@ Window {
             delegate: Rectangle {
                 width: serverListView.width
                 height: 50
-                color: cardColor
+                color: selectedServerID === modelData.id ? "#1F2937" : cardColor
                 radius: 8
-                border.color: borderColor
-                border.width: 1
+                border.color: selectedServerID === modelData.id ? accentColor : borderColor
+                border.width: selectedServerID === modelData.id ? 2 : 1
                 scale: delegateMouseArea.pressed ? 0.98 : 1.0
                 Behavior on scale { NumberAnimation { duration: 100 } }
                 RowLayout {
@@ -331,12 +401,14 @@ Window {
                         Text { text: modelData.protocol.toUpperCase() + " • " + modelData.address; color: subTextColor; font.pixelSize: 9 }
                     }
                     Text { text: modelData.latency == 9999 ? "N/A" : (modelData.latency == 0 ? "-" : modelData.latency + "ms"); color: getPingColor(modelData.latency); font.bold: true; font.pixelSize: 11 }
+                    Text { text: "✔"; color: accentColor; font.bold: true; visible: selectedServerID === modelData.id }
                 }
                 MouseArea {
                     id: delegateMouseArea
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
+                        selectedServerID = modelData.id
                         prevDownload = 0; prevUpload = 0; prevTime = Date.now()
                         vpnController.connectToServer(modelData.uri)
                     }
@@ -350,7 +422,6 @@ Window {
             spacing: 8
             Text { text: "LOGS"; color: subTextColor; font.pixelSize: 10; font.bold: true; font.letterSpacing: 1 }
             Item { Layout.fillWidth: true }
-            
             ActionButton {
                 text: "Copy Logs"
                 property color textColor: accentColor
@@ -363,7 +434,7 @@ Window {
         Rectangle {
             Layout.fillWidth: true
             height: 100
-            color: "#010409" // Deep console black
+            color: "#010409"
             radius: 8
             border.color: borderColor
             border.width: 1
@@ -373,7 +444,6 @@ Window {
                 anchors.fill: parent
                 anchors.margins: 8
                 ScrollBar.vertical.policy: ScrollBar.AsNeeded
-                
                 TextArea {
                     text: vpnController.logs
                     color: subTextColor

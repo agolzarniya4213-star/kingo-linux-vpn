@@ -4,7 +4,6 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
-# FIX BUG-025 & 026: Type=notify, Watchdog, and Restart=always
 Type=notify
 WatchdogSec=30s
 
@@ -14,8 +13,6 @@ Group=kingo-vpn
 ExecStart=/usr/local/bin/kingo-linux-vpn-daemon
 Restart=always
 RestartSec=5
-StartLimitBurst=3
-StartLimitIntervalSec=60
 
 # Security Hardening
 NoNewPrivileges=true
@@ -30,20 +27,10 @@ PrivateDevices=true
 ProtectKernelTunables=true
 ProtectKernelModules=true
 ProtectControlGroups=true
-ProtectClock=true
-ProtectHostname=true
-ProtectKernelLogs=true
-ProtectProc=invisible
-ProcSubset=pid
-RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
-RestrictNamespaces=true
-RestrictRealtime=true
-RestrictSUIDSGID=true
-LockPersonality=true
-MemoryDenyWriteExecute=true
 SystemCallFilter=@system-service
 SystemCallErrorNumber=EPERM
 
+# FIX: CAP_NET_ADMIN is strictly required for TUN interface creation
 AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 
