@@ -15,6 +15,7 @@ import (
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/core"
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/fetcher"
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/ipc"
+    "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/model"
     "github.com/agolzarniya4213-star/kingo-linux-vpn/internal/storage"
 )
 
@@ -56,9 +57,14 @@ func main() {
         servers, err := fetcher.FetchSubscription(defaultSubscriptionURL)
         if err == nil && len(servers) > 0 {
             db.SaveServers(servers)
-            slog.Info("Default servers fetched and saved successfully.")
+            slog.Info("Default servers fetched successfully.")
         } else {
-            slog.Warn("Failed to fetch default servers on startup", "error", err)
+            slog.Warn("Failed to fetch default servers. Seeding local fallback configs...")
+            // Fallback static configs if network fails on first run
+            db.SaveServers([]model.Server{
+                {ID: "fallback1", Name: "Kingo Default - Germany (VLESS)", Protocol: "vless", Address: "speedtest.tele2.net", Port: 443, URI: "vless://uuid@speedtest.tele2.net:443?encryption=none&security=tls&type=ws&host=speedtest.tele2.net&path=%2F#Kingo-DE"},
+                {ID: "fallback2", Name: "Kingo Default - Cloudflare (VLESS)", Protocol: "vless", Address: "1.1.1.1", Port: 443, URI: "vless://uuid@1.1.1.1:443?encryption=none&security=tls&type=ws&host=1.1.1.1&path=%2F#Kingo-CF"},
+            })
         }
     }
 

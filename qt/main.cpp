@@ -2,20 +2,24 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QQuickStyle>
+#include <QIcon>
 #include "vpncontroller.h"
 #include "trayicon.h"
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
     QQuickStyle::setStyle("Basic");
+    
+    // Set Application Icon
+    QIcon appIcon(":/assets/icon.png");
+    app.setWindowIcon(appIcon);
 
     QQmlApplicationEngine engine;
     
-    // FIX: Create objects on the heap to prevent premature destruction and QML null references
     VpnController *controller = new VpnController();
     engine.rootContext()->setContextProperty("vpnController", controller);
 
-    TrayIcon *tray = new TrayIcon();
+    TrayIcon *tray = new TrayIcon(); // Icon is set internally now
     engine.rootContext()->setContextProperty("trayIcon", tray);
     tray->show();
 

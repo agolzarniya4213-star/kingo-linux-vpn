@@ -2,13 +2,14 @@
 #include <QObject>
 #include <QSystemTrayIcon>
 #include <QMenu>
+#include <QIcon>
 
 class TrayIcon : public QObject {
     Q_OBJECT
     Q_PROPERTY(bool visible READ visible WRITE setVisible NOTIFY visibleChanged)
 public:
     explicit TrayIcon(QObject *parent = nullptr);
-    ~TrayIcon(); // اضافه شدن دستریکتور برای پاکسازی حافظه منو
+    ~TrayIcon();
 
     bool visible() const { return m_tray->isVisible(); }
     void setVisible(bool v) { m_tray->setVisible(v); emit visibleChanged(); }
@@ -18,6 +19,7 @@ public:
     Q_INVOKABLE void showMessage(const QString &title, const QString &msg) {
         m_tray->showMessage(title, msg);
     }
+    void setIcon(const QIcon &icon) { m_tray->setIcon(icon); }
 
 signals:
     void visibleChanged();

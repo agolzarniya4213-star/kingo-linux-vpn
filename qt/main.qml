@@ -87,32 +87,9 @@ Window {
                 font.letterSpacing: 2
             }
             Item { Layout.fillWidth: true }
-            Button {
-                text: "Best Server"
-                background: Rectangle {
-                    color: "#1A1A24"
-                    radius: 6
-                    border.color: "#00FF9D"
-                    border.width: 1
-                }
-                contentItem: Text {
-                    text: parent.text
-                    color: "#00FF9D"
-                    font.pixelSize: 11
-                    font.bold: true
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-                onClicked: {
-                    prevDownload = 0
-                    prevUpload = 0
-                    prevTime = Date.now()
-                    vpnController.autoConnect()
-                }
-            }
         }
 
-        // Circular Connect Button & Status
+        // Circular Connect Button
         ColumnLayout {
             Layout.fillWidth: true
             Layout.topMargin: 20
@@ -137,9 +114,9 @@ Window {
 
                     Text {
                         anchors.centerIn: parent
-                        text: connStatus == "connecting" ? "..." : (connStatus == "connected" ? "ON" : "OFF")
+                        text: connStatus == "connecting" ? "..." : (connStatus == "connected" ? "DISCONNECT" : "CONNECT")
                         color: "#080810"
-                        font.pixelSize: 32
+                        font.pixelSize: 14
                         font.bold: true
                     }
 
@@ -353,14 +330,15 @@ Window {
             ScrollBar.vertical.policy: ScrollBar.AsNeeded
 
             ListView {
+                id: serverListView
                 width: parent.width
                 height: parent.height
                 model: serverList
                 spacing: 8
 
                 delegate: Rectangle {
-                    width: parent.width
-                    height: 55
+                    width: serverListView.width
+                    height: 65
                     color: "#12121A"
                     radius: 8
                     border.color: "#1F1F2A"
@@ -408,6 +386,9 @@ Window {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
+                            prevDownload = 0
+                            prevUpload = 0
+                            prevTime = Date.now()
                             vpnController.connectToServer(modelData.uri)
                         }
                     }

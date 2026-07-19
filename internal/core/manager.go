@@ -51,29 +51,20 @@ func NewSingBoxManager() *SingBoxManager {
 }
 
 func (m *SingBoxManager) setState(newState State) {
-    valid := false
-    switch m.state {
-    case StateDisconnected:
-        if newState == StateConnecting { valid = true }
-    case StateConnecting:
-        if newState == StateConnected || newState == StateError || newState == StateDisconnected { valid = true }
-    case StateConnected:
-        if newState == StateDisconnected || newState == StateError { valid = true }
-    case StateError:
-        if newState == StateConnecting || newState == StateDisconnected { valid = true }
-    }
-    if valid {
-        m.state = newState
-    }
+    m.state = newState
 }
 
-// findSingBox searches for sing-box in PATH, and common local directories
 func findSingBox() (string, error) {
     if path, err := exec.LookPath("sing-box"); err == nil {
         return path, nil
     }
-    // Check relative paths for dev environments
-    candidates := []string{"./sing-box", "./build/sing-box", "/usr/local/bin/sing-box"}
+    
+    candidates := []string{"./sing-box", "./build/sing-box", "../sing-box", "../build/sing-box"}
+    if exe, err := os.Executable(); err == nil {
+        exeDir := filepath.Dir(exe)
+        candidates = append(candidates, filepath.Join(exeDir, "sing-box"), filepath.Join(exeDir, "build", "sing-box"))
+    }
+    
     for _, c := range candidates {
         if abs, err := filepath.Abs(c); err == nil {
             if _, err := os.Stat(abs); err == nil {
@@ -89,7 +80,7 @@ func (m *SingBoxManager) Start(ctx context.Context, configPath string, clashSecr
     defer m.mu.Unlock()
 
     if m.failureCount >= 3 && time.Since(m.lastFailure) < 1*time.Minute {
-        return fmt.Errorf("circuit breaker tripped: too many failures, please wait")
+        return fmt.Errorf("circuit breaker tripped: too many failures")
     }
 
     if m.state == StateConnected || m.state == StateConnecting {
@@ -102,7 +93,6 @@ func (m *SingBoxManager) Start(ctx context.Context, configPath string, clashSecr
         return err
     }
 
-    // Validate config
     checkCmd := exec.Command(singBoxPath, "check", "-c", configPath)
     if err := checkCmd.Run(); err != nil {
         m.setState(StateError)
@@ -138,9 +128,7 @@ func (m *SingBoxManager) Start(ctx context.Context, configPath string, clashSecr
     m.cancel = cancel
 
     go func() {
-        defer func() {
-            if r := recover(); r != nil { fmt.Printf("Recovered: %v\n", r) }
-        }()
+        defer func() { if r := recover(); r != nil { fmt.Printf("Recovered: %v\n", r) } }()
         _ = cmd.Wait()
         m.mu.Lock()
         defer m.mu.Unlock()
