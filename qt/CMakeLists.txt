@@ -14,10 +14,6 @@ qt_add_executable(kingo-linux-vpn-ui
     trayicon.h trayicon.cpp
 )
 
-qt_add_qml_module(kingo-linux-vpn-ui
-    URI KingoVPN
-    VERSION 1.0
-    QML_FILES main.qml
-)
+qt_add_resources(RESOURCES "resources.qrc")
 
 target_link_libraries(kingo-linux-vpn-ui PRIVATE Qt6::Quick Qt6::QuickControls2 Qt6::Gui Qt6::Network Qt6::Widgets)
