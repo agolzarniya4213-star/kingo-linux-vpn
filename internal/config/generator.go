@@ -2,8 +2,8 @@ package config
 
 import (
     "crypto/rand"
+	"encoding/base64"
     "crypto/sha256"
-    "encoding/base64"
     "encoding/hex"
     "encoding/json"
     "fmt"
@@ -29,7 +29,7 @@ func GenerateSingBoxConfig(uri string, cfg *AppConfig) (string, string, error) {
     } else if strings.HasPrefix(uri, "vmess://") {
         return generateVmessConfig(uri, cfg)
     }
-    return "", "", fmt.Errorf("unsupported protocol for config generation")
+    return "", "", fmt.Errorf("unsupported protocol")
 }
 
 func generateVlessConfig(uri string, cfg *AppConfig) (string, string, error) {
@@ -45,10 +45,17 @@ func generateVlessConfig(uri string, cfg *AppConfig) (string, string, error) {
     if err != nil { return "", "", fmt.Errorf("invalid port format") }
 
     outbound := map[string]interface{}{
-        "type": "vless", "server": host, "server_port": port, "uuid": uuid,
+        "type": "vless", "tag": "proxy",
+        "server": host, "server_port": port, "uuid": uuid,
     }
 
-    if u.Query().Get("security") == "tls" {
+    // FIX: Add flow for XTLS/Reality
+    if flow := u.Query().Get("flow"); flow != "" {
+        outbound["flow"] = flow
+    }
+
+    security := u.Query().Get("security")
+    if security == "tls" {
         sni := u.Query().Get("sni")
         if sni == "" { sni = host }
         tlsOpts := map[string]interface{}{"enabled": true, "server_name": sni}
@@ -57,6 +64,22 @@ func generateVlessConfig(uri string, cfg *AppConfig) (string, string, error) {
         }
         if u.Query().Get("allowInsecure") == "1" { tlsOpts["insecure"] = true }
         outbound["tls"] = tlsOpts
+    } else if security == "reality" {
+        pbk := u.Query().Get("pbk")
+        sid := u.Query().Get("sid")
+        if pbk == "" { return "", "", fmt.Errorf("missing pbk for reality") }
+        
+        sni := u.Query().Get("sni")
+        if sni == "" { sni = host }
+        
+        realityOpts := map[string]interface{}{"enabled": true, "public_key": pbk}
+        if sid != "" { realityOpts["short_id"] = sid }
+        
+        outbound["tls"] = map[string]interface{}{
+            "enabled": true, "server_name": sni,
+            "reality": realityOpts,
+            "utls": map[string]interface{}{"enabled": true, "fingerprint": u.Query().Get("fp")},
+        }
     }
 
     if t := u.Query().Get("type"); t == "ws" {
@@ -67,7 +90,6 @@ func generateVlessConfig(uri string, cfg *AppConfig) (string, string, error) {
         outbound["transport"] = map[string]interface{}{"type": "grpc", "service_name": u.Query().Get("serviceName")}
     }
 
-    if u.Query().Get("uot") == "1" { outbound["udp_over_tcp"] = true }
     return buildConfig(outbound, cfg)
 }
 
@@ -84,17 +106,18 @@ func generateTrojanConfig(uri string, cfg *AppConfig) (string, string, error) {
     if err != nil { return "", "", fmt.Errorf("invalid port format") }
 
     outbound := map[string]interface{}{
-        "type": "trojan", "server": host, "server_port": port, "password": password,
+        "type": "trojan", "tag": "proxy",
+        "server": host, "server_port": port, "password": password,
     }
     sni := u.Query().Get("sni")
     if sni == "" { sni = host }
     outbound["tls"] = map[string]interface{}{
         "enabled": true, "server_name": sni, "insecure": u.Query().Get("allowInsecure") == "1",
     }
+
     return buildConfig(outbound, cfg)
 }
 
-// FIX BUG-042: Full VMess Support
 func generateVmessConfig(uri string, cfg *AppConfig) (string, string, error) {
     rawJSON := strings.TrimPrefix(uri, "vmess://")
     decoded, err := base64.StdEncoding.DecodeString(rawJSON)
@@ -121,16 +144,15 @@ func generateVmessConfig(uri string, cfg *AppConfig) (string, string, error) {
     if err != nil { return "", "", fmt.Errorf("invalid port format") }
 
     outbound := map[string]interface{}{
-        "type": "vmess", "server": data.Add, "server_port": port, 
+        "type": "vmess", "tag": "proxy",
+        "server": data.Add, "server_port": port, 
         "uuid": data.ID, "alter_id": data.AID, "security": "auto",
     }
 
     if data.TLS == "tls" {
         sni := data.SNI
         if sni == "" { sni = data.Add }
-        outbound["tls"] = map[string]interface{}{
-            "enabled": true, "server_name": sni, "insecure": false, // VMess usually doesn't use allowInsecure directly in this format
-        }
+        outbound["tls"] = map[string]interface{}{"enabled": true, "server_name": sni, "insecure": false}
     }
 
     if data.Net == "ws" {
@@ -170,12 +192,15 @@ func buildConfig(outbound map[string]interface{}, cfg *AppConfig) (string, strin
         },
         Inbounds: []map[string]interface{}{
             {
-                "type": "mixed", "listen": "127.0.0.1", "listen_port": cfg.Network.ProxyPort,
+                "type": "mixed", "tag": "mixed-in",
+                "listen": "127.0.0.1", "listen_port": cfg.Network.ProxyPort,
                 "authentication": []map[string]interface{}{{"username": proxyUser, "password": proxyPass}},
             },
         },
         Outbounds: []map[string]interface{}{
-            outbound, {"type": "direct", "tag": "direct"}, {"type": "dns", "tag": "proxy_dns"},
+            outbound, 
+            {"type": "direct", "tag": "direct"}, 
+            {"type": "dns", "tag": "proxy_dns"},
         },
     }
 

@@ -8,7 +8,7 @@ Window {
     height: 850
     visible: true
     title: "Kingo VPN"
-    color: "#0F172A" // Deep Navy Blue
+    color: "#0F172A"
 
     onClosing: (close) => {
         close.accepted = false
@@ -83,8 +83,8 @@ Window {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 24
-        spacing: 16
+        anchors.margins: 20
+        spacing: 12
 
         // Header
         RowLayout {
@@ -92,142 +92,128 @@ Window {
             Text {
                 text: "KINGO VPN"
                 color: textColor
-                font.pixelSize: 22
+                font.pixelSize: 20
                 font.bold: true
                 font.letterSpacing: 2
             }
             Item { Layout.fillWidth: true }
             Text {
-                text: "v1.5"
+                text: "v1.6"
                 color: subTextColor
                 font.pixelSize: 12
             }
         }
 
         // Circular Connect Button with Animations
-        ColumnLayout {
-            Layout.fillWidth: true
-            Layout.topMargin: 20
-            spacing: 12
+        Rectangle {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.topMargin: 10
+            width: 160
+            height: 160
+            radius: 80
+            color: "transparent"
+            border.width: 4
+            border.color: getButtonColor()
+            Behavior on border.color { ColorAnimation { duration: 300 } }
 
             Rectangle {
-                id: outerCircle
-                Layout.alignment: Qt.AlignHCenter
+                id: innerCircle
+                anchors.centerIn: parent
                 width: 140
                 height: 140
                 radius: 70
-                color: "transparent"
-                border.width: 4
-                border.color: getButtonColor()
-                
-                Behavior on border.color { ColorAnimation { duration: 300 } }
+                color: getButtonColor()
+                Behavior on color { ColorAnimation { duration: 300 } }
+                scale: connectMouseArea.pressed ? 0.95 : 1.0
+                Behavior on scale { NumberAnimation { duration: 100; easing.type: Easing.OutCubic } }
 
                 Rectangle {
-                    id: innerCircle
+                    anchors.fill: parent
+                    radius: parent.radius
+                    color: parent.color
+                    opacity: connStatus == "connecting" ? 0.4 : 0.0
+                    z: -1
+                    SequentialAnimation on scale {
+                        running: connStatus == "connecting"
+                        loops: Animation.Infinite
+                        NumberAnimation { to: 1.3; duration: 600; easing.type: Easing.OutQuad }
+                        NumberAnimation { to: 1.0; duration: 600; easing.type: Easing.InQuad }
+                    }
+                    SequentialAnimation on opacity {
+                        running: connStatus == "connecting"
+                        loops: Animation.Infinite
+                        NumberAnimation { to: 0.0; duration: 600 }
+                        NumberAnimation { to: 0.4; duration: 600 }
+                    }
+                }
+
+                Text {
                     anchors.centerIn: parent
-                    width: 120
-                    height: 120
-                    radius: 60
-                    color: getButtonColor()
-                    
-                    Behavior on color { ColorAnimation { duration: 300 } }
-                    scale: connectMouseArea.pressed ? 0.95 : 1.0
-                    Behavior on scale { NumberAnimation { duration: 100; easing.type: Easing.OutCubic } }
+                    text: connStatus == "connecting" ? "..." : (connStatus == "connected" ? "DISCONNECT" : "CONNECT")
+                    color: "#FFFFFF"
+                    font.pixelSize: 16
+                    font.bold: true
+                }
 
-                    // Glow/Pulse Effect for Connecting
-                    Rectangle {
-                        anchors.fill: parent
-                        radius: parent.radius
-                        color: parent.color
-                        opacity: connStatus == "connecting" ? 0.4 : 0.0
-                        z: -1
-                        
-                        SequentialAnimation on scale {
-                            running: connStatus == "connecting"
-                            loops: Animation.Infinite
-                            NumberAnimation { to: 1.3; duration: 600; easing.type: Easing.OutQuad }
-                            NumberAnimation { to: 1.0; duration: 600; easing.type: Easing.InQuad }
-                        }
-                        SequentialAnimation on opacity {
-                            running: connStatus == "connecting"
-                            loops: Animation.Infinite
-                            NumberAnimation { to: 0.0; duration: 600 }
-                            NumberAnimation { to: 0.4; duration: 600 }
-                        }
-                    }
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: connStatus == "connecting" ? "..." : (connStatus == "connected" ? "DISCONNECT" : "CONNECT")
-                        color: "#FFFFFF"
-                        font.pixelSize: 14
-                        font.bold: true
-                    }
-
-                    MouseArea {
-                        id: connectMouseArea
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            if (connStatus == "connected") {
-                                vpnController.disconnectVpn()
-                            } else if (connStatus != "connecting") {
-                                prevDownload = 0
-                                prevUpload = 0
-                                prevTime = Date.now()
-                                vpnController.autoConnect()
-                            }
+                MouseArea {
+                    id: connectMouseArea
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        if (connStatus == "connected") {
+                            vpnController.disconnectVpn()
+                        } else if (connStatus != "connecting") {
+                            prevDownload = 0
+                            prevUpload = 0
+                            prevTime = Date.now()
+                            vpnController.autoConnect()
                         }
                     }
                 }
             }
+        }
 
-            Text {
+        Text {
+            Layout.fillWidth: true
+            text: connStatus.toUpperCase()
+            color: textColor
+            font.pixelSize: 16
+            font.bold: true
+            font.letterSpacing: 1
+            horizontalAlignment: Text.AlignHCenter
+        }
+
+        // Speed Stats
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 12
+            visible: connStatus == "connected"
+
+            Rectangle {
                 Layout.fillWidth: true
-                Layout.topMargin: 10
-                text: connStatus.toUpperCase()
-                color: textColor
-                font.pixelSize: 16
-                font.bold: true
-                font.letterSpacing: 1
-                horizontalAlignment: Text.AlignHCenter
+                height: 45
+                color: cardColor
+                radius: 8
+                border.color: "#334155"
+                border.width: 1
+                ColumnLayout {
+                    anchors.centerIn: parent
+                    Text { text: "DOWNLOAD"; color: subTextColor; font.pixelSize: 8; font.bold: true; Layout.alignment: Qt.AlignHCenter }
+                    Text { id: downloadSpeedText; text: "0 B/s"; color: successColor; font.pixelSize: 14; font.bold: true; Layout.alignment: Qt.AlignHCenter }
+                }
             }
 
-            // Speed Stats
-            RowLayout {
+            Rectangle {
                 Layout.fillWidth: true
-                Layout.topMargin: 5
-                spacing: 16
-                visible: connStatus == "connected"
-
-                Rectangle {
-                    Layout.fillWidth: true
-                    height: 50
-                    color: cardColor
-                    radius: 8
-                    border.color: "#334155"
-                    border.width: 1
-
-                    ColumnLayout {
-                        anchors.centerIn: parent
-                        Text { text: "DOWNLOAD"; color: subTextColor; font.pixelSize: 8; font.bold: true; Layout.alignment: Qt.AlignHCenter }
-                        Text { id: downloadSpeedText; text: "0 B/s"; color: successColor; font.pixelSize: 14; font.bold: true; Layout.alignment: Qt.AlignHCenter }
-                    }
-                }
-
-                Rectangle {
-                    Layout.fillWidth: true
-                    height: 50
-                    color: cardColor
-                    radius: 8
-                    border.color: "#334155"
-                    border.width: 1
-
-                    ColumnLayout {
-                        anchors.centerIn: parent
-                        Text { text: "UPLOAD"; color: subTextColor; font.pixelSize: 8; font.bold: true; Layout.alignment: Qt.AlignHCenter }
-                        Text { id: uploadSpeedText; text: "0 B/s"; color: textColor; font.pixelSize: 14; font.bold: true; Layout.alignment: Qt.AlignHCenter }
-                    }
+                height: 45
+                color: cardColor
+                radius: 8
+                border.color: "#334155"
+                border.width: 1
+                ColumnLayout {
+                    anchors.centerIn: parent
+                    Text { text: "UPLOAD"; color: subTextColor; font.pixelSize: 8; font.bold: true; Layout.alignment: Qt.AlignHCenter }
+                    Text { id: uploadSpeedText; text: "0 B/s"; color: textColor; font.pixelSize: 14; font.bold: true; Layout.alignment: Qt.AlignHCenter }
                 }
             }
         }
@@ -236,7 +222,6 @@ Window {
         RowLayout {
             Layout.fillWidth: true
             spacing: 8
-
             TextField {
                 id: subUrlField
                 Layout.fillWidth: true
@@ -245,14 +230,8 @@ Window {
                 color: textColor
                 font.pixelSize: 12
                 text: "https://raw.githubusercontent.com/MhdiTaheri/VpnHub/main/sub"
-                background: Rectangle {
-                    color: cardColor
-                    radius: 6
-                    border.color: subUrlField.activeFocus ? accentColor : "#334155"
-                    border.width: 1
-                }
+                background: Rectangle { color: cardColor; radius: 6; border.color: subUrlField.activeFocus ? accentColor : "#334155"; border.width: 1 }
             }
-
             Button {
                 text: "Update"
                 implicitWidth: 70
@@ -261,7 +240,6 @@ Window {
                 contentItem: Text { text: parent.text; color: accentColor; font.pixelSize: 11; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                 onClicked: { if (subUrlField.text.length > 0) vpnController.addSubscription(subUrlField.text) }
             }
-
             Button {
                 text: "Clear"
                 implicitWidth: 50
@@ -272,133 +250,107 @@ Window {
             }
         }
 
-        // Server List
-        Text {
-            text: "SERVERS"
-            color: subTextColor
-            font.pixelSize: 10
-            font.bold: true
-            font.letterSpacing: 1
-            Layout.topMargin: 5
-        }
-
-        ScrollView {
+        // Server List (Native Scrolling, no nested ScrollView)
+        ListView {
+            id: serverListView
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
-            ScrollBar.vertical.policy: ScrollBar.AsNeeded
+            model: serverList
+            spacing: 8
 
-            ListView {
-                id: serverListView
-                width: parent.width
-                height: parent.height
-                model: serverList
-                spacing: 8
-
-                // Best Server Header
-                header: Rectangle {
-                    width: serverListView.width
-                    height: 60
-                    color: accentColor
-                    radius: 8
-
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.margins: 12
-                        spacing: 10
-
-                        Rectangle { width: 8; height: 8; radius: 4; color: "#FFFFFF" }
-
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            spacing: 1
-                            Text { text: "Best Server (Auto Connect)"; color: "#FFFFFF"; font.bold: true; font.pixelSize: 13 }
-                            Text { text: "FIND THE FASTEST SERVER"; color: "#E2E8F0"; font.pixelSize: 8 }
-                        }
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            prevDownload = 0
-                            prevUpload = 0
-                            prevTime = Date.now()
-                            vpnController.autoConnect()
-                        }
+            header: Rectangle {
+                width: serverListView.width
+                height: 55
+                color: accentColor
+                radius: 8
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.margins: 12
+                    spacing: 10
+                    Rectangle { width: 8; height: 8; radius: 4; color: "#FFFFFF" }
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 1
+                        Text { text: "Best Server (Auto Connect)"; color: "#FFFFFF"; font.bold: true; font.pixelSize: 13 }
+                        Text { text: "FIND THE FASTEST SERVER"; color: "#E2E8F0"; font.pixelSize: 8 }
                     }
                 }
-
-                delegate: Rectangle {
-                    width: serverListView.width
-                    height: 55
-                    color: cardColor
-                    radius: 8
-                    border.color: "#334155"
-                    border.width: 1
-
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.margins: 12
-                        spacing: 10
-
-                        Rectangle {
-                            width: 8
-                            height: 8
-                            radius: 4
-                            color: getPingColor(modelData.latency)
-                        }
-
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            spacing: 1
-                            Text { text: modelData.name; color: textColor; font.bold: true; font.pixelSize: 12; elide: Text.ElideRight; Layout.fillWidth: true }
-                            Text { text: modelData.protocol.toUpperCase() + " • " + modelData.address; color: subTextColor; font.pixelSize: 9 }
-                        }
-
-                        Text {
-                            text: modelData.latency == 9999 ? "N/A" : (modelData.latency == 0 ? "-" : modelData.latency + "ms")
-                            color: getPingColor(modelData.latency)
-                            font.bold: true
-                            font.pixelSize: 11
-                        }
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        prevDownload = 0; prevUpload = 0; prevTime = Date.now()
+                        vpnController.autoConnect()
                     }
+                }
+            }
 
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            prevDownload = 0
-                            prevUpload = 0
-                            prevTime = Date.now()
-                            vpnController.connectToServer(modelData.uri)
-                        }
+            delegate: Rectangle {
+                width: serverListView.width
+                height: 50
+                color: cardColor
+                radius: 8
+                border.color: "#334155"
+                border.width: 1
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.margins: 12
+                    spacing: 10
+                    Rectangle { width: 8; height: 8; radius: 4; color: getPingColor(modelData.latency) }
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 1
+                        Text { text: modelData.name; color: textColor; font.bold: true; font.pixelSize: 12; elide: Text.ElideRight; Layout.fillWidth: true }
+                        Text { text: modelData.protocol.toUpperCase() + " • " + modelData.address; color: subTextColor; font.pixelSize: 9 }
+                    }
+                    Text { text: modelData.latency == 9999 ? "N/A" : (modelData.latency == 0 ? "-" : modelData.latency + "ms"); color: getPingColor(modelData.latency); font.bold: true; font.pixelSize: 11 }
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        prevDownload = 0; prevUpload = 0; prevTime = Date.now()
+                        vpnController.connectToServer(modelData.uri)
                     }
                 }
             }
         }
 
         // Logs Panel
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 8
+            Text { text: "LOGS"; color: subTextColor; font.pixelSize: 10; font.bold: true; font.letterSpacing: 1 }
+            Item { Layout.fillWidth: true }
+            Button {
+                text: "Copy Logs"
+                implicitHeight: 25
+                background: Rectangle { color: cardColor; radius: 4; border.color: "#334155"; border.width: 1 }
+                contentItem: Text { text: parent.text; color: accentColor; font.pixelSize: 10; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                onClicked: { vpnController.copyLogs() }
+            }
+        }
+
         Rectangle {
             Layout.fillWidth: true
-            height: 100
-            color: "#0B1120" // Slightly darker than main bg
+            height: 80
+            color: "#0B1120"
             radius: 8
             border.color: "#334155"
             border.width: 1
 
-            ScrollView {
+            // FIX: TextEdit allows text selection and copying
+            TextEdit {
                 anchors.fill: parent
                 anchors.margins: 8
-                clip: true
-
-                Text {
-                    text: vpnController.logs
-                    color: subTextColor
-                    font.family: "Monospace"
-                    font.pixelSize: 10
-                    wrapMode: Text.WrapAnywhere
-                }
+                text: vpnController.logs
+                color: subTextColor
+                font.family: "Monospace"
+                font.pixelSize: 10
+                wrapMode: TextEdit.WrapAnywhere
+                readOnly: true
+                selectByMouse: true
             }
         }
     }

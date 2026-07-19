@@ -1,6 +1,8 @@
 #pragma once
 #include <QObject>
 #include <QVariantList>
+#include <QGuiApplication>
+#include <QClipboard>
 #include "ipcclient.h"
 
 class VpnController : public QObject {
@@ -31,6 +33,7 @@ public:
     Q_INVOKABLE void clearServers();
     Q_INVOKABLE void testLatency();
     Q_INVOKABLE void getTraffic();
+    Q_INVOKABLE void copyLogs() { QGuiApplication::clipboard()->setText(m_logs); }
 
 signals:
     void statusChanged();
@@ -48,7 +51,7 @@ private:
     QVariantList m_servers;
     qint64 m_uploadSpeed = 0;
     qint64 m_downloadSpeed = 0;
-    QString m_logs = "Kingo VPN v1.5 Initialized.\n";
+    QString m_logs = "Kingo VPN v1.6 Initialized.\n";
     void setStatus(const QString &newStatus);
     void appendLog(const QString &log);
     QString generateRequestID();
