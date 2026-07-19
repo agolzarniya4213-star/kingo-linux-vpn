@@ -1,15 +1,14 @@
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Controls.Material
 import QtQuick.Layouts
 
 Window {
     id: mainWindow
-    width: 400
-    height: 750
+    width: 420
+    height: 780
     visible: true
     title: "Kingo VPN"
-    color: "#101016"
+    color: "#0A0A0F" // Deep Cyber Black
 
     onClosing: (close) => {
         close.accepted = false
@@ -17,13 +16,16 @@ Window {
         trayIcon.showMessage("Kingo VPN", "Application minimized to tray.")
     }
 
+    // Defensive checks to prevent null crashes during initialization
+    property string connStatus: vpnController ? vpnController.status : "loading"
+    property var serverList: vpnController ? vpnController.servers : []
     property real prevDownload: 0
     property real prevUpload: 0
     property real prevTime: 0
 
     Timer {
         interval: 1000
-        running: vpnController.status == "connected"
+        running: connStatus == "connected"
         repeat: true
         onTriggered: vpnController.getTraffic()
     }
@@ -31,8 +33,8 @@ Window {
     function formatSpeed(bytes) {
         if (!bytes || bytes < 0) return "0 B/s"
         if (bytes < 1024) return bytes.toFixed(0) + " B/s"
-        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB/s"
-        return (bytes / (1024 * 1024)).toFixed(2) + " MB/s"
+        if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB/s"
+        return (bytes / 1048576).toFixed(2) + " MB/s"
     }
 
     Connections {
@@ -66,74 +68,125 @@ Window {
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 24
-        spacing: 20
+        spacing: 18
 
-        Label {
-            text: "Kingo VPN"
-            color: "#FFFFFF"
-            font.pixelSize: 28
-            font.bold: true
-            Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: 20
+        // Header
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.topMargin: 10
+
+            Rectangle {
+                width: 32; height: 32
+                color: "#00FF9D"
+                radius: 6
+                Text { text: "K"; color: "#0A0A0F"; font.bold: true; font.pixelSize: 20; anchors.centerIn: parent }
+            }
+            
+            Text {
+                text: "KINGO VPN"
+                color: "#FFFFFF"
+                font.pixelSize: 20
+                font.bold: true
+                font.letterSpacing: 2
+                Layout.leftMargin: 10
+            }
+            
+            Item { Layout.fillWidth: true }
+            
+            Text {
+                text: "v2.0"
+                color: "#4A4A5A"
+                font.pixelSize: 12
+            }
         }
 
+        // Main Status Card
         Rectangle {
             Layout.fillWidth: true
-            height: 180
-            color: "#1E1E2A"
-            radius: 24
+            height: 220
+            color: "#14141B"
+            radius: 16
+            border.color: "#22222E"
+            border.width: 1
 
             ColumnLayout {
                 anchors.fill: parent
-                anchors.margins: 16
-                spacing: 8
+                anchors.margins: 20
+                spacing: 12
 
-                Label {
-                    text: vpnController.status.toUpperCase()
-                    color: vpnController.status == "connected" ? "#3DDC84" : (vpnController.status == "connecting" ? "#FFCC00" : "#FF5252")
-                    font.pixelSize: 20
+                Text {
+                    text: "STATUS"
+                    color: "#5A5A6A"
+                    font.pixelSize: 11
                     font.bold: true
-                    Layout.alignment: Qt.AlignHCenter
+                    font.letterSpacing: 1
                 }
 
-                RowLayout {
-                    Layout.alignment: Qt.AlignHCenter
-                    spacing: 40
-                    visible: vpnController.status == "connected"
+                Text {
+                    text: connStatus.toUpperCase()
+                    color: connStatus == "connected" ? "#00FF9D" : (connStatus == "connecting" ? "#FFCC00" : "#FF3366")
+                    font.pixelSize: 32
+                    font.bold: true
+                    font.letterSpacing: 1
+                }
 
-                    ColumnLayout {
-                        spacing: 2
-                        Label { text: "Download"; color: "#B0B0B0"; font.pixelSize: 12; Layout.alignment: Qt.AlignHCenter }
-                        Label { id: downloadSpeedText; text: "0 B/s"; color: "#3DDC84"; font.pixelSize: 18; font.bold: true; Layout.alignment: Qt.AlignHCenter }
+                // Speed Stats Row
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.topMargin: 10
+                    spacing: 20
+                    visible: connStatus == "connected"
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        height: 60
+                        color: "#1A1A24"
+                        radius: 10
+                        
+                        ColumnLayout {
+                            anchors.centerIn: parent
+                            Text { text: "DOWNLOAD"; color: "#5A5A6A"; font.pixelSize: 9; font.bold: true; Layout.alignment: Qt.AlignHCenter }
+                            Text { id: downloadSpeedText; text: "0 B/s"; color: "#00FF9D"; font.pixelSize: 16; font.bold: true; Layout.alignment: Qt.AlignHCenter }
+                        }
                     }
-                    ColumnLayout {
-                        spacing: 2
-                        Label { text: "Upload"; color: "#B0B0B0"; font.pixelSize: 12; Layout.alignment: Qt.AlignHCenter }
-                        Label { id: uploadSpeedText; text: "0 B/s"; color: "#FFCC00"; font.pixelSize: 18; font.bold: true; Layout.alignment: Qt.AlignHCenter }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        height: 60
+                        color: "#1A1A24"
+                        radius: 10
+                        
+                        ColumnLayout {
+                            anchors.centerIn: parent
+                            Text { text: "UPLOAD"; color: "#5A5A6A"; font.pixelSize: 9; font.bold: true; Layout.alignment: Qt.AlignHCenter }
+                            Text { id: uploadSpeedText; text: "0 B/s"; color: "#FFFFFF"; font.pixelSize: 16; font.bold: true; Layout.alignment: Qt.AlignHCenter }
+                        }
                     }
                 }
             }
         }
 
+        // Connect Button (Modern Hexagon-like Capsule)
         Button {
             Layout.fillWidth: true
-            height: 60
-            enabled: vpnController.status != "connecting"
+            height: 56
+            enabled: connStatus != "connecting"
             
             background: Rectangle {
-                color: vpnController.status == "connected" ? "#FF5252" : "#3DDC84"
-                radius: 30
+                color: connStatus == "connected" ? "#FF3366" : "#00FF9D"
+                radius: 12
             }
             contentItem: Text {
-                text: vpnController.status == "connecting" ? "Connecting..." : (vpnController.status == "connected" ? "DISCONNECT" : "CONNECT")
-                color: "#101016"
-                font.pixelSize: 18
+                text: connStatus == "connecting" ? "INITIALIZING..." : (connStatus == "connected" ? "DISCONNECT" : "CONNECT")
+                color: "#0A0A0F"
+                font.pixelSize: 16
                 font.bold: true
+                font.letterSpacing: 2
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
             }
             onClicked: {
-                if (vpnController.status == "connected") {
+                if (connStatus == "connected") {
                     vpnController.disconnectVpn()
                 } else {
                     prevDownload = 0; prevUpload = 0; prevTime = Date.now()
@@ -142,76 +195,81 @@ Window {
             }
         }
 
+        // Error Box
         Rectangle {
             id: errorBox
             Layout.fillWidth: true
             height: 40
-            color: "#FF5252"
-            radius: 12
+            color: "#33000000"
+            radius: 8
             visible: false
-            Label { id: errorText; anchors.centerIn: parent; color: "#FFFFFF"; font.bold: true }
-            Timer { id: errorTimer; interval: 4000; onTriggered: errorBox.visible = false }
+            border.color: "#FF3366"
+            border.width: 1
+            
+            Text { id: errorText; anchors.centerIn: parent; color: "#FF3366"; font.bold: true; font.pixelSize: 12 }
+            Timer { id: errorTimer; interval: 5000; onTriggered: errorBox.visible = false }
         }
 
+        // Subscription Input
         TextField {
             id: subUrlField
             Layout.fillWidth: true
-            height: 50
+            height: 45
             placeholderText: "Enter Subscription URL..."
             color: "#FFFFFF"
-            font.pixelSize: 14
+            font.pixelSize: 13
             text: "https://raw.githubusercontent.com/MhdiTaheri/VpnHub/main/sub"
             background: Rectangle {
-                color: "#1E1E2A"; radius: 16
-                border.color: subUrlField.activeFocus ? "#3DDC84" : "transparent"; border.width: 2
+                color: "#14141B"; radius: 8
+                border.color: subUrlField.activeFocus ? "#00FF9D" : "#22222E"; border.width: 1
             }
         }
 
-        Button {
-            Layout.fillWidth: true
-            height: 44
-            text: "Update Subscription"
-            background: Rectangle { color: "#2A2A3A"; radius: 16 }
-            contentItem: Text { text: parent.text; color: "#FFFFFF"; font.bold: true; font.pixelSize: 14; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-            onClicked: { if (subUrlField.text.length > 0) vpnController.addSubscription(subUrlField.text) }
-        }
-
-        Label {
-            text: "Available Servers"
-            color: "#B0B0B0"
-            font.pixelSize: 14
+        // Server List Section
+        Text {
+            text: "AVAILABLE NODES"
+            color: "#5A5A6A"
+            font.pixelSize: 11
             font.bold: true
-            Layout.topMargin: 10
+            font.letterSpacing: 1
+            Layout.topMargin: 5
         }
 
         ListView {
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
-            model: vpnController.servers
+            model: serverList
 
             delegate: Rectangle {
                 width: ListView.view.width
-                height: 65
-                color: "#1E1E2A"
-                radius: 16
-                Layout.bottomMargin: 10
+                height: 60
+                color: "#14141B"
+                radius: 10
+                border.color: "#22222E"
+                border.width: 1
+                Layout.bottomMargin: 8
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.margins: 16
+                    anchors.margins: 14
                     spacing: 12
+
+                    Rectangle {
+                        width: 8; height: 8
+                        radius: 4
+                        color: modelData.latency < 100 ? "#00FF9D" : (modelData.latency < 300 ? "#FFCC00" : "#FF3366")
+                    }
 
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 2
-                        Label { text: modelData.name; color: "#FFFFFF"; font.bold: true; font.pixelSize: 14; elide: Text.ElideRight; Layout.fillWidth: true }
-                        Label { text: modelData.protocol + " - " + modelData.address; color: "#B0B0B0"; font.pixelSize: 11 }
+                        Text { text: modelData.name; color: "#FFFFFF"; font.bold: true; font.pixelSize: 13; elide: Text.ElideRight; Layout.fillWidth: true }
+                        Text { text: modelData.protocol.toUpperCase() + " • " + modelData.address; color: "#5A5A6A"; font.pixelSize: 10 }
                     }
-                    Label {
+                    Text {
                         text: modelData.latency == 9999 ? "N/A" : (modelData.latency == 0 ? "-" : modelData.latency + "ms")
-                        color: modelData.latency < 100 ? "#3DDC84" : (modelData.latency < 300 ? "#FFCC00" : "#FF5252")
-                        font.bold: true; font.pixelSize: 12
+                        color: "#5A5A6A"; font.bold: true; font.pixelSize: 11
                     }
                 }
                 MouseArea {

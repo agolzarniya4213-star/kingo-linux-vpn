@@ -7,7 +7,6 @@ set(CMAKE_AUTOMOC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Quick QuickControls2 Gui Network Widgets)
 
-# Process resources.qrc
 qt_add_resources(RES_SOURCES "resources.qrc")
 
 qt_add_executable(kingo-linux-vpn-ui
@@ -15,7 +14,7 @@ qt_add_executable(kingo-linux-vpn-ui
     ipcclient.h ipcclient.cpp
     vpncontroller.h vpncontroller.cpp
     trayicon.h trayicon.cpp
-    ${RES_SOURCES} # FIX: This was missing! Injects QML into binary.
+    ${RES_SOURCES}
 )
 
 target_link_libraries(kingo-linux-vpn-ui PRIVATE Qt6::Quick Qt6::QuickControls2 Qt6::Gui Qt6::Network Qt6::Widgets)
