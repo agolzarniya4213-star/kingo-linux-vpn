@@ -176,7 +176,7 @@ func buildConfig(outbound map[string]interface{}, cfg *AppConfig) (string, strin
         },
     }
 
-    // FIX: Explicit DNS tags
+    // FIX: Explicit DNS tags for sing-box v1.8
     dnsServers := []map[string]interface{}{
         {"tag": "dns-remote", "address": "https://1.1.1.1/dns-query", "detour": "proxy"},
         {"tag": "dns-direct", "address": "8.8.8.8", "detour": "direct"},
