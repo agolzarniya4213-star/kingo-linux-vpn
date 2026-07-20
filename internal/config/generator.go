@@ -35,12 +35,10 @@ func GenerateSingBoxConfig(uri string, cfg *AppConfig) (string, string, error) {
 func generateVlessConfig(uri string, cfg *AppConfig) (string, string, error) {
     u, err := url.Parse(uri)
     if err != nil { return "", "", err }
-
     uuid := u.User.Username()
     host := u.Hostname()
     portStr := u.Port()
     if uuid == "" || host == "" || portStr == "" { return "", "", fmt.Errorf("invalid vless uri") }
-
     port, err := strconv.Atoi(portStr)
     if err != nil { return "", "", fmt.Errorf("invalid port format") }
 
@@ -49,9 +47,7 @@ func generateVlessConfig(uri string, cfg *AppConfig) (string, string, error) {
         "server": host, "server_port": port, "uuid": uuid,
     }
 
-    if flow := u.Query().Get("flow"); flow != "" {
-        outbound["flow"] = flow
-    }
+    if flow := u.Query().Get("flow"); flow != "" { outbound["flow"] = flow }
 
     security := u.Query().Get("security")
     if security == "tls" {
@@ -65,15 +61,11 @@ func generateVlessConfig(uri string, cfg *AppConfig) (string, string, error) {
         outbound["tls"] = tlsOpts
     } else if security == "reality" {
         pbk := u.Query().Get("pbk")
-        sid := u.Query().Get("sid")
         if pbk == "" { return "", "", fmt.Errorf("missing pbk for reality") }
-        
         sni := u.Query().Get("sni")
         if sni == "" { sni = host }
-        
         realityOpts := map[string]interface{}{"enabled": true, "public_key": pbk}
-        if sid != "" { realityOpts["short_id"] = sid }
-        
+        if sid := u.Query().Get("sid"); sid != "" { realityOpts["short_id"] = sid }
         outbound["tls"] = map[string]interface{}{
             "enabled": true, "server_name": sni,
             "reality": realityOpts,
@@ -95,12 +87,10 @@ func generateVlessConfig(uri string, cfg *AppConfig) (string, string, error) {
 func generateTrojanConfig(uri string, cfg *AppConfig) (string, string, error) {
     u, err := url.Parse(uri)
     if err != nil { return "", "", err }
-
     password := u.User.Username()
     host := u.Hostname()
     portStr := u.Port()
     if password == "" || host == "" || portStr == "" { return "", "", fmt.Errorf("invalid trojan uri") }
-
     port, err := strconv.Atoi(portStr)
     if err != nil { return "", "", fmt.Errorf("invalid port format") }
 
@@ -113,7 +103,6 @@ func generateTrojanConfig(uri string, cfg *AppConfig) (string, string, error) {
     outbound["tls"] = map[string]interface{}{
         "enabled": true, "server_name": sni, "insecure": u.Query().Get("allowInsecure") == "1",
     }
-
     return buildConfig(outbound, cfg)
 }
 
@@ -124,9 +113,7 @@ func generateVmessConfig(uri string, cfg *AppConfig) (string, string, error) {
         decoded, err = base64.URLEncoding.DecodeString(rawJSON)
         if err != nil { return "", "", fmt.Errorf("b64 decode failed") }
     }
-
     var data struct {
-        PS   string `json:"ps"`
         Add  string `json:"add"`
         Port string `json:"port"`
         ID   string `json:"id"`
@@ -138,7 +125,6 @@ func generateVmessConfig(uri string, cfg *AppConfig) (string, string, error) {
         SNI  string `json:"sni"`
     }
     if err := json.Unmarshal(decoded, &data); err != nil { return "", "", fmt.Errorf("json unmarshal failed") }
-
     port, err := strconv.Atoi(data.Port)
     if err != nil { return "", "", fmt.Errorf("invalid port format") }
 
@@ -147,13 +133,11 @@ func generateVmessConfig(uri string, cfg *AppConfig) (string, string, error) {
         "server": data.Add, "server_port": port, 
         "uuid": data.ID, "alter_id": data.AID, "security": "auto",
     }
-
     if data.TLS == "tls" {
         sni := data.SNI
         if sni == "" { sni = data.Add }
         outbound["tls"] = map[string]interface{}{"enabled": true, "server_name": sni, "insecure": false}
     }
-
     if data.Net == "ws" {
         wsOpts := map[string]interface{}{"path": data.Path}
         if data.Host != "" { wsOpts["headers"] = map[string]interface{}{"Host": data.Host} }
@@ -161,22 +145,25 @@ func generateVmessConfig(uri string, cfg *AppConfig) (string, string, error) {
     } else if data.Net == "grpc" {
         outbound["transport"] = map[string]interface{}{"type": "grpc", "service_name": data.Path}
     }
-
     return buildConfig(outbound, cfg)
 }
 
 func buildConfig(outbound map[string]interface{}, cfg *AppConfig) (string, string, error) {
     clashSecret := generateRandomString(32)
 
-    // FIX: TUN Inbound for System-wide traffic routing
+    // FIX: Strict TUN Inbound for sing-box v1.8
     inbounds := []map[string]interface{}{
         {
             "type": "tun", "tag": "tun-in",
-            "interface_name": "kingo0", "auto_route": true, "auto_detect_interface": true,
+            "interface_name": "kingo0", 
+            "inet4_address": "172.19.0.1/30",
+            "auto_route": true, 
+            "strict_route": true,
+            "stack": "system",
+            "sniff": true,
         },
     }
 
-    // FIX: Explicit DNS tags for sing-box v1.8
     dnsServers := []map[string]interface{}{
         {"tag": "dns-remote", "address": "https://1.1.1.1/dns-query", "detour": "proxy"},
         {"tag": "dns-direct", "address": "8.8.8.8", "detour": "direct"},
@@ -209,7 +196,6 @@ func buildConfig(outbound map[string]interface{}, cfg *AppConfig) (string, strin
 
     tmpFile, err := os.CreateTemp("", "kingo-config-*.json")
     if err != nil { return "", "", err }
-    
     if err := os.Chmod(tmpFile.Name(), 0600); err != nil {
         tmpFile.Close(); os.Remove(tmpFile.Name()); return "", "", err
     }

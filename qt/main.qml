@@ -4,8 +4,10 @@ import QtQuick.Layouts
 
 ApplicationWindow {
     id: root
-    width: 480
-    height: 900
+    width: 900
+    height: 600
+    minimumWidth: 800
+    minimumHeight: 500
     visible: true
     title: "Kingo VPN"
     color: "#070D18"
@@ -19,12 +21,10 @@ ApplicationWindow {
     property bool autoScanActive: false
     property int autoScanProgress: 0
 
-    readonly property color bgColor: "#070D18"
     readonly property color cardColor: "#1A2636"
     readonly property color surfaceColor: "#0E1A2C"
     readonly property color borderColor: "#243245"
     readonly property color accentColor: "#18CFFF"
-    readonly property color accent2Color: "#0FA8D9"
     readonly property color textColor: "#FFFFFF"
     readonly property color subTextColor: "#8899AA"
     readonly property color successColor: "#4CAF50"
@@ -85,15 +85,8 @@ ApplicationWindow {
 
     Connections {
         target: trayIcon
-        function onActivateRequested() {
-            root.show()
-            root.raise()
-            root.requestActivate()
-        }
-        function onConnectRequested() {
-            root.show()
-            root.raise()
-        }
+        function onActivateRequested() { root.show(); root.raise(); root.requestActivate() }
+        function onConnectRequested() { root.show(); root.raise() }
         function onDisconnectRequested() { vpnController.disconnectVpn() }
         function onQuitRequested() { Qt.quit() }
     }
@@ -135,10 +128,7 @@ ApplicationWindow {
         title: "Add Server"
         modal: true
         anchors.centerIn: parent
-        background: Rectangle {
-            color: root.cardColor
-            radius: 22
-        }
+        background: Rectangle { color: root.cardColor; radius: 22 }
         ColumnLayout {
             width: parent.width
             spacing: 12
@@ -147,23 +137,13 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 placeholderText: "vless://... or vmess://..."
                 color: root.textColor
-                background: Rectangle {
-                    color: root.surfaceColor
-                    radius: 12
-                }
+                background: Rectangle { color: root.surfaceColor; radius: 12 }
             }
             Button {
                 text: "Add"
                 Layout.alignment: Qt.AlignRight
-                background: Rectangle {
-                    color: root.accentColor
-                    radius: 12
-                }
-                contentItem: Text {
-                    text: parent.text
-                    color: "#FFFFFF"
-                    font.bold: true
-                }
+                background: Rectangle { color: root.accentColor; radius: 12 }
+                contentItem: Text { text: parent.text; color: "#FFFFFF"; font.bold: true }
                 onClicked: {
                     if (serverUriInput.text.length > 0) {
                         vpnController.addSubscription(serverUriInput.text)
@@ -174,29 +154,30 @@ ApplicationWindow {
         }
     }
 
-    Item {
-        anchors.centerIn: parent
-        width: Math.min(520, parent.width - 32)
-        height: parent.height
+    // Desktop Split Layout
+    RowLayout {
+        anchors.fill: parent
+        anchors.margins: 20
+        spacing: 20
 
+        // Left Column (Status & Stats)
         ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: 24
-            spacing: 20
+            Layout.preferredWidth: 320
+            Layout.fillHeight: true
+            spacing: 16
 
             Text {
                 text: "Kingo VPN"
                 color: root.textColor
-                font.pixelSize: 32
+                font.pixelSize: 28
                 font.weight: Font.Bold
                 Layout.alignment: Qt.AlignHCenter
-                Layout.topMargin: 10
             }
 
             Text {
                 text: getStatusText()
                 color: getStatusColor()
-                font.pixelSize: 20
+                font.pixelSize: 18
                 font.weight: Font.Bold
                 Layout.alignment: Qt.AlignHCenter
             }
@@ -204,16 +185,16 @@ ApplicationWindow {
             Text {
                 text: root.connStatus == "connected" ? "" : "Tap to connect"
                 color: root.subTextColor
-                font.pixelSize: 12
+                font.pixelSize: 11
                 opacity: 0.8
                 Layout.alignment: Qt.AlignHCenter
-                Layout.bottomMargin: 10
             }
 
+            // Power Button
             Item {
                 Layout.alignment: Qt.AlignHCenter
-                width: 200
-                height: 200
+                width: 160
+                height: 160
 
                 Rectangle {
                     anchors.fill: parent
@@ -227,8 +208,8 @@ ApplicationWindow {
                 Rectangle {
                     id: innerCircle
                     anchors.centerIn: parent
-                    width: 176
-                    height: 176
+                    width: 140
+                    height: 140
                     radius: width / 2
                     color: root.surfaceColor
                     border.color: root.borderColor
@@ -260,38 +241,28 @@ ApplicationWindow {
                         anchors.centerIn: parent
                         text: "⏻"
                         color: "#FFFFFF"
-                        font.pixelSize: 60
+                        font.pixelSize: 50
                         visible: !root.autoScanActive
                     }
                     
                     ColumnLayout {
                         anchors.centerIn: parent
                         visible: root.autoScanActive
-                        spacing: 4
-                        Text {
-                            text: "Scanning..."
-                            color: "#FFFFFF"
-                            font.pixelSize: 14
-                            font.weight: Font.Bold
-                            Layout.alignment: Qt.AlignHCenter
-                        }
-                        Text {
-                            text: root.autoScanProgress + "%"
-                            color: root.accentColor
-                            font.pixelSize: 18
-                            font.weight: Font.Bold
-                            Layout.alignment: Qt.AlignHCenter
-                        }
+                        spacing: 2
+                        Text { text: "Scanning..."; color: "#FFFFFF"; font.pixelSize: 12; font.weight: Font.Bold; Layout.alignment: Qt.AlignHCenter }
+                        Text { text: root.autoScanProgress + "%"; color: root.accentColor; font.pixelSize: 16; font.weight: Font.Bold; Layout.alignment: Qt.AlignHCenter }
                     }
 
                     MouseArea {
                         id: powerMouseArea
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
+                        // FIX: Allow disconnecting while connecting
                         onClicked: {
-                            if (root.connStatus == "connected") {
+                            if (root.connStatus == "connected" || root.connStatus == "connecting") {
+                                root.autoScanActive = false
                                 vpnController.disconnectVpn()
-                            } else if (root.connStatus != "connecting") {
+                            } else {
                                 root.prevDownload = 0
                                 root.prevUpload = 0
                                 root.prevTime = Date.now()
@@ -307,16 +278,14 @@ ApplicationWindow {
             Text {
                 text: "Best Server (Auto Connect)"
                 color: root.accentColor
-                font.pixelSize: 13
+                font.pixelSize: 12
                 font.weight: Font.Bold
                 Layout.alignment: Qt.AlignHCenter
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        root.prevDownload = 0
-                        root.prevUpload = 0
-                        root.prevTime = Date.now()
+                        root.prevDownload = 0; root.prevUpload = 0; root.prevTime = Date.now()
                         root.selectedServerID = "best"
                         root.autoScanActive = true
                         root.autoScanProgress = 0
@@ -325,228 +294,118 @@ ApplicationWindow {
                 }
             }
 
+            // Stats Grid
             GridLayout {
                 Layout.fillWidth: true
                 columns: 2
-                rowSpacing: 12
-                columnSpacing: 12
+                rowSpacing: 10
+                columnSpacing: 10
 
                 Rectangle {
-                    Layout.fillWidth: true
-                    height: 60
-                    radius: 16
-                    color: root.cardColor
-                    border.color: root.borderColor
-                    ColumnLayout {
-                        anchors.fill: parent
-                        anchors.margins: 12
-                        spacing: 2
-                        Text {
-                            text: "Connection Time"
-                            color: root.subTextColor
-                            font.pixelSize: 10
-                        }
-                        Text {
-                            text: vpnController ? vpnController.connectionTime : "00:00:00"
-                            color: root.textColor
-                            font.pixelSize: 16
-                            font.weight: Font.Bold
-                        }
+                    Layout.fillWidth: true; height: 50; radius: 12; color: root.cardColor; border.color: root.borderColor
+                    ColumnLayout { anchors.fill: parent; anchors.margins: 8; spacing: 1
+                        Text { text: "Time"; color: root.subTextColor; font.pixelSize: 9 }
+                        Text { text: vpnController ? vpnController.connectionTime : "00:00:00"; color: root.textColor; font.pixelSize: 14; font.weight: Font.Bold }
                     }
                 }
-                
                 Rectangle {
-                    Layout.fillWidth: true
-                    height: 60
-                    radius: 16
-                    color: root.cardColor
-                    border.color: root.borderColor
-                    ColumnLayout {
-                        anchors.fill: parent
-                        anchors.margins: 12
-                        spacing: 2
-                        Text {
-                            text: "VPN IP"
-                            color: root.subTextColor
-                            font.pixelSize: 10
-                        }
-                        Text {
-                            text: vpnController ? vpnController.ipAddress : "0.0.0.0"
-                            color: root.textColor
-                            font.pixelSize: 16
-                            font.weight: Font.Bold
-                            elide: Text.ElideRight
-                        }
+                    Layout.fillWidth: true; height: 50; radius: 12; color: root.cardColor; border.color: root.borderColor
+                    ColumnLayout { anchors.fill: parent; anchors.margins: 8; spacing: 1
+                        Text { text: "VPN IP"; color: root.subTextColor; font.pixelSize: 9 }
+                        Text { text: vpnController ? vpnController.ipAddress : "0.0.0.0"; color: root.textColor; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
                     }
                 }
-                
                 Rectangle {
-                    Layout.fillWidth: true
-                    height: 60
-                    radius: 16
-                    color: root.cardColor
-                    border.color: root.borderColor
-                    ColumnLayout {
-                        anchors.fill: parent
-                        anchors.margins: 12
-                        spacing: 2
-                        Text {
-                            text: "Download"
-                            color: root.subTextColor
-                            font.pixelSize: 10
-                        }
-                        Text {
-                            id: txtDownSpeed
-                            text: "0.0 B/s"
-                            color: root.successColor
-                            font.pixelSize: 16
-                            font.weight: Font.Bold
-                        }
+                    Layout.fillWidth: true; height: 50; radius: 12; color: root.cardColor; border.color: root.borderColor
+                    ColumnLayout { anchors.fill: parent; anchors.margins: 8; spacing: 1
+                        Text { text: "Download"; color: root.subTextColor; font.pixelSize: 9 }
+                        Text { id: txtDownSpeed; text: "0.0 B/s"; color: root.successColor; font.pixelSize: 14; font.weight: Font.Bold }
                     }
                 }
-                
                 Rectangle {
-                    Layout.fillWidth: true
-                    height: 60
-                    radius: 16
-                    color: root.cardColor
-                    border.color: root.borderColor
-                    ColumnLayout {
-                        anchors.fill: parent
-                        anchors.margins: 12
-                        spacing: 2
-                        Text {
-                            text: "Upload"
-                            color: root.subTextColor
-                            font.pixelSize: 10
-                        }
-                        Text {
-                            id: txtUpSpeed
-                            text: "0.0 B/s"
-                            color: root.warningColor
-                            font.pixelSize: 16
-                            font.weight: Font.Bold
-                        }
+                    Layout.fillWidth: true; height: 50; radius: 12; color: root.cardColor; border.color: root.borderColor
+                    ColumnLayout { anchors.fill: parent; anchors.margins: 8; spacing: 1
+                        Text { text: "Upload"; color: root.subTextColor; font.pixelSize: 9 }
+                        Text { id: txtUpSpeed; text: "0.0 B/s"; color: root.warningColor; font.pixelSize: 14; font.weight: Font.Bold }
                     }
                 }
             }
+            Item { Layout.fillHeight: true } // Spacer
+        }
 
+        // Right Column (Server List & Logs)
+        ColumnLayout {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            spacing: 12
+
+            // Server List Card
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 color: root.cardColor
-                radius: 22
+                radius: 18
                 border.color: root.borderColor
                 border.width: 1
 
                 ColumnLayout {
                     anchors.fill: parent
-                    anchors.margins: 18
-                    spacing: 14
+                    anchors.margins: 16
+                    spacing: 12
 
                     RowLayout {
                         Layout.fillWidth: true
-                        Text {
-                            text: "Server List"
-                            color: root.textColor
-                            font.pixelSize: 24
-                            font.weight: Font.Bold
-                        }
+                        Text { text: "Server List"; color: root.textColor; font.pixelSize: 20; font.weight: Font.Bold }
                         Item { Layout.fillWidth: true }
-                        Button {
-                            text: "⋮"
-                            background: Rectangle { color: "transparent" }
-                            contentItem: Text {
-                                text: parent.text
-                                color: root.subTextColor
-                                font.pixelSize: 22
-                            }
-                            onClicked: serverMenu.popup()
+                        
+                        // FIX: Menu Button using MouseArea
+                        Item {
+                            width: 30; height: 30
+                            Text { anchors.centerIn: parent; text: "⋮"; color: root.subTextColor; font.pixelSize: 20 }
+                            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: serverMenu.popup() }
                         }
                     }
 
+                    // Tabs
                     Rectangle {
-                        Layout.fillWidth: true
-                        height: 42
-                        radius: 16
-                        color: root.surfaceColor
-                        border.color: root.borderColor
+                        Layout.fillWidth: true; height: 36; radius: 12; color: root.surfaceColor; border.color: root.borderColor
                         RowLayout {
-                            anchors.fill: parent
-                            anchors.margins: 4
-                            spacing: 4
+                            anchors.fill: parent; anchors.margins: 4; spacing: 4
                             Repeater {
                                 model: ["Favorites", "Servers", "Custom"]
                                 delegate: Rectangle {
-                                    Layout.fillWidth: true
-                                    Layout.fillHeight: true
-                                    radius: 12
+                                    Layout.fillWidth: true; Layout.fillHeight: true; radius: 8
                                     color: root.currentTab === index ? root.cardColor : "transparent"
                                     border.color: root.currentTab === index ? root.accentColor : "transparent"
                                     border.width: 1
                                     scale: tabMouseArea.pressed ? 0.95 : 1.0
                                     Behavior on scale { NumberAnimation { duration: 100 } }
                                     Behavior on color { ColorAnimation { duration: 200 } }
-                                    Text {
-                                        anchors.centerIn: parent
-                                        text: modelData
-                                        color: root.currentTab === index ? root.textColor : root.subTextColor
-                                        font.weight: root.currentTab === index ? Font.Bold : Font.Normal
-                                        font.pixelSize: 12
-                                    }
-                                    MouseArea {
-                                        id: tabMouseArea
-                                        anchors.fill: parent
-                                        cursorShape: Qt.PointingHandCursor
-                                        onClicked: root.currentTab = index
-                                    }
+                                    Text { anchors.centerIn: parent; text: modelData; color: root.currentTab === index ? root.textColor : root.subTextColor; font.weight: root.currentTab === index ? Font.Bold : Font.Normal; font.pixelSize: 11 }
+                                    MouseArea { id: tabMouseArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.currentTab = index }
                                 }
                             }
                         }
                     }
 
                     Rectangle {
-                        Layout.fillWidth: true
-                        height: 44
-                        radius: 16
-                        gradient: Gradient {
-                            orientation: Gradient.Horizontal
-                            GradientStop { position: 0.0; color: root.accentColor }
-                            GradientStop { position: 1.0; color: root.accent2Color }
-                        }
+                        Layout.fillWidth: true; height: 36; radius: 12
+                        gradient: Gradient { orientation: Gradient.Horizontal; GradientStop { position: 0.0; color: root.accentColor }; GradientStop { position: 1.0; color: "#0FA8D9" } }
                         scale: activeBtnMouseArea.pressed ? 0.98 : 1.0
                         Behavior on scale { NumberAnimation { duration: 100 } }
-                        Text {
-                            anchors.centerIn: parent
-                            text: "Get Active Servers"
-                            color: "#FFFFFF"
-                            font.pixelSize: 14
-                            font.weight: Font.Bold
-                        }
-                        MouseArea {
-                            id: activeBtnMouseArea
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                vpnController.addSubscription("https://raw.githubusercontent.com/MhdiTaheri/VpnHub/main/sub")
-                                vpnController.fetchServers()
-                            }
-                        }
+                        Text { anchors.centerIn: parent; text: "Get Active Servers"; color: "#FFFFFF"; font.pixelSize: 12; font.weight: Font.Bold }
+                        MouseArea { id: activeBtnMouseArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: { vpnController.addSubscription("https://raw.githubusercontent.com/MhdiTaheri/VpnHub/main/sub"); vpnController.fetchServers() } }
                     }
 
                     ListView {
                         id: serverListView
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        clip: true
+                        Layout.fillWidth: true; Layout.fillHeight: true; clip: true
                         model: root.currentTab === 0 ? (vpnController ? vpnController.favorites : []) : (root.currentTab === 1 ? (vpnController ? vpnController.servers : []) : (vpnController ? vpnController.custom : []))
-                        spacing: 10
+                        spacing: 8
                         ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
 
                         delegate: Rectangle {
-                            width: serverListView.width
-                            height: 60
-                            radius: 16
+                            width: serverListView.width; height: 50; radius: 12
                             color: root.selectedServerID === modelData.id ? "#243245" : root.surfaceColor
                             border.color: root.selectedServerID === modelData.id ? root.accentColor : "transparent"
                             border.width: 1
@@ -555,40 +414,14 @@ ApplicationWindow {
                             Behavior on color { ColorAnimation { duration: 200 } }
 
                             RowLayout {
-                                anchors.fill: parent
-                                anchors.margins: 16
-                                spacing: 12
-                                Rectangle {
-                                    width: 10
-                                    height: 10
-                                    radius: 5
-                                    color: getPingColor(modelData.latency)
-                                    Layout.alignment: Qt.AlignVCenter
-                                }
+                                anchors.fill: parent; anchors.margins: 12; spacing: 10
+                                Rectangle { width: 8; height: 8; radius: 4; color: getPingColor(modelData.latency); Layout.alignment: Qt.AlignVCenter }
                                 ColumnLayout {
-                                    Layout.fillWidth: true
-                                    spacing: 2
-                                    Text {
-                                        text: modelData.name
-                                        color: root.textColor
-                                        font.weight: Font.Bold
-                                        font.pixelSize: 14
-                                        elide: Text.ElideRight
-                                        Layout.fillWidth: true
-                                    }
-                                    Text {
-                                        text: modelData.protocol.toUpperCase() + " • " + modelData.address
-                                        color: root.subTextColor
-                                        font.pixelSize: 10
-                                    }
+                                    Layout.fillWidth: true; spacing: 1
+                                    Text { text: modelData.name; color: root.textColor; font.weight: Font.Bold; font.pixelSize: 13; elide: Text.ElideRight; Layout.fillWidth: true }
+                                    Text { text: modelData.protocol.toUpperCase() + " • " + modelData.address; color: root.subTextColor; font.pixelSize: 9 }
                                 }
-                                Text {
-                                    text: modelData.latency == 9999 ? "N/A" : (modelData.latency == 0 ? "-" : modelData.latency + "ms")
-                                    color: getPingColor(modelData.latency)
-                                    font.bold: true
-                                    font.pixelSize: 12
-                                    Layout.alignment: Qt.AlignVCenter
-                                }
+                                Text { text: modelData.latency == 9999 ? "N/A" : (modelData.latency == 0 ? "-" : modelData.latency + "ms"); color: getPingColor(modelData.latency); font.bold: true; font.pixelSize: 11; Layout.alignment: Qt.AlignVCenter }
                             }
 
                             MouseArea {
@@ -597,13 +430,56 @@ ApplicationWindow {
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
                                     root.selectedServerID = modelData.id
-                                    root.prevDownload = 0
-                                    root.prevUpload = 0
-                                    root.prevTime = Date.now()
+                                    root.prevDownload = 0; root.prevUpload = 0; root.prevTime = Date.now()
                                     root.autoScanActive = false
                                     vpnController.connectToServer(modelData.uri)
                                 }
                             }
+                        }
+                    }
+                }
+            }
+
+            // Logs Panel
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 120
+                color: root.surfaceColor
+                radius: 12
+                border.color: root.borderColor
+                border.width: 1
+
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    spacing: 4
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Text { text: "Logs"; color: root.subTextColor; font.pixelSize: 10; font.bold: true }
+                        Item { Layout.fillWidth: true }
+                        Button {
+                            text: "Copy"
+                            implicitHeight: 20
+                            background: Rectangle { color: root.cardColor; radius: 4; border.color: root.borderColor; border.width: 1 }
+                            contentItem: Text { text: parent.text; color: root.accentColor; font.pixelSize: 9; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                            onClicked: vpnController.copyLogs()
+                        }
+                    }
+
+                    ScrollView {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        clip: true
+                        TextArea {
+                            text: vpnController.logs
+                            color: root.subTextColor
+                            font.family: "Monospace"
+                            font.pixelSize: 9
+                            wrapMode: TextArea.WrapAnywhere
+                            readOnly: true
+                            selectByMouse: true
+                            background: Rectangle { color: "transparent" }
                         }
                     }
                 }
